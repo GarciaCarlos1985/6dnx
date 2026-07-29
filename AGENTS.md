@@ -56,6 +56,13 @@ work so a new agent can resume without reconstructing the conversation.
   sessions, and Discord messages visibly marked TESTE. It is local-only by
   default and may run on Vercel Preview only with an explicit
   `PAYMENT_TEST_MODE=true`; never silently enable it in Production.
+- Treat checkout as the primary sales surface: keep the official product art
+  and angel atmosphere visible, but never let decorative layers obscure price,
+  status, payment controls, the laboratory/production state, or accessibility.
+- StorM Wallet remains server-only and inactive until its API contract is
+  verified, `/api/webhooks/storm-wallet` validates `X-Storm-Signature` from the
+  raw body, Supabase is the idempotent order source of truth, and end-to-end
+  sandbox tests pass.
 - Radar 6DNX uses only the official Steam News API, Google AI Blog RSS, and
   OpenAI News RSS. Never scrape Google Search results. Reads stay bounded and
   streamed; the daily schedule is Vercel Cron at 12:00 UTC.

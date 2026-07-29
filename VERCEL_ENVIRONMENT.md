@@ -1,44 +1,130 @@
-# Vercel environment map
+# Mapa de variáveis e segredos 6DNX
 
-The first block of `.env.local` contains the variable names intended for
-Vercel. The file itself is ignored by Git and must never be committed.
+Auditoria local: 2026-07-28. Os valores nunca devem ser copiados para este
+arquivo, para o GitHub, para logs ou para capturas de tela.
 
-## Configure now
+## 1. Vercel — necessárias para o site atual
 
-| Variable | Production | Preview | Notes |
+Configure em **Project Settings > Environment Variables**.
+
+| Variável | Production | Preview | Uso atual |
 | --- | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | required | required | Use each deployed HTTPS origin, never localhost. |
-| `CRON_SECRET` | required | required | Independent 64-character random secret; not a GitHub token. |
-| `DISCORD_INVITE_URL` | required | required | Public support invite. |
-| `DISCORD_WEBHOOK_URL` | required | required | Server-only fallback webhook. |
-| `DISCORD_TICKET_WEBHOOK_URL` | required | required | Dedicated TICKET webhook; currently mirrors the working webhook. |
-| `SUPABASE_URL` | required | required | Project API URL. |
-| `SUPABASE_SECRET_KEY` | required | required | Server-only; never prefix with `NEXT_PUBLIC_`. |
+| `NEXT_PUBLIC_SITE_URL` | `https://6dnx.vercel.app` | URL HTTPS do Preview | Metadados e URLs absolutas. Nunca use localhost na Production. |
+| `CRON_SECRET` | obrigatório | segredo diferente | Protege `/api/cron/news`; use um segredo aleatório sem privilégios externos. |
+| `DISCORD_INVITE_URL` | obrigatório | pode repetir | Link público de suporte. |
+| `DISCORD_TICKET_WEBHOOK_URL` | obrigatório | webhook de teste | Entrega dos TICKETs; somente servidor. |
+| `DISCORD_WEBHOOK_URL` | opcional | opcional | Fallback do webhook de TICKET. |
+| `SUPABASE_URL` | obrigatório | pode repetir | Persistência do Radar 6DNX. |
+| `SUPABASE_SECRET_KEY` | obrigatório | segredo de Preview separado, se houver | Somente servidor; nunca use prefixo `NEXT_PUBLIC_`. |
 
-## Prepared for browser auth and real checkout
+`VERCEL` é injetada automaticamente pela plataforma e não deve ser cadastrada
+manualmente.
 
-| Variable | Production | Preview | Current status |
+## 2. Vercel — preparadas, mas ainda não ativadas
+
+| Variável | Production | Preview | Quando usar |
 | --- | --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | future | future | Already prepared. |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | future | future | Already prepared; RLS is mandatory before use. |
-| `NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY` | later | test key | Pending Mercado Pago application. |
-| `MERCADO_PAGO_ACCESS_TOKEN` | later | test token | Pending; server-only. |
-| `MERCADO_PAGO_WEBHOOK_SECRET` | later | test secret | Pending; server-only. |
-| `PAYMENT_TEST_MODE` | false/absent | `true` | Never enable the internal simulator in Production. |
+| `STORM_WALLET_API_URL` | URL oficial | sandbox, se existir | Depois de validar a documentação da API StorM. |
+| `STORM_WALLET_API_KEY` | chave live | somente chave sandbox | Depois de implementar criação de cobrança no backend. |
+| `STORM_WALLET_WEBHOOK_SECRET` | segredo live | segredo sandbox diferente | Depois de implementar e testar a assinatura `X-Storm-Signature`. |
+| `NEXT_PUBLIC_SUPABASE_URL` | futura | futura | Somente quando autenticação/RLS do navegador forem implementadas. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | futura | futura | É pública por design, mas exige RLS correto antes do uso. |
+| `PAYMENT_TEST_MODE` | ausente/`false` | `true`, somente se desejado | Libera o simulador interno; nunca habilite na Production. |
 
-The optional Discord bot variables are necessary only if each paid order should
-create its own private Discord channel. The current webhook-based TICKET flow
-does not need them.
+As três variáveis StorM já estão preenchidas em `.env.local` e cadastradas na
+Vercel. Na auditoria de 2026-07-28, todas estavam marcadas como **Sensitive** e
+aplicadas simultaneamente a Production e Preview. Como a chave local tem
+prefixo live, remova o escopo Preview dessas três variáveis; Preview deve usar
+somente credenciais sandbox, se a StorM fornecer esse ambiente.
 
-## Never copy to Vercel runtime
+O cadastro das chaves não ativa pagamentos sozinho. Enquanto
+`/api/webhooks/storm-wallet` e a criação de cobrança server-side não existirem,
+o checkout continuará sendo apenas o laboratório de R$ 1,00.
 
-- `VERCEL_TOKEN`: local CLI credential;
-- `SUPABASE_DB_URL`: direct migration/tooling connection;
-- `SUPABASE_JWKS_URL`: derived tooling metadata;
-- `SUPABASE_SERVICE_ROLE_KEY`: legacy fallback, unnecessary while the new
-  `SUPABASE_SECRET_KEY` is configured;
-- any GitHub personal access token.
+O webhook futuro da StorM deverá apontar para:
 
-After the repository is connected, add the variables in Vercel Project
-Settings and choose the scopes explicitly. Do not paste the whole `.env.local`
-into logs, issues, chat, or source control.
+```text
+https://6dnx.vercel.app/api/webhooks/storm-wallet
+```
+
+Essa URL só deve ser ativada depois que a rota estiver publicada e validada. O
+painel StorM nunca deve receber uma URL de webhook do Discord. O backend 6DNX
+primeiro verifica a assinatura e só então envia uma notificação sanitizada para
+`DISCORD_TICKET_WEBHOOK_URL`.
+
+## 3. Não precisam ficar na Vercel agora
+
+Estas variáveis aparecem ou já apareceram no projeto Vercel, mas o código
+publicado hoje não as utiliza:
+
+- `DISCORD_BOT_TOKEN`
+- `DISCORD_GUILD_ID`
+- `DISCORD_TICKET_CATEGORY_ID`
+- `DISCORD_SUPPORT_ROLE_ID`
+- `SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_DB_URL`
+- `SUPABASE_JWKS_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`, quando `SUPABASE_SECRET_KEY` já está configurada
+- `NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY`
+- `MERCADO_PAGO_ACCESS_TOKEN`
+- `MERCADO_PAGO_WEBHOOK_SECRET`
+
+Os quatro dados de bot do Discord só serão necessários se a 6DNX decidir criar
+um canal privado diferente para cada compra. As três variáveis Mercado Pago
+devem continuar vazias ou ser removidas enquanto a StorM for a provedora
+escolhida.
+
+Na auditoria, todas as variáveis da Vercel estavam definidas como
+**Sensitive**. A API e a CLI confirmam nome e escopo, mas não devolvem seus
+valores; portanto, não é possível comparar o conteúdo com `.env.local`.
+Variáveis `NEXT_PUBLIC_*` serão públicas no bundle do navegador por definição e
+podem ser recriadas como Plain para facilitar conferência. Isso não se aplica a
+tokens, secrets, webhooks ou chaves privadas.
+
+## 4. GitHub
+
+### Repositório
+
+Nenhum valor secreto sobe para os arquivos do repositório. O GitHub recebe
+somente `.env.example`, com nomes e valores vazios. `.env.local` está ignorado
+por `.gitignore` e deve continuar assim.
+
+### GitHub Actions
+
+Atualmente o repositório não possui `.github/workflows`, portanto não precisa de
+nenhum **Actions Secret**. O Radar diário usa Vercel Cron, não GitHub Actions.
+Se um workflow for criado no futuro, adicione apenas os segredos que aquele
+workflow referenciar explicitamente.
+
+Um token usado para `git push` autentica o computador/CLI. Ele não deve ser
+salvo em `.env.local`, em Vercel ou em GitHub Actions.
+
+## 5. Somente no computador local
+
+- `VERCEL_TOKEN`: credencial da CLI para leitura/administração da Vercel;
+- `SUPABASE_DB_URL`: conexão direta para migrations e ferramentas;
+- `SUPABASE_JWKS_URL`: metadado de ferramentas;
+- `SUPABASE_SERVICE_ROLE_KEY`: fallback legado, dispensável quando a nova
+  `SUPABASE_SECRET_KEY` funciona;
+- qualquer token pessoal usado pelo Git/GitHub CLI.
+
+## 6. Outros painéis
+
+- **StorM Wallet:** chave e secret ficam na Vercel/local; no painel StorM entra
+  apenas a URL HTTPS do webhook 6DNX, depois que a rota existir.
+- **Discord:** o webhook é criado/rotacionado no Discord e seu valor completo
+  fica apenas na Vercel e em `.env.local`.
+- **Supabase:** a migration
+  `supabase/migrations/20260727010000_create_news_articles.sql` deve ser
+  revisada e aplicada no projeto; não se “envia” chave para o painel.
+
+## Checklist antes de publicar
+
+1. Ajustar `NEXT_PUBLIC_SITE_URL` de Production para
+   `https://6dnx.vercel.app`.
+2. Manter `PAYMENT_TEST_MODE` ausente em Production.
+3. Retirar Preview do escopo das três variáveis StorM live.
+4. Não ativar o webhook StorM antes da rota assinada existir.
+5. Conceder permissão de escrita no repositório GitHub à conta autenticada.
+6. Fazer o push da `main` e confirmar que a Vercel criou um deployment com o
+   novo SHA.

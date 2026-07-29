@@ -130,6 +130,18 @@ isolated test checkout, and an automated games-and-AI news area.
   against the protected cron endpoint.
 - Added `COMMERCE_ARCHITECTURE.md` and `VERCEL_ENVIRONMENT.md` as the canonical
   purchase-flow and deployment-variable references.
+- Rebuilt the checkout laboratory as a cinematic sales surface: product art,
+  the official angel, a three-stage purchase journey, stronger Pix/card
+  presentation, clearer trust states, and responsive hierarchy. The
+  non-chargeable laboratory label and fixed R$ 1,00 simulator remain explicit.
+- Re-audited the 24 local environment keys without printing their values: there
+  are no duplicate names, the StorM API URL/key/webhook secret are populated,
+  and Mercado Pago remains intentionally empty. `VERCEL_ENVIRONMENT.md` now
+  separates Production, Preview, GitHub, local tooling, and external panels.
+- Confirmed 23 variables in the linked Vercel project. All are marked Sensitive,
+  so Vercel exposes their names/scopes but not their values. The three StorM
+  variables exist in both Production and Preview; the live credentials must be
+  removed from Preview until a sandbox set is available.
 
 ## Pending human or business input
 
@@ -145,18 +157,28 @@ isolated test checkout, and an automated games-and-AI news area.
 - Revoke the old classic GitHub PAT in GitHub settings. It is no longer present
   in `CRON_SECRET`; no replacement GitHub token is needed unless Git
   authentication later requests one.
-- Reconcile Git history before pushing. The local branch is `master` with no
-  remote, while the public repository already has a distinct one-commit
-  `main`; never force-push it without explicit approval.
-- Choose and contract a real payment provider before any production checkout.
-  The current laboratory must never be presented as a real charge.
+- The local branch is now `main`; merge `78c3fa7` preserves both local and
+  remote histories without a force-push, and the latest sales/environment work
+  is committed locally. The current Git credential is `carloshg-dev`; GitHub
+  rejects its push with HTTP 403 because it has no write permission.
+- Confirm StorM Wallet accepts the catalog and provides sandbox documentation
+  before enabling real payments. The current laboratory must never be
+  presented as a real charge.
+- Implement `/api/webhooks/storm-wallet`, raw-body HMAC verification, canonical
+  Supabase orders, idempotency, and server-side charge creation before copying
+  the StorM live credentials into Vercel or activating the provider webhook.
 - Follow `COMMERCE_ARCHITECTURE.md`: Supabase is the order source of truth,
-  Mercado Pago webhooks confirm payment, and Discord is notification/support,
-  never proof of payment.
+  signed provider webhooks confirm payment, and Discord is
+  notification/support, never proof of payment.
 - The requested `i-have-adhd` plugin was not exposed by the safe plugin manager;
   project continuity is currently provided by `AGENTS.md` and this file.
 
 ## Safety status
 
-- No Git commit, push, database migration, or production deployment authorized.
+- Commit and push to `main` were authorized; the push is still blocked by
+  GitHub permissions and no production deployment has occurred.
+- Vercel is still serving the repository's old `6fd770b` snapshot, whose
+  project framework was not detected and whose deployment returns
+  `404: NOT_FOUND`. The local storefront cannot become public until the newer
+  `main` reaches GitHub and triggers a fresh Vercel deployment.
 - `.env.local` is ignored by Git and must remain secret.
