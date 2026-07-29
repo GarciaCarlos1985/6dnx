@@ -22,7 +22,9 @@ isolated test checkout, and an automated games-and-AI news area.
   logo hover through independent nested rotors.
 - Desktop product interaction is always information left / card center / video
   right. Mobile uses one centered sheet.
-- Product and price claims must be traceable to `discord-imagens/`.
+- Historical product claims remain traceable to `discord-imagens/` and
+  `docs/Produtos_Organizados.md`. The seven executable laboratory services are
+  independent reference drafts and are not automatic renames of those records.
 - Supabase API credentials are normalized; the `news_articles` migration is
   still pending human approval.
 - The daily schedule is Vercel Cron (`0 12 * * *`), not GitHub Actions.
@@ -157,13 +159,27 @@ isolated test checkout, and an automated games-and-AI news area.
   route payloads/news URLs/cron headers, prepared least-privilege news RLS, and
   confirmed that the deployed site is still on an older public build while the
   remote `news_articles` table is still absent.
+- Replaced the executable storefront catalog with seven legitimate service
+  drafts, five original card artworks, explicit reference-price labels, and a
+  video-safe media preview. The fixed R$ 1,00 checkout remains a non-payable
+  laboratory and carries reference prices separately from its simulated total.
+- Centralized explanatory Markdown under `docs/`, added `docs/README.md` and
+  consolidated human-readable rules in
+  `docs/governance/REGRAS_DO_PROJETO.md`. Root `AGENTS.md` and `CLAUDE.md`
+  remain in place because development tools consume them automatically.
+- Reconciled all 31 historical source entries one-to-one with 31 internal card
+  positions in `MAPA_EDITORIAL_31_ENTRADAS.md`. Their cadastral state is
+  `PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO`; this records missing documented
+  approval and does not assert `false` or a commercial block.
 
 ## Pending human or business input
 
-- Add each product's approved YouTube ID in `lib/products.ts`.
+- Add an approved YouTube ID only when official material exists; products
+  without video use the designed media preview instead of a broken player.
 - `Custom Steam Profile` uses the approved vertical YouTube video
   `BqPwa1SXowE`; its popup preserves the video's portrait proportion.
-- Confirm commercial prices before replacing `sob consulta`.
+- Confirm or replace each displayed reference price before enabling real
+  commerce.
 - Configure `SITE_REVIEW_ENABLED`, `SITE_REVIEW_USER`, and a 16+ character
   `SITE_REVIEW_PASSWORD` in Vercel before the next reviewed deployment.
 - Apply the Supabase news migration only after human review.

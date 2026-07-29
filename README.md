@@ -3,17 +3,21 @@
 Vitrine comercial cinematográfica para os produtos 6DNX, com checkout de
 laboratório, suporte pelo Discord e uma central editorial de games e IA.
 
+A documentação completa está indexada em [`docs/README.md`](docs/README.md).
 O fluxo comercial de produção e suas regras de segurança estão definidos em
-[`COMMERCE_ARCHITECTURE.md`](COMMERCE_ARCHITECTURE.md).
+[`docs/COMMERCE_ARCHITECTURE.md`](docs/COMMERCE_ARCHITECTURE.md).
 O mapa de variáveis e escopos da Vercel está em
-[`VERCEL_ENVIRONMENT.md`](VERCEL_ENVIRONMENT.md).
+[`docs/VERCEL_ENVIRONMENT.md`](docs/VERCEL_ENVIRONMENT.md).
 
 ## Estado atual
 
-- Hero com narrativa de scroll em GSAP, troca sincronizada entre duas poses de cada personagem, atmosfera gerada em CSS e suporte a `prefers-reduced-motion`.
-- Seis produtos, exibidos em páginas de três cards.
-- Detalhes do produto sempre abertos acima do card no desktop; vídeo abre no
-  lado com espaço disponível e ambos permanecem dentro da viewport.
+- Hero com narrativa de scroll em GSAP, cinco poses de cada personagem
+  distribuídas uma vez até o rodapé, atmosfera gerada em CSS e suporte a
+  `prefers-reduced-motion`.
+- Sete serviços de referência, exibidos em páginas de três cards.
+- No desktop, informação abre à esquerda, o card selecionado permanece visível
+  no centro e o vídeo ou prévia visual abre à direita. No mobile, o conteúdo
+  usa uma única sheet acessível.
 - Checkout isolado de teste por variação, com Pix/cartão cenográficos, valor
   fixo de R$ 1,00 e notificação server-side marcada como TESTE no TICKET.
 - `Radar 6DNX` na home e página completa em `/noticias`.
@@ -21,11 +25,13 @@ O mapa de variáveis e escopos da Vercel está em
   Google AI Blog e OpenAI News via RSS.
 - Persistência Supabase e sincronização diária preparadas, mas não aplicadas remotamente.
 
-Ainda faltam dados comerciais que não devem ser inventados:
+Ainda faltam decisões comerciais que precisam de validação do proprietário:
 
-- `priceBRL` das variações em `lib/products.ts`;
-- `youtubeId` de cada produto em `lib/products.ts`;
-- convite real em `DISCORD_INVITE_URL`.
+- confirmar escopo e preços de referência de cada variação;
+- adicionar somente vídeos oficiais e aprovados;
+- confirmar o destino definitivo de suporte;
+- aprovar políticas de atendimento, cancelamento e reembolso;
+- validar provedor, banco e webhooks antes de qualquer cobrança real.
 
 ## Arquitetura
 
@@ -82,10 +88,10 @@ Enquanto o site não for público, configure `SITE_REVIEW_ENABLED=true`,
 `SITE_REVIEW_USER` e uma `SITE_REVIEW_PASSWORD` aleatória com pelo menos 16
 caracteres. A proteção falha fechada quando a senha está ausente ou fraca.
 Cron e webhooks permanecem independentes e precisam validar seus próprios
-segredos. Consulte `REVIEW_HANDOFF.md` para o checklist completo.
+segredos. Consulte `docs/REVIEW_HANDOFF.md` para o checklist completo.
 
 Para o relatório pré-commit, falhas corrigidas e limitações que exigem ação
-humana/externa, consulte `AUDITORIA_SEGURANCA.md`.
+humana/externa, consulte `docs/AUDITORIA_SEGURANCA.md`.
 
 ### Checkout de laboratório
 
@@ -97,6 +103,10 @@ expira em 20 minutos.
 
 Use `DISCORD_TICKET_WEBHOOK_URL` para isolar os pedidos TESTE no canal TICKET.
 Sem essa variável, o sistema reutiliza `DISCORD_WEBHOOK_URL`.
+
+O catálogo atual usa valores de referência separados do total fixo de R$ 1,00
+do simulador. A fronteira completa, os arquivos editáveis e os pré-requisitos
+para uma futura carteira real estão em `docs/CATALOG_PAYMENT_LAB.md`.
 
 ## Ativação manual do Supabase
 

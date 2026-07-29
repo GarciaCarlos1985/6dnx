@@ -21,11 +21,15 @@ checkout remains a laboratory and must not be presented as a real charge.
    StorM Wallet, the raw request body must be verified against
    `X-Storm-Signature` before processing. Redirect pages and browser messages
    are never sufficient proof of payment.
-6. After approval, the order is queued for fulfillment and one support ticket
-   is created. Discord receives a concise notification, while Supabase remains
-   the canonical record.
-7. The customer receives a private order-status URL and can follow payment,
-   fulfillment, delivery, or support without repeating the purchase.
+6. After approval, the backend records the paid order and sends one concise
+   staff notification. Supabase remains the canonical financial record.
+7. The confirmation page displays the official Discord destination and the
+   order reference. Staff checks the paid state in the backend before releasing
+   the product manually through the private Discord support flow.
+
+The website never hosts, uploads, downloads, or automatically releases product
+files. Discord is the assisted fulfillment channel after payment, not the
+financial source of truth.
 
 ## Order state machine
 
@@ -33,8 +37,8 @@ checkout remains a laboratory and must not be presented as a real charge.
 draft
   -> pending_payment
   -> paid
-  -> awaiting_fulfillment
-  -> delivered
+  -> awaiting_discord_fulfillment
+  -> delivered_manually
 
 pending_payment -> expired | cancelled
 paid -> refunded | disputed
@@ -51,7 +55,8 @@ Ticket states are independent: `open`, `waiting_staff`, `waiting_customer`, and
 - `payment_attempts`: provider ID, method, amount, status, and timestamps;
 - `webhook_events`: unique provider event ID and idempotent processing result;
 - `tickets` and `ticket_messages`: support history;
-- `fulfillment_events`: who released, delivered, cancelled, or refunded.
+- `fulfillment_events`: who released manually, delivered, cancelled, or
+  refunded.
 
 Discord is a notification and support surface. It is not the order database.
 
@@ -65,6 +70,8 @@ Discord is a notification and support surface. It is not the order database.
 - Browser Supabase access uses only the publishable key plus RLS.
 - Server writes use server-only credentials.
 - Payment, fulfillment, refund, and ticket actions keep an audit trail.
+- No executable, token, archive, or download URL is stored in the public
+  frontend, emitted in a webhook notification, or released by browser state.
 - Production checkout cannot be enabled until prices, videos, refund rules,
   privacy copy, and provider credentials have been approved.
 

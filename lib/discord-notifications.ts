@@ -73,8 +73,8 @@ export async function notifyDiscordTestCheckout(
 ) {
   const method =
     session.paymentMethod === "pix"
-      ? "Pix simulado"
-      : "Cartão de teste";
+      ? "PIX ilustrativo"
+      : "Cartão ilustrativo";
 
   return sendTicket({
     username: "6DNX Checkout Lab",
@@ -105,7 +105,12 @@ export async function notifyDiscordTestCheckout(
           },
           { name: "💳 Forma", value: method, inline: true },
           {
-            name: "💰 Valor",
+            name: "🏷️ Valor de referência",
+            value: session.referenceAmountLabel ?? "Sob consulta",
+            inline: true,
+          },
+          {
+            name: "🧪 Valor simulado",
             value: `${session.testAmountLabel} · simulação`,
             inline: true,
           },

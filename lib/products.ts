@@ -1,9 +1,12 @@
-export type ProductStatus = "undetected" | "updating";
+export type ProductStatus = "available" | "custom";
 
 export type Variant = {
   name: string;
   note?: string;
-  /** PREENCHER: preço real em R$. Sem valor, o card mostra "sob consulta". */
+  /**
+   * Valor de referência em R$ para montagem da vitrine.
+   * Não deve ser usado como cobrança real sem validação comercial.
+   */
   priceBRL?: number;
   badge?: string;
 };
@@ -17,144 +20,227 @@ export type Product = {
   image: string;
   status: ProductStatus;
   variants: Variant[];
-  /** PREENCHER: id do vídeo do YouTube (o trecho depois de `v=`). */
+  /** ID do vídeo do YouTube (o trecho depois de `v=`), quando disponível. */
   youtubeId?: string;
   videoOrientation?: "landscape" | "portrait";
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PREENCHER ANTES DE PUBLICAR
-//   • priceBRL de cada variação — hoje todas saem como "sob consulta".
-//   • youtubeId de cada produto — sem ele o player mostra um aviso.
-// Os produtos e variações abaixo vieram dos canais do Discord 6DNX SHOP.
-// ─────────────────────────────────────────────────────────────────────────────
-
+/**
+ * Catálogo legítimo de referência.
+ *
+ * Os valores abaixo são rascunhos editoriais para testar a vitrine e o
+ * checkout de laboratório. Eles não autorizam cobrança real nem substituem a
+ * confirmação comercial do responsável pela 6DNX.
+ */
 export const products: Product[] = [
   {
-    slug: "dayz",
-    title: "DayZ",
-    category: "Software para DayZ",
-    tagline: "A linha mais completa da 6DNX",
+    slug: "performance-audit",
+    title: "PC Performance Audit",
+    category: "Diagnóstico e desempenho",
+    tagline: "Um diagnóstico claro para jogar com estabilidade",
     description:
-      "Nossa categoria carro-chefe. Sete builds distintas para DayZ, de spoofer de hardware a versões private focadas em discrição. Cada build tem seu próprio canal de suporte no Discord.",
-    image: "/products/card-art/dayz-6dnx.webp",
-    status: "undetected",
+      "Análise guiada de desempenho do computador, temperaturas, uso de memória, armazenamento e configurações do sistema. A entrega inclui um relatório objetivo e um plano de melhorias sem prometer resultados incompatíveis com o hardware.",
+    image: "/products/card-art/performance-audit-6dnx.webp",
+    status: "available",
     variants: [
-      { name: "Spoofer", note: "Limpeza de HWID" },
-      { name: "Moonwalk" },
-      { name: "Private", note: "Acesso restrito" },
-      { name: "DayZ · GG" },
-      { name: "Rage", note: "Full visual" },
-      { name: "Shadow", note: "Foco em discrição" },
-      { name: "Elisyum" },
+      {
+        name: "Essencial",
+        note: "Checklist e diagnóstico remoto",
+        priceBRL: 49.9,
+      },
+      {
+        name: "Completo",
+        note: "Diagnóstico e relatório priorizado",
+        priceBRL: 89.9,
+        badge: "POPULAR",
+      },
+      {
+        name: "Acompanhado",
+        note: "Relatório e sessão de orientação",
+        priceBRL: 149.9,
+      },
     ],
   },
   {
-    slug: "arc-raiders",
-    title: "Arc Raiders",
-    category: "Software para Arc Raiders",
-    tagline: "Duas builds, entrega imediata",
+    slug: "game-setup-pro",
+    title: "Game Setup Pro",
+    category: "Configuração de jogos",
+    tagline: "Controles, vídeo e áudio ajustados ao seu setup",
     description:
-      "Cobertura para Arc Raiders em duas frentes: a build Private, de circulação controlada, e a GG, com atualização acompanhando cada patch do jogo.",
-    image: "/products/card-art/arc-raiders-6dnx.webp",
-    status: "undetected",
+      "Configuração assistida de opções permitidas pelo próprio jogo: controles, sensibilidade, acessibilidade, qualidade visual e áudio. O serviço respeita as regras de cada plataforma e não instala automações ou vantagens indevidas.",
+    image: "/products/card-art/game-setup-pro-6dnx.webp",
+    status: "available",
     variants: [
-      { name: "Private", note: "Acesso restrito" },
-      { name: "GG" },
+      {
+        name: "1 Jogo",
+        note: "Configuração de um título",
+        priceBRL: 39.9,
+      },
+      {
+        name: "3 Jogos",
+        note: "Pacote para três títulos",
+        priceBRL: 79.9,
+        badge: "PACOTE",
+      },
+      {
+        name: "Setup Completo",
+        note: "Jogos e periféricos compatíveis",
+        priceBRL: 129.9,
+      },
     ],
   },
   {
-    slug: "cs2",
-    title: "Counter-Strike 2",
-    category: "Software para CS2",
-    tagline: "Kryptos, Horus e o novo Radar",
+    slug: "aim-training-lab",
+    title: "Aim Training Lab",
+    category: "Treino e evolução",
+    tagline: "Rotina legítima para precisão e consistência",
     description:
-      "Três produtos para CS2, incluindo o Radar recém-lançado. Suporte e atualizações pelos canais dedicados de cada build no Discord.",
-    image: "/products/card-art/cs2-6dnx.webp",
-    status: "undetected",
+      "Plano de treino personalizado para ferramentas e modos de prática permitidos. A proposta organiza metas, sensibilidade, aquecimento e acompanhamento de evolução sem alterar o jogo ou automatizar movimentos.",
+    image: "/products/card-art/aim-training-lab-6dnx.webp",
+    status: "custom",
     variants: [
-      { name: "Kryptos" },
-      { name: "Horus" },
-      { name: "Radar", badge: "NOVO" },
+      {
+        name: "Starter",
+        note: "Rotina inicial de treino",
+        priceBRL: 29.9,
+      },
+      {
+        name: "Pro",
+        note: "Plano evolutivo de quatro semanas",
+        priceBRL: 59.9,
+        badge: "RECOMENDADO",
+      },
+      {
+        name: "Coaching",
+        note: "Plano e sessão individual",
+        priceBRL: 99.9,
+      },
     ],
   },
   {
-    slug: "contas-steam-nfa",
-    title: "Contas Steam NFA",
-    category: "Contas e acesso",
-    tagline: "Executável ou token, vários jogos",
+    slug: "creator-identity-pack",
+    title: "Creator Identity Pack",
+    category: "Design para criadores",
+    tagline: "Uma identidade visual pronta para se destacar",
     description:
-      "Contas NFA (No First Answer) entregues de duas formas: por executável ou via token. Entre, jogue e preserve a sessão, a senha e o e-mail originais. Disponíveis para DayZ, CS, Arc Raiders, Rust, Dead by Daylight, Squad, Scum, Arma Reforger e jogos aleatórios.",
-    image: "/products/card-art/steam-nfa-6dnx.webp",
-    status: "undetected",
+      "Criação de peças visuais originais para perfis, comunidades e canais: avatar, banner e elementos coordenados dentro da estética escolhida. A arte final é ajustada aos formatos combinados antes da entrega.",
+    image: "/products/card-art/creator-identity-pack-6dnx.webp",
+    status: "custom",
     variants: [
-      { name: "NFA · Executável", note: "Entrega por loader" },
-      { name: "NFA · Token", note: "Entrega por token" },
-      { name: "DayZ" },
-      { name: "Counter-Strike" },
-      { name: "Arc Raiders" },
-      { name: "Rust" },
-      { name: "Dead by Daylight" },
-      { name: "Squad" },
-      { name: "Scum" },
-      { name: "Arma Reforger" },
-      { name: "Jogos Aleatórios" },
+      { name: "Avatar", note: "Uma peça principal", priceBRL: 34.9 },
+      {
+        name: "Combo",
+        note: "Avatar e banner coordenados",
+        priceBRL: 69.9,
+        badge: "POPULAR",
+      },
+      {
+        name: "Identidade Completa",
+        note: "Kit visual para múltiplos formatos",
+        priceBRL: 119.9,
+      },
     ],
   },
   {
     slug: "custom-steam-profile",
     title: "Custom Steam Profile",
     category: "Personalização Steam",
-    tagline: "Seu perfil Steam, sob medida",
+    tagline: "Seu perfil Steam com identidade própria",
     description:
-      "Personalização completa de perfil da Steam. Escolha entre os modelos prontos ou encomende um perfil autoral. O canal oficial pede nível 10, pontos na Loja de Pontos e um tema definido antes do orçamento.",
+      "Personalização visual de perfil da Steam com recursos oficiais da plataforma. Escolha um modelo, encomende uma composição autoral ou faça uma consultoria de requisitos antes de definir o projeto.",
     image: "/products/card-art/steam-profile-6dnx.webp",
-    status: "undetected",
+    status: "custom",
     youtubeId: "BqPwa1SXowE",
     videoOrientation: "portrait",
     variants: [
-      { name: "Modelos", note: "Catálogo pronto" },
-      { name: "Seu Perfil", note: "Sob encomenda" },
-      { name: "Requisitos", note: "Leia antes" },
+      {
+        name: "Modelo Pronto",
+        note: "Composição baseada no catálogo",
+        priceBRL: 49.9,
+      },
+      {
+        name: "Perfil Autoral",
+        note: "Direção visual sob encomenda",
+        priceBRL: 149.9,
+        badge: "EXCLUSIVO",
+      },
+      {
+        name: "Consultoria",
+        note: "Tema, requisitos e planejamento",
+        priceBRL: 29.9,
+      },
     ],
   },
   {
     slug: "reshades",
-    title: "Reshades",
+    title: "Visual Presets",
     category: "Visual e presets",
-    tagline: "Do gratuito ao exclusivo",
+    tagline: "Uma direção de cor para cada experiência",
     description:
-      "Presets de Reshade para deixar a imagem mais legível e com a sua identidade. Há uma linha gratuita liberada na comunidade e a opção de reshade exclusivo.",
+      "Presets visuais para capturas, experiências offline e jogos que permitam filtros externos. A configuração é feita com foco estético e de legibilidade, sempre respeitando os termos do título e da plataforma.",
     image: "/products/card-art/reshades-6dnx.webp",
-    status: "undetected",
+    status: "custom",
     variants: [
-      { name: "Free Reshades", note: "Gratuito" },
-      { name: "Seu Reshade", note: "Exclusivo" },
+      {
+        name: "Preset Essencial",
+        note: "Perfil visual pronto",
+        priceBRL: 24.9,
+      },
+      {
+        name: "Preset Autoral",
+        note: "Ajuste criado para o seu estilo",
+        priceBRL: 59.9,
+        badge: "AUTORAL",
+      },
+      {
+        name: "Pacote Criador",
+        note: "Três variações para conteúdo",
+        priceBRL: 99.9,
+      },
     ],
   },
   {
-    slug: "thermal",
-    title: "Thermal",
-    category: "Ferramenta visual",
-    tagline: "Leitura térmica para cenários críticos",
+    slug: "stream-studio-setup",
+    title: "Stream Studio Setup",
+    category: "Conteúdo e transmissão",
+    tagline: "Áudio, câmera e cenas em uma experiência coesa",
     description:
-      "Solução visual térmica apresentada no canal oficial da 6DNX. Configuração, compatibilidade e valor são confirmados diretamente com o suporte antes da aquisição.",
-    image: "/products/card-art/thermal-6dnx.webp",
-    status: "undetected",
+      "Organização assistida do ambiente de transmissão: cenas, áudio, câmera, atalhos e identidade básica. O objetivo é entregar um fluxo compreensível e fácil de manter com as ferramentas já disponíveis ao criador.",
+    image: "/products/card-art/stream-studio-6dnx.webp",
+    status: "custom",
     variants: [
-      { name: "Thermal", note: "Compatibilidade sob consulta" },
+      {
+        name: "Revisão",
+        note: "Diagnóstico do ambiente atual",
+        priceBRL: 49.9,
+      },
+      {
+        name: "Studio Setup",
+        note: "Organização completa de cenas e áudio",
+        priceBRL: 109.9,
+        badge: "POPULAR",
+      },
+      {
+        name: "Creator Plus",
+        note: "Setup, identidade e orientação",
+        priceBRL: 179.9,
+      },
     ],
   },
 ];
+
+export function productStatusLabel(status: ProductStatus) {
+  return status === "available" ? "Disponível" : "Sob medida";
+}
 
 export function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-/** Menor preço definido entre as variações, ou null se nenhuma tiver preço. */
+/** Menor preço de referência definido entre as variações. */
 export function priceFrom(product: Product): number | null {
   const prices = product.variants
-    .map((v) => v.priceBRL)
-    .filter((p): p is number => typeof p === "number");
+    .map((variant) => variant.priceBRL)
+    .filter((price): price is number => typeof price === "number");
   return prices.length ? Math.min(...prices) : null;
 }

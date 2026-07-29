@@ -80,14 +80,30 @@ Problemas conhecidos:
 - há possíveis associações incorretas de vídeos;
 - os valores divergem de `CATALOG_AUDIT.md`, que veio dos prints do Discord.
 
-Nenhum preço desse documento foi inserido em `lib/products.ts`. Essa separação
-impede que um valor provisório se torne cobrança real por acidente.
+Nenhum item, preço ou descrição desse documento foi promovido automaticamente
+para o catálogo executável.
+
+`lib/products.ts` agora contém sete serviços legítimos de referência:
+
+- PC Performance Audit;
+- Game Setup Pro;
+- Aim Training Lab;
+- Creator Identity Pack;
+- Custom Steam Profile;
+- Visual Presets;
+- Stream Studio Setup.
+
+Cinco artes originais foram criadas em `public/products/card-art/`; as artes já
+existentes de Steam Profile e Visual Presets foram preservadas. Os valores
+exibidos são rascunhos editoriais independentes, identificados na interface
+como **referência**, e podem ser ajustados manualmente depois da aprovação do
+proprietário.
 
 ## Trabalho que pode continuar
 
-- confirmar preços e vídeos de serviços legítimos com o proprietário;
-- criar artes originais na paleta 6DNX para produtos compatíveis com as regras
-  das plataformas;
+- confirmar os preços de referência, escopos e vídeos com o proprietário;
+- substituir a prévia visual por vídeo próprio somente quando o material
+  oficial de cada serviço estiver pronto;
 - evoluir Custom Steam Profile, presets visuais permitidos, design e suporte;
 - criar catálogo canônico com histórico de preço, disponibilidade e fonte;
 - implementar o checkout profissional somente para itens comercialmente
@@ -95,13 +111,15 @@ impede que um valor provisório se torne cobrança real por acidente.
 
 ## Trabalho não realizado
 
-Os nomes descritivos legados de itens ligados a HWID/anti-cheat continuam no
-catálogo atual, mas seus preços provisórios não foram importados nem conectados
-a pagamento real. A aprovação comercial, jurídica e das plataformas permanece
-obrigatória antes de qualquer cobrança.
+Itens ligados a tokens de conta, alteração de HWID, automação de mira ou
+contorno de anti-cheat não fazem mais parte do catálogo executável. O arquivo
+`Produtos_Organizados.md` foi mantido apenas como material histórico de revisão
+e não deve ser usado para recriar ofertas disfarçadas.
 
-O checkout StorM Wallet real continua inativo. Ainda faltam, para qualquer
-produto permitido:
+O laboratório agora transporta dois valores separados: o preço de referência
+da variação e o total fixo simulado de R$ 1,00. O QR é decorativo e
+deliberadamente não pagável. O checkout StorM Wallet real continua inativo.
+Ainda faltam, para qualquer produto permitido:
 
 - contrato oficial da API e ambiente sandbox;
 - formato exato de criação e consulta de cobrança Pix;

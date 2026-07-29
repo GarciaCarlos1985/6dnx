@@ -6,9 +6,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # 6DNX — project memory
 
-Read this file, `PROJECT_STATE.md`, `README.md`, `DESIGN.md`, and `PRODUCT.md`
-before changing the product. Keep `PROJECT_STATE.md` current after meaningful
-work so a new agent can resume without reconstructing the conversation.
+Read this file, `README.md`, `docs/README.md`, `docs/PROJECT_STATE.md`,
+`docs/DESIGN.md`, and `docs/PRODUCT.md` before changing the product. Keep
+`docs/PROJECT_STATE.md` current after meaningful work so a new agent can resume
+without reconstructing the conversation.
 
 ## Product north star
 

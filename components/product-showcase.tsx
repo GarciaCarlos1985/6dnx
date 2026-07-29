@@ -16,6 +16,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   formatBRL,
   priceFrom,
+  productStatusLabel,
   products,
   type Product,
   type Variant,
@@ -255,13 +256,54 @@ function VariantRow({
             <span className="block text-[0.7rem] text-muted">{variant.note}</span>
           ) : null}
         </span>
-        <span className="shrink-0 text-sm font-bold text-primary">
-          {typeof variant.priceBRL === "number"
-            ? formatBRL(variant.priceBRL)
-            : "sob consulta"}
+        <span className="shrink-0 text-right">
+          <span className="block text-sm font-bold text-primary">
+            {typeof variant.priceBRL === "number"
+              ? formatBRL(variant.priceBRL)
+              : "sob consulta"}
+          </span>
+          {typeof variant.priceBRL === "number" ? (
+            <span className="block text-[0.48rem] uppercase tracking-[0.14em] text-muted">
+              referência
+            </span>
+          ) : null}
         </span>
       </button>
     </li>
+  );
+}
+
+function ProductMediaPreview({ product }: { product: Product }) {
+  return (
+    <div className="relative h-full min-h-52 overflow-hidden bg-black">
+      <Image
+        src={product.image}
+        alt=""
+        fill
+        sizes="(max-width: 1023px) 92vw, 420px"
+        className="object-cover opacity-65 saturate-75"
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(0,0,0,.92),rgba(0,0,0,.35)_58%,rgba(120,0,16,.55))]" />
+      <div className="pointer-events-none absolute -bottom-10 -right-3 h-[90%] w-[38%] min-w-28">
+        <Image
+          src="/anjo1-premium.webp"
+          alt=""
+          fill
+          sizes="160px"
+          className="object-contain object-right-bottom opacity-85"
+        />
+      </div>
+      <div className="relative flex h-full min-h-52 max-w-[68%] flex-col justify-end p-6">
+        <span className="mb-2 text-[0.55rem] font-black uppercase tracking-[0.24em] text-primary">
+          6DNX // prévia do serviço
+        </span>
+        <p className="text-lg font-bold text-ink">Demonstração em preparação</p>
+        <p className="mt-2 text-[0.68rem] leading-relaxed text-white/55">
+          A arte e a descrição já representam esta solução. O vídeo oficial
+          poderá ser adicionado depois, sem deixar um player quebrado.
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -312,6 +354,10 @@ function Popups({
           <p className="mb-4 text-sm leading-relaxed text-muted">
             {product.description}
           </p>
+          <p className="mb-4 border border-amber-300/20 bg-amber-300/[0.06] px-3 py-2 text-[0.64rem] leading-relaxed text-amber-100/75">
+            Valores de referência para montagem da vitrine. Confirme escopo e
+            preço final antes de qualquer venda real.
+          </p>
           <p className="mb-2 text-[0.65rem] uppercase tracking-[0.2em] text-muted">
             Variações · escolha uma opção
           </p>
@@ -342,7 +388,7 @@ function Popups({
             {checkout.checkoutLoading
               ? "Abrindo laboratório…"
               : checkout.selectedVariant
-                ? "Comprar agora · teste R$ 1"
+                ? "Simular compra · R$ 1"
                 : "Selecione uma variação"}
           </button>
           <a
@@ -370,16 +416,7 @@ function Popups({
             allowFullScreen
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
-            <span className="text-3xl" aria-hidden>
-              ▶
-            </span>
-            <p className="text-sm font-bold text-ink">Vídeo não configurado</p>
-            <p className="text-[0.7rem] leading-relaxed text-muted">
-              Defina <code className="text-primary">youtubeId</code> deste produto
-              em <code className="text-primary">lib/products.ts</code>.
-            </p>
-          </div>
+          <ProductMediaPreview product={product} />
         )}
       </section>
     </>
@@ -439,7 +476,7 @@ function Card({
 
         <div className="absolute inset-x-4 top-4 z-[4] flex flex-wrap items-center justify-between gap-2">
           <span className="border border-accent/40 bg-black/70 px-2 py-1 text-[0.6rem] font-bold uppercase tracking-wider text-accent backdrop-blur-sm">
-            {product.status === "undetected" ? "Undetected" : "Updating"}
+            {productStatusLabel(product.status)}
           </span>
           <span className="border border-white/15 bg-black/70 px-2 py-1 text-[0.6rem] font-bold uppercase tracking-wider text-muted backdrop-blur-sm">
             {product.variants.length}{" "}
@@ -455,7 +492,7 @@ function Card({
       <div className="product-card__body flex flex-1 flex-col p-6">
         <p className="mb-2 flex items-center gap-2 text-[0.58rem] font-bold uppercase tracking-[0.28em] text-primary/80">
           <span className="inline-block h-px w-7 bg-primary/70" aria-hidden />
-          6DNX // catálogo verificado
+          6DNX // catálogo seguro
         </p>
         <h3 className="mb-1 text-2xl leading-tight text-ink">{product.title}</h3>
         <p className="mb-5 text-sm text-muted">{product.tagline}</p>
@@ -479,7 +516,7 @@ function Card({
         <p className="mb-4 text-sm text-muted">
           {from ? (
             <>
-              A partir de{" "}
+              Referência a partir de{" "}
               <span className="text-xl font-bold text-ink">{formatBRL(from)}</span>
             </>
           ) : (
@@ -804,11 +841,11 @@ export function ProductShowcase() {
           id="produtos-heading"
           className="mb-3 text-[clamp(2rem,5vw,3.25rem)] tracking-tight text-ink"
         >
-          Nossos Softwares
+          Soluções 6DNX
         </h2>
         <p className="mx-auto max-w-2xl text-white/72">
-          Explore cada variação e teste o fluxo de compra antes da integração
-          bancária real.
+          Serviços legítimos, artes originais e valores de referência para
+          validar toda a experiência antes de uma cobrança real.
         </p>
       </div>
 
@@ -1008,16 +1045,17 @@ function MobileSheet({
               allowFullScreen
             />
           ) : (
-            <div className="flex h-full items-center justify-center px-6 text-center text-[0.7rem] text-muted">
-              Vídeo não configurado — defina{" "}
-              <code className="mx-1 text-primary">youtubeId</code> em products.ts
-            </div>
+            <ProductMediaPreview product={product} />
           )}
         </div>
 
         <div className="px-4 py-3">
           <p className="mb-4 text-sm leading-relaxed text-muted">
             {product.description}
+          </p>
+          <p className="mb-4 border border-amber-300/20 bg-amber-300/[0.06] px-3 py-2 text-[0.64rem] leading-relaxed text-amber-100/75">
+            Valores de referência. Confirme escopo e preço final antes de uma
+            venda real.
           </p>
           <ul className="space-y-1.5">
             {product.variants.map((v) => (
@@ -1047,7 +1085,7 @@ function MobileSheet({
           {checkout.checkoutLoading
             ? "Abrindo laboratório…"
             : checkout.selectedVariant
-              ? "Comprar agora · teste R$ 1"
+              ? "Simular compra · R$ 1"
               : "Selecione uma variação"}
         </button>
         <a

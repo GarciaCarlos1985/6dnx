@@ -18,6 +18,8 @@ export type TestCheckoutSession = {
   productSlug: string;
   productTitle: string;
   variantName: string;
+  referenceAmountBRL?: number;
+  referenceAmountLabel?: string;
   testAmountBRL: number;
   testAmountLabel: string;
   status: TestCheckoutStatus;
@@ -104,6 +106,11 @@ export function createTestCheckout(
     productSlug: product.slug,
     productTitle: product.title,
     variantName: variant.name,
+    referenceAmountBRL: variant.priceBRL,
+    referenceAmountLabel:
+      typeof variant.priceBRL === "number"
+        ? formatBRL(variant.priceBRL)
+        : undefined,
     testAmountBRL: TEST_AMOUNT_BRL,
     testAmountLabel: formatBRL(TEST_AMOUNT_BRL),
     status: "pending",

@@ -12,6 +12,7 @@ type CheckoutSession = {
   productSlug: string;
   productTitle: string;
   variantName: string;
+  referenceAmountLabel?: string;
   testAmountLabel: string;
   status: "pending" | "approved";
   paymentMethod?: PaymentMethod;
@@ -111,6 +112,9 @@ export function TestCheckout({ sessionId }: { sessionId: string }) {
       products.find((item) => item.slug === session?.productSlug) ?? null,
     [session?.productSlug],
   );
+  const discordSupportUrl = session
+    ? `/api/redirect?slug=${encodeURIComponent(session.productSlug)}`
+    : "/#produtos";
 
   useEffect(() => {
     if (!sessionId) return;
@@ -165,8 +169,8 @@ export function TestCheckout({ sessionId }: { sessionId: string }) {
       setSession(payload.session);
       setMessage(
         payload.ticketDelivered
-          ? "Teste aprovado e pedido TESTE entregue ao canal TICKET."
-          : "Pagamento simulado aprovado, mas o Discord não confirmou o TICKET. Você pode tentar reenviar.",
+          ? "Teste aprovado e pedido TESTE entregue ao canal TICKET. O atendimento no Discord está liberado."
+          : "Pagamento simulado aprovado, mas o Discord não confirmou o TICKET. O atendimento pode ser aberto manualmente.",
       );
     } catch (reason) {
       setError(
@@ -211,7 +215,7 @@ export function TestCheckout({ sessionId }: { sessionId: string }) {
                 6DNX
               </span>
               <span className="block text-[0.52rem] uppercase tracking-[0.26em] text-muted">
-                Secure checkout
+                Checkout lab
               </span>
             </span>
           </Link>
@@ -240,8 +244,8 @@ export function TestCheckout({ sessionId }: { sessionId: string }) {
             <div className="grid border-b border-white/10 bg-black/35 md:grid-cols-3">
               {[
                 ["01", "Pedido conferido"],
-                ["02", "Pagamento protegido"],
-                ["03", "Liberação assistida"],
+                ["02", "Simulação de pagamento"],
+                ["03", "Ticket de teste"],
               ].map(([number, label], index) => (
                 <div
                   key={number}
@@ -280,22 +284,23 @@ export function TestCheckout({ sessionId }: { sessionId: string }) {
 
                 <div className="relative">
                   <p className="mb-3 text-[0.6rem] font-black uppercase tracking-[0.27em] text-primary">
-                    6DNX // central de aquisição
+                    6DNX // laboratório de aquisição
                   </p>
                   <h1
                     id="checkout-heading"
                     className="max-w-xl text-[clamp(2.7rem,7vw,5.6rem)] leading-[0.84] tracking-[-0.06em]"
                   >
-                    Seu acesso,
+                    Seu pedido,
                     <br />
                     <span className="text-primary drop-shadow-[0_0_25px_var(--primary-glow)]">
                       sem ruído.
                     </span>
                   </h1>
                   <p className="mt-5 max-w-lg text-sm leading-relaxed text-muted">
-                    Confira a configuração escolhida. A aprovação real só será
-                    liberada quando a integração StorM Wallet e o registro no
-                    Supabase estiverem validados em produção.
+                    Confira a configuração escolhida e simule a jornada de
+                    compra. A cobrança real continua bloqueada até o provedor,
+                    o webhook e a persistência serem validados em ambiente
+                    isolado.
                   </p>
 
                   <div className="mt-8 overflow-hidden border border-white/10 bg-black/35">
@@ -303,7 +308,7 @@ export function TestCheckout({ sessionId }: { sessionId: string }) {
                       <Image
                         src={
                           product?.image ??
-                          "/products/card-art/dayz-6dnx.webp"
+                          "/products/card-art/performance-audit-6dnx.webp"
                         }
                         alt=""
                         fill
@@ -338,27 +343,27 @@ export function TestCheckout({ sessionId }: { sessionId: string }) {
                     <dl className="grid sm:grid-cols-3">
                       <div className="border-b border-white/10 px-4 py-4 sm:border-b-0 sm:border-r">
                         <dt className="text-[0.52rem] uppercase tracking-[0.18em] text-muted">
-                          Total teste
+                          Valor de referência
+                        </dt>
+                        <dd className="mt-1 text-xl font-black text-white/90">
+                          {session.referenceAmountLabel ?? "Sob consulta"}
+                        </dd>
+                      </div>
+                      <div className="border-b border-white/10 px-4 py-4 sm:border-b-0 sm:border-r">
+                        <dt className="text-[0.52rem] uppercase tracking-[0.18em] text-muted">
+                          Total simulado
                         </dt>
                         <dd className="mt-1 text-xl font-black text-primary">
                           {session.testAmountLabel}
                         </dd>
                       </div>
-                      <div className="border-b border-white/10 px-4 py-4 sm:border-b-0 sm:border-r">
-                        <dt className="text-[0.52rem] uppercase tracking-[0.18em] text-muted">
-                          Status
-                        </dt>
-                        <dd className="mt-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-emerald-300">
-                          <span className="size-1.5 rounded-full bg-emerald-400 shadow-[0_0_12px_#34d399]" />
-                          Catálogo validado
-                        </dd>
-                      </div>
                       <div className="px-4 py-4">
                         <dt className="text-[0.52rem] uppercase tracking-[0.18em] text-muted">
-                          Suporte
+                          Estado
                         </dt>
-                        <dd className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-white/75">
-                          Ticket Discord
+                        <dd className="mt-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-200">
+                          <span className="size-1.5 rounded-full bg-amber-300 shadow-[0_0_12px_#fcd34d]" />
+                          Somente teste
                         </dd>
                       </div>
                     </dl>
@@ -366,9 +371,9 @@ export function TestCheckout({ sessionId }: { sessionId: string }) {
 
                   <div className="mt-5 grid gap-2 sm:grid-cols-3">
                     {[
-                      "Preço validado no servidor",
-                      "Status por webhook assinado",
-                      "Atendimento pós-compra",
+                      "Valor de referência vindo do catálogo",
+                      "QR ilustrativo e impossível de pagar",
+                      "Ticket Discord marcado como teste",
                     ].map((item) => (
                       <div
                         key={item}
@@ -389,9 +394,9 @@ export function TestCheckout({ sessionId }: { sessionId: string }) {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-[0.55rem] font-black uppercase tracking-[0.22em] text-primary">
-                        Forma de pagamento
+                        Simulação de pagamento
                       </p>
-                      <h2 className="mt-1 text-2xl">Finalize o teste</h2>
+                      <h2 className="mt-1 text-2xl">Escolha a experiência</h2>
                     </div>
                     <span
                       className={`border px-2.5 py-1 text-[0.52rem] font-black uppercase tracking-[0.15em] ${
@@ -418,14 +423,14 @@ export function TestCheckout({ sessionId }: { sessionId: string }) {
                           [
                             "pix",
                             "PIX",
-                            "StorM Wallet",
-                            "instantâneo",
+                            "Simulação local",
+                            "não pagável",
                           ],
                           [
                             "card",
                             "Cartão",
-                            "Provedor futuro",
-                            "laboratório",
+                            "Simulação local",
+                            "ilustrativo",
                           ],
                         ] as const
                       ).map(([value, label, provider, detail]) => (
@@ -517,9 +522,9 @@ export function TestCheckout({ sessionId }: { sessionId: string }) {
                           ? "Teste concluído"
                           : session.status === "approved"
                             ? "Reenviar TICKET de teste"
-                            : `Aprovar ${
+                            : `Simular ${
                                 method === "pix" ? "PIX" : "cartão"
-                              } de teste`}
+                              }`}
                     </span>
                     <span className="absolute inset-y-0 -left-1/3 w-1/3 skew-x-[-20deg] bg-white/30 blur-md transition-transform duration-700 group-hover:translate-x-[500%]" />
                   </button>
@@ -527,6 +532,14 @@ export function TestCheckout({ sessionId }: { sessionId: string }) {
                   <p className="mt-3 text-center text-[0.56rem] leading-relaxed text-white/35">
                     Nenhum valor real será movimentado nesta versão.
                   </p>
+                  {session.status === "approved" ? (
+                    <Link
+                      href={discordSupportUrl}
+                      className="mt-3 flex min-h-11 items-center justify-center border border-white/15 bg-white/[0.035] px-4 text-center text-[0.6rem] font-black uppercase tracking-[0.15em] text-white/75 transition-colors hover:border-primary hover:text-primary"
+                    >
+                      Continuar atendimento no Discord
+                    </Link>
+                  ) : null}
                   <Link
                     href="/#produtos"
                     className="mt-3 flex min-h-10 items-center justify-center text-[0.58rem] font-bold uppercase tracking-[0.18em] text-muted transition-colors hover:text-white"

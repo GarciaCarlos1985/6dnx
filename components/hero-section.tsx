@@ -674,8 +674,8 @@ export function HeroSection() {
           </span>
         </h1>
         <p className="mb-3 text-balance text-[clamp(0.95rem,2.2vw,1.6rem)] font-extrabold uppercase tracking-[0.05em] text-ink">
-          Softwares <span className="italic text-primary">Incríveis</span>,{" "}
-          <span className="italic text-primary">Seguros</span> e Profissionais
+          Soluções <span className="italic text-primary">Incríveis</span>,{" "}
+          <span className="italic text-primary">Seguras</span> e Profissionais
         </p>
         <p className="mx-auto max-w-xl text-[0.65rem] uppercase leading-relaxed tracking-[0.22em] text-white/85 drop-shadow-[0_1px_12px_rgba(255,255,255,0.2)] md:text-xs">
           Descubra soluções criadas para elevar sua experiência em diferentes
@@ -689,11 +689,11 @@ export function HeroSection() {
         aria-hidden
       >
         <p className="mx-auto max-w-2xl text-[clamp(1.4rem,4vw,2.75rem)] font-extrabold uppercase leading-[1.05] tracking-tight text-ink">
-          Indetectável. Atualizado.{" "}
-          <span className="text-primary">Sem desculpa.</span>
+          Informação clara. Compra assistida.{" "}
+          <span className="text-primary">Suporte humano.</span>
         </p>
         <p className="mx-auto mt-4 max-w-md text-[0.65rem] uppercase tracking-[0.24em] text-muted">
-          Escolha seu jogo abaixo
+          Escolha sua solução abaixo
         </p>
       </div>
 
