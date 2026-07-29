@@ -991,21 +991,53 @@ export function ProductShowcase() {
         </p>
       </div>
 
-      <div
-        className={`relative mx-auto grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 ${
-          wide && openSlug ? "z-[80]" : "z-[var(--z-content)]"
-        }`}
-      >
-        {orderedVisible.map((product) => (
-          <Card
-            key={product.slug}
-            product={product}
-            open={openSlug === product.slug}
-            obscured={wide && openSlug !== null && openSlug !== product.slug}
-            centered={orderedVisible.length === 1}
-            onOpen={(el, trigger) => openCard(product.slug, el, trigger)}
-          />
-        ))}
+      <div className="relative mx-auto w-full max-w-[90rem]">
+        {/* Seta Esquerda */}
+        <button
+          type="button"
+          onClick={() => changePage(page - 1)}
+          disabled={page === 0}
+          aria-label="Página anterior"
+          className={`absolute left-0 sm:left-4 xl:left-12 top-1/2 z-[var(--z-content)] -translate-y-1/2 hidden md:flex h-24 w-16 items-center justify-center text-7xl font-light transition-all ${
+            openSlug
+              ? "opacity-0 pointer-events-none"
+              : "text-muted/30 hover:text-primary disabled:opacity-0 disabled:pointer-events-none"
+          }`}
+        >
+          ‹
+        </button>
+
+        <div
+          className={`relative mx-auto grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 ${
+            wide && openSlug ? "z-[80]" : "z-[var(--z-content)]"
+          }`}
+        >
+          {orderedVisible.map((product) => (
+            <Card
+              key={product.slug}
+              product={product}
+              open={openSlug === product.slug}
+              obscured={wide && openSlug !== null && openSlug !== product.slug}
+              centered={orderedVisible.length === 1}
+              onOpen={(el, trigger) => openCard(product.slug, el, trigger)}
+            />
+          ))}
+        </div>
+
+        {/* Seta Direita */}
+        <button
+          type="button"
+          onClick={() => changePage(page + 1)}
+          disabled={page === pages - 1}
+          aria-label="Próxima página"
+          className={`absolute right-0 sm:right-4 xl:right-12 top-1/2 z-[var(--z-content)] -translate-y-1/2 hidden md:flex h-24 w-16 items-center justify-center text-7xl font-light transition-all ${
+            openSlug
+              ? "opacity-0 pointer-events-none"
+              : "text-muted/30 hover:text-primary disabled:opacity-0 disabled:pointer-events-none"
+          }`}
+        >
+          ›
+        </button>
       </div>
 
       {/* Pager: the brand mark itself is the control — 6 back, D/N the pages, X forward. */}
