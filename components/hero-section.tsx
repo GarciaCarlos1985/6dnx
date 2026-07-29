@@ -663,7 +663,7 @@ export function HeroSection() {
             <Image
               ref={logoRef}
               data-hero-logo-motion
-              src="/brand/6dorme-nois-xita-hero.png"
+              src="/brand/6dorme-nois-xita-hero-v2.webp"
               alt="6Dorme Nois Xita"
               width={1536}
               height={1024}
@@ -677,8 +677,9 @@ export function HeroSection() {
           Softwares <span className="italic text-primary">Incríveis</span>,{" "}
           <span className="italic text-primary">Seguros</span> e Profissionais
         </p>
-        <p className="mx-auto max-w-xl text-[0.65rem] uppercase leading-relaxed tracking-[0.22em] text-white/70 drop-shadow-[0_1px_10px_rgba(255,255,255,0.12)] md:text-xs">
-          Descubra como o DayZ foi feito para ser jogado e aproveitado ao máximo.
+        <p className="mx-auto max-w-xl text-[0.65rem] uppercase leading-relaxed tracking-[0.22em] text-white/85 drop-shadow-[0_1px_12px_rgba(255,255,255,0.2)] md:text-xs">
+          Descubra soluções criadas para elevar sua experiência em diferentes
+          jogos.
         </p>
       </div>
 
@@ -698,7 +699,7 @@ export function HeroSection() {
 
       <p
         ref={cueRef}
-        className="absolute bottom-8 left-1/2 z-[var(--z-hero-copy)] flex -translate-x-1/2 flex-col items-center gap-2 text-[0.6rem] uppercase tracking-[0.3em] text-muted/70"
+        className="absolute bottom-8 left-1/2 z-[var(--z-hero-copy)] flex -translate-x-1/2 flex-col items-center gap-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/75 drop-shadow-[0_1px_10px_rgba(255,255,255,0.16)]"
       >
         Role para desvendar
         <span ref={cueArrowRef} className="block h-4 w-px bg-primary/70" aria-hidden />

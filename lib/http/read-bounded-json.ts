@@ -3,17 +3,26 @@ import "server-only";
 export class BoundedJsonError extends Error {
   constructor(
     message: string,
-    readonly status: 400 | 413,
+    readonly status: 400 | 413 | 415,
   ) {
     super(message);
     this.name = "BoundedJsonError";
   }
 }
 
-export async function readBoundedJson<T>(
+export async function readBoundedJson<T extends Record<string, unknown>>(
   request: Request,
   maxBytes: number,
 ): Promise<T> {
+  const mediaType = request.headers
+    .get("content-type")
+    ?.split(";", 1)[0]
+    ?.trim()
+    .toLowerCase();
+  if (mediaType !== "application/json") {
+    throw new BoundedJsonError("Content-Type deve ser application/json", 415);
+  }
+
   const declaredLength = Number(request.headers.get("content-length") || 0);
   if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
     throw new BoundedJsonError("Payload muito grande", 413);
@@ -47,7 +56,15 @@ export async function readBoundedJson<T>(
   }
 
   try {
-    return JSON.parse(text) as T;
+    const payload: unknown = JSON.parse(text);
+    if (
+      payload === null ||
+      typeof payload !== "object" ||
+      Array.isArray(payload)
+    ) {
+      throw new BoundedJsonError("Payload inválido", 400);
+    }
+    return payload as T;
   } catch {
     throw new BoundedJsonError("Payload inválido", 400);
   }

@@ -1,6 +1,6 @@
 # 6DNX project state
 
-Last updated: 2026-07-28
+Last updated: 2026-07-29
 
 ## Current objective
 
@@ -142,6 +142,21 @@ isolated test checkout, and an automated games-and-AI news area.
   so Vercel exposes their names/scopes but not their values. The three live
   StorM variables are now scoped exclusively to Production; Preview has no live
   StorM credential.
+- Added a fail-closed private-review boundary in `proxy.ts`. When enabled, it
+  protects pages and static assets with server-only Basic credentials while
+  leaving the independently authenticated cron and future webhook routes
+  reachable. Global `noindex`, `Disallow: /`, private caching, environment
+  guidance, and the complete continuation boundary are documented in
+  `REVIEW_HANDOFF.md`.
+- Preserved `Produtos_Organizados.md` as an unmodified staging reference. Its
+  provisional prices were not promoted into `lib/products.ts`; the extraction
+  contains 31 headings versus 30 summary entries, encoding damage, repeated
+  prompts, reused videos, and conflicts with the prior Discord audit.
+- Completed a severe pre-commit audit documented in
+  `AUDITORIA_SEGURANCA.md`: removed the public Discord side effect, hardened
+  route payloads/news URLs/cron headers, prepared least-privilege news RLS, and
+  confirmed that the deployed site is still on an older public build while the
+  remote `news_articles` table is still absent.
 
 ## Pending human or business input
 
@@ -149,6 +164,8 @@ isolated test checkout, and an automated games-and-AI news area.
 - `Custom Steam Profile` uses the approved vertical YouTube video
   `BqPwa1SXowE`; its popup preserves the video's portrait proportion.
 - Confirm commercial prices before replacing `sob consulta`.
+- Configure `SITE_REVIEW_ENABLED`, `SITE_REVIEW_USER`, and a 16+ character
+  `SITE_REVIEW_PASSWORD` in Vercel before the next reviewed deployment.
 - Apply the Supabase news migration only after human review.
 - Replace the currently rejected Supabase server credential before testing
   durable ingestion only if it fails after migration; current key formats and

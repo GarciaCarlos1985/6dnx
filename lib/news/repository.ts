@@ -1,5 +1,6 @@
 import "server-only";
 
+import { readBoundedResponseJson } from "@/lib/http/read-bounded-response";
 import { fetchOfficialNews } from "@/lib/news/sources";
 import { seedNews } from "@/lib/news/seed";
 import {
@@ -9,6 +10,25 @@ import {
 } from "@/lib/news/types";
 
 const MAX_PUBLIC_ITEMS = 24;
+const MAX_EXTERNAL_ID_LENGTH = 200;
+const MAX_SLUG_LENGTH = 180;
+const MAX_SOURCE_URL_LENGTH = 2_048;
+const MAX_SUPABASE_READ_BYTES = 512_000;
+const MAX_SUPABASE_RPC_BYTES = 64_000;
+const SAFE_SOURCE_HOSTS = new Set([
+  "blog.google",
+  "openai.com",
+  "www.openai.com",
+  "steamcommunity.com",
+  "www.steamcommunity.com",
+  "store.steampowered.com",
+  "steamstore-a.akamaihd.net",
+]);
+const SAFE_IMAGE_HOSTS = new Set([
+  "blog.google",
+  "cdn.akamai.steamstatic.com",
+  "storage.googleapis.com",
+]);
 
 type NewsRow = {
   id: unknown;
@@ -59,35 +79,91 @@ function isCategory(value: unknown): value is NewsCategory {
   return newsCategories.includes(value as NewsCategory);
 }
 
+function boundedString(
+  value: unknown,
+  minimum: number,
+  maximum: number,
+) {
+  if (typeof value !== "string") return null;
+  const normalized = value.trim();
+  return normalized.length >= minimum && normalized.length <= maximum
+    ? normalized
+    : null;
+}
+
+function safeHttpsUrl(
+  value: unknown,
+  allowedHosts: ReadonlySet<string>,
+  allowEmpty = false,
+) {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const normalized = value.trim();
+  if (allowEmpty && normalized === "") return "";
+  if (normalized.length > MAX_SOURCE_URL_LENGTH) return null;
+
+  try {
+    const url = new URL(normalized);
+    return url.protocol === "https:" &&
+      !url.username &&
+      !url.password &&
+      allowedHosts.has(url.hostname)
+      ? url.toString()
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 function fromRow(row: NewsRow): NewsArticle | null {
+  const id = boundedString(row.id, 1, 80);
+  const externalId = boundedString(
+    row.external_id,
+    1,
+    MAX_EXTERNAL_ID_LENGTH,
+  );
+  const slug = boundedString(row.slug, 1, MAX_SLUG_LENGTH);
+  const title = boundedString(row.title, 3, 220);
+  const summary = boundedString(row.summary, 10, 800);
+  const gameName = boundedString(row.game_name, 2, 80);
+  const sourceName = boundedString(row.source_name, 2, 120);
+  const sourceUrl = safeHttpsUrl(row.source_url, SAFE_SOURCE_HOSTS);
+  const imageUrl = safeHttpsUrl(row.image_url, SAFE_IMAGE_HOSTS, true);
+  const publishedAt =
+    typeof row.published_at === "string"
+      ? new Date(row.published_at)
+      : new Date(NaN);
+
   if (
-    typeof row.id !== "string" ||
-    typeof row.external_id !== "string" ||
-    typeof row.slug !== "string" ||
-    typeof row.title !== "string" ||
-    typeof row.summary !== "string" ||
-    typeof row.game_name !== "string" ||
+    !id ||
+    !externalId ||
+    !slug ||
+    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) ||
+    !title ||
+    !summary ||
+    !gameName ||
     !isCategory(row.category) ||
-    typeof row.source_name !== "string" ||
-    typeof row.source_url !== "string" ||
-    typeof row.image_url !== "string" ||
-    typeof row.published_at !== "string"
+    !sourceName ||
+    sourceUrl === null ||
+    imageUrl === null ||
+    !Number.isFinite(publishedAt.getTime())
   ) {
     return null;
   }
 
   return {
-    id: row.id,
-    externalId: row.external_id,
-    slug: row.slug,
-    title: row.title,
-    summary: row.summary,
-    gameName: row.game_name,
+    id,
+    externalId,
+    slug,
+    title,
+    summary,
+    gameName,
     category: row.category,
-    sourceName: row.source_name,
-    sourceUrl: row.source_url,
-    imageUrl: row.image_url,
-    publishedAt: row.published_at,
+    sourceName,
+    sourceUrl,
+    imageUrl,
+    publishedAt: publishedAt.toISOString(),
     featured: row.is_featured === true,
   };
 }
@@ -115,7 +191,10 @@ async function readFromSupabase(limit: number) {
     );
     if (!response.ok) return null;
 
-    const rows = (await response.json()) as NewsRow[];
+    const rows = await readBoundedResponseJson<NewsRow[]>(
+      response,
+      MAX_SUPABASE_READ_BYTES,
+    );
     const articles = Array.isArray(rows)
       ? rows.map(fromRow).filter((item): item is NewsArticle => item !== null)
       : [];
@@ -170,6 +249,9 @@ export async function persistNewsArticles(articles: NewsArticle[]) {
     throw new Error(`Supabase news ingestion returned ${response.status}`);
   }
 
-  const count = (await response.json()) as unknown;
+  const count = await readBoundedResponseJson<unknown>(
+    response,
+    MAX_SUPABASE_RPC_BYTES,
+  );
   return typeof count === "number" ? count : items.length;
 }

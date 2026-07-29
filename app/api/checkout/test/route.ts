@@ -21,7 +21,7 @@ function noStore(payload: unknown, status = 200) {
 
 function isSameOrigin(request: NextRequest) {
   const origin = request.headers.get("origin");
-  return !origin || origin === request.nextUrl.origin;
+  return origin === request.nextUrl.origin;
 }
 
 export function GET(request: NextRequest) {

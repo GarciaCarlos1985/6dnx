@@ -7,6 +7,7 @@ import type { NewsArticle } from "@/lib/news/types";
 const MAX_FEED_BYTES = 1_000_000;
 const MAX_ITEMS_PER_FEED = 5;
 const MAX_SUMMARY_LENGTH = 360;
+const MAX_SOURCE_URL_LENGTH = 2_048;
 
 type FeedSource = {
   id: "google-ai" | "openai";
@@ -98,9 +99,13 @@ function slugify(value: string) {
 
 function safeHttpsUrl(value: unknown, allowedHosts: ReadonlySet<string>) {
   if (typeof value !== "string") return "";
+  if (value.length > MAX_SOURCE_URL_LENGTH) return "";
   try {
     const url = new URL(value);
-    return url.protocol === "https:" && allowedHosts.has(url.hostname)
+    return url.protocol === "https:" &&
+      !url.username &&
+      !url.password &&
+      allowedHosts.has(url.hostname)
       ? url.toString()
       : "";
   } catch {
@@ -159,7 +164,12 @@ function normalizeItem(
   item: RssItem,
   source: FeedSource,
 ): NewsArticle | null {
-  const title = cleanText(typeof item.title === "string" ? item.title : "");
+  const title = truncate(
+    cleanText(
+      typeof item.title === "string" ? item.title.slice(0, 2_000) : "",
+    ),
+    220,
+  );
   const summary = truncate(
     cleanText(
       typeof item.description === "string" ? item.description : "",

@@ -1,11 +1,20 @@
 import "server-only";
 
+import { readBoundedResponseJson } from "@/lib/http/read-bounded-response";
 import type { NewsArticle, NewsCategory } from "@/lib/news/types";
 
 const STEAM_NEWS_ENDPOINT =
   "https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/";
 const MAX_ITEMS_PER_GAME = 5;
 const MAX_SUMMARY_LENGTH = 360;
+const MAX_STEAM_RESPONSE_BYTES = 512_000;
+const MAX_SOURCE_URL_LENGTH = 2_048;
+const SAFE_STEAM_ARTICLE_HOSTS = new Set([
+  "steamcommunity.com",
+  "www.steamcommunity.com",
+  "store.steampowered.com",
+  "steamstore-a.akamaihd.net",
+]);
 
 const trackedGames = [
   { appId: 221100, name: "DayZ" },
@@ -90,8 +99,16 @@ function classify(title: string): NewsCategory {
 }
 
 function isSafeSourceUrl(value: string) {
+  if (value.length > MAX_SOURCE_URL_LENGTH) return false;
+
   try {
-    return new URL(value).protocol === "https:";
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      !url.username &&
+      !url.password &&
+      SAFE_STEAM_ARTICLE_HOSTS.has(url.hostname)
+    );
   } catch {
     return false;
   }
@@ -103,7 +120,10 @@ function normalizeItem(
 ): NewsArticle | null {
   if (
     typeof item.gid !== "string" ||
+    item.gid.length < 1 ||
+    item.gid.length > 80 ||
     typeof item.title !== "string" ||
+    item.title.length > 2_000 ||
     typeof item.url !== "string" ||
     typeof item.date !== "number" ||
     !isSafeSourceUrl(item.url)
@@ -111,9 +131,16 @@ function normalizeItem(
     return null;
   }
 
-  const title = cleanText(item.title);
+  const publishedAt = new Date(item.date * 1000);
+  if (!Number.isFinite(publishedAt.getTime())) return null;
+
+  const title = truncate(cleanText(item.title), 220);
   const summary = truncate(
-    cleanText(typeof item.contents === "string" ? item.contents : ""),
+    cleanText(
+      typeof item.contents === "string"
+        ? item.contents.slice(0, 32_000)
+        : "",
+    ),
     MAX_SUMMARY_LENGTH,
   );
   if (!title || !summary) return null;
@@ -132,7 +159,7 @@ function normalizeItem(
     sourceName: `${game.name} · Steam`,
     sourceUrl: item.url,
     imageUrl: `https://cdn.akamai.steamstatic.com/steam/apps/${game.appId}/header.jpg`,
-    publishedAt: new Date(item.date * 1000).toISOString(),
+    publishedAt: publishedAt.toISOString(),
     featured: false,
   };
 }
@@ -159,7 +186,10 @@ async function fetchGameNews(
     throw new Error(`Steam news returned ${response.status} for ${game.appId}`);
   }
 
-  const payload = (await response.json()) as SteamNewsResponse;
+  const payload = await readBoundedResponseJson<SteamNewsResponse>(
+    response,
+    MAX_STEAM_RESPONSE_BYTES,
+  );
   const items = Array.isArray(payload.appnews?.newsitems)
     ? payload.appnews.newsitems
     : [];

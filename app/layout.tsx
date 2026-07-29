@@ -15,16 +15,40 @@ const manrope = Manrope({
   display: "swap",
 });
 
+function metadataBase() {
+  const fallback = new URL("http://localhost:3127");
+  const configured = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!configured) return fallback;
+
+  try {
+    const url = new URL(configured);
+    return url.protocol === "https:" ||
+      ["localhost", "127.0.0.1"].includes(url.hostname)
+      ? url
+      : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3127",
-  ),
+  metadataBase: metadataBase(),
   title: {
     default: "6DNX — Softwares Incríveis, Seguros e Profissionais",
     template: "%s | 6DNX",
   },
   description:
     "Softwares utilitários premium para PC, checkout assistido e notícias oficiais de games e inteligência artificial.",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
 };
 
 export default function RootLayout({

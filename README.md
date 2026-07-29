@@ -76,6 +76,17 @@ npm run dev
 O projeto usa `http://localhost:3127` por padrão. Copie as variáveis documentadas
 em `.env.example` para `.env.local` e preencha somente no ambiente local/Vercel.
 
+### Revisão privada
+
+Enquanto o site não for público, configure `SITE_REVIEW_ENABLED=true`,
+`SITE_REVIEW_USER` e uma `SITE_REVIEW_PASSWORD` aleatória com pelo menos 16
+caracteres. A proteção falha fechada quando a senha está ausente ou fraca.
+Cron e webhooks permanecem independentes e precisam validar seus próprios
+segredos. Consulte `REVIEW_HANDOFF.md` para o checklist completo.
+
+Para o relatório pré-commit, falhas corrigidas e limitações que exigem ação
+humana/externa, consulte `AUDITORIA_SEGURANCA.md`.
+
 ### Checkout de laboratório
 
 O laboratório abre localmente por padrão e fica desativado na Vercel até que

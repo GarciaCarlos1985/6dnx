@@ -15,12 +15,15 @@ const OPERATOR_FRAMES = [
   "/operador2-premium.webp",
 ] as const;
 
+// Visual contract: pose 1 has exactly two arms and two hands: one index
+// finger on the lips and the other hand clearly resting on the upper chest.
+// Poses 2–5 preserve their body posture, and every wing stays pale ivory.
 const ANGEL_FRAMES = [
-  "/anjo1-premium.webp",
-  "/anjo-frame-02.webp",
-  "/anjo-frame-03.webp",
-  "/anjo-frame-04-v2.webp",
-  "/anjo-frame-05.webp",
+  "/anjo-hero-shh-v4.webp",
+  "/anjo-frame-02-ivory-v2.webp",
+  "/anjo-frame-03-ivory-v2.webp",
+  "/anjo-frame-04-ivory-v2.webp",
+  "/anjo-frame-05-ivory-v2.webp",
 ] as const;
 
 const FEATHERS = [

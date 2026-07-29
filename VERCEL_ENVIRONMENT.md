@@ -11,6 +11,9 @@ Configure em **Project Settings > Environment Variables**.
 | --- | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | `https://6dnx.vercel.app` | URL HTTPS do Preview | Metadados e URLs absolutas. Nunca use localhost na Production. |
 | `CRON_SECRET` | obrigatório | segredo diferente | Protege `/api/cron/news`; use um segredo aleatório sem privilégios externos. |
+| `SITE_REVIEW_ENABLED` | `true` enquanto privado | `true` enquanto privado | Ativa a senha de revisão. Na Vercel, ausente também bloqueia por segurança; somente `false` explícito abre. |
+| `SITE_REVIEW_USER` | usuário privado | usuário diferente, se desejado | Usuário do desafio HTTP Basic; somente servidor. |
+| `SITE_REVIEW_PASSWORD` | senha aleatória de 16+ caracteres | senha diferente | Senha do ambiente de revisão; nunca use `NEXT_PUBLIC_`. |
 | `DISCORD_INVITE_URL` | obrigatório | pode repetir | Link público de suporte. |
 | `DISCORD_TICKET_WEBHOOK_URL` | obrigatório | webhook de teste | Entrega dos TICKETs; somente servidor. |
 | `DISCORD_WEBHOOK_URL` | opcional | opcional | Fallback do webhook de TICKET. |
@@ -32,9 +35,8 @@ manualmente.
 | `PAYMENT_TEST_MODE` | ausente/`false` | `true`, somente se desejado | Libera o simulador interno; nunca habilite na Production. |
 
 As três variáveis StorM já estão preenchidas em `.env.local` e cadastradas na
-Vercel. Na auditoria de 2026-07-28, todas estavam marcadas como **Sensitive** e
-aplicadas simultaneamente a Production e Preview. Como a chave local tem
-prefixo live, remova o escopo Preview dessas três variáveis; Preview deve usar
+Vercel. Na auditoria concluída em 2026-07-28, todas estavam marcadas como
+**Sensitive** e foram corrigidas para **Production somente**. Preview deve usar
 somente credenciais sandbox, se a StorM fornecer esse ambiente.
 
 O cadastro das chaves não ativa pagamentos sozinho. Enquanto
@@ -80,6 +82,14 @@ valores; portanto, não é possível comparar o conteúdo com `.env.local`.
 Variáveis `NEXT_PUBLIC_*` serão públicas no bundle do navegador por definição e
 podem ser recriadas como Plain para facilitar conferência. Isso não se aplica a
 tokens, secrets, webhooks ou chaves privadas.
+
+Na auditoria de 2026-07-29, as três variáveis `SITE_REVIEW_*` ainda não
+existiam na Vercel. O domínio publicado respondia `200` e `robots.txt` retornava
+`404`, confirmando que o deploy online ainda é anterior à proteção. Também
+permaneciam em Preview e Production várias credenciais não utilizadas
+(`SUPABASE_DB_URL`, service role, bot Discord e Mercado Pago). Antes do próximo
+push, configure a revisão e reduza esses escopos conforme
+`AUDITORIA_SEGURANCA.md`.
 
 ## 4. GitHub
 
@@ -128,3 +138,6 @@ salvo em `.env.local`, em Vercel ou em GitHub Actions.
 5. Conceder permissão de escrita no repositório GitHub à conta autenticada.
 6. Fazer o push da `main` e confirmar que a Vercel criou um deployment com o
    novo SHA.
+7. Enquanto o site estiver em revisão, manter `SITE_REVIEW_ENABLED=true`,
+   cadastrar uma senha forte e confirmar `401` sem credenciais / `200` com
+   credenciais antes de divulgar qualquer URL.

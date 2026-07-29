@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: "storage.googleapis.com",
         pathname: "/gweb-uniblog-publish-prod/images/**",
       },
+      {
+        protocol: "https",
+        hostname: "blog.google",
+        pathname: "/**",
+      },
     ],
   },
 };

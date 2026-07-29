@@ -17,7 +17,7 @@ function ArticleLink({ article }: { article: NewsArticle }) {
       rel="noreferrer"
       className="group flex min-h-24 items-center gap-4 border-t border-white/10 py-4 transition-colors hover:border-primary/70"
     >
-      <span className="font-display text-2xl text-white/20 transition-colors group-hover:text-primary">
+      <span className="font-display text-2xl text-white/55 transition-colors group-hover:text-primary">
         {dateFormatter.format(new Date(article.publishedAt))}
       </span>
       <span className="min-w-0 flex-1">
@@ -130,7 +130,7 @@ export async function NewsRadar() {
             </h2>
           </div>
           <div className="max-w-md md:text-right">
-            <p className="mb-4 text-sm leading-relaxed text-muted">
+            <p className="mb-4 text-sm leading-relaxed text-white/72">
               Jogos e inteligência artificial em uma leitura diária — direto
               da Steam, Google AI e OpenAI, sem scraping de resultados.
             </p>

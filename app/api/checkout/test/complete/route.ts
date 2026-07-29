@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
   }
 
   const origin = request.headers.get("origin");
-  if (origin && origin !== request.nextUrl.origin) {
+  if (origin !== request.nextUrl.origin) {
     return noStore({ error: "Origem inválida" }, 403);
   }
 

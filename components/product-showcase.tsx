@@ -137,8 +137,22 @@ function useProductCheckout(product: Product) {
         );
       }
 
+      const checkoutUrl = new URL(payload.checkoutUrl, window.location.origin);
+      if (
+        checkoutUrl.origin !== window.location.origin ||
+        checkoutUrl.pathname !== "/checkout/test"
+      ) {
+        throw new Error("O servidor retornou um destino de checkout inválido.");
+      }
+
       burstConfetti(window.innerWidth / 2, window.innerHeight / 2);
-      window.setTimeout(() => window.location.assign(payload.checkoutUrl as string), 420);
+      window.setTimeout(
+        () =>
+          window.location.assign(
+            `${checkoutUrl.pathname}${checkoutUrl.search}${checkoutUrl.hash}`,
+          ),
+        420,
+      );
     } catch (reason) {
       setCheckoutError(
         reason instanceof Error
@@ -269,6 +283,7 @@ function Popups({
 
       <section
         role="dialog"
+        aria-modal="true"
         aria-label={`Detalhes de ${product.title}`}
         data-popup-side="left"
         className="product-popup product-popup--info-left fixed z-[80] flex flex-col overflow-hidden border border-primary/40 bg-surface/95 shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)] backdrop-blur-md"
@@ -285,6 +300,8 @@ function Popups({
             type="button"
             onClick={onClose}
             aria-label="Fechar"
+            autoFocus
+            data-product-dialog-close
             className="shrink-0 border border-white/15 px-2 py-0.5 text-sm text-muted transition-colors hover:border-primary hover:text-primary"
           >
             ✕
@@ -380,7 +397,7 @@ function Card({
   open: boolean;
   obscured: boolean;
   centered: boolean;
-  onOpen: (el: HTMLElement) => void;
+  onOpen: (el: HTMLElement, trigger: HTMLButtonElement) => void;
 }) {
   const from = priceFrom(product);
 
@@ -483,7 +500,10 @@ function Card({
       <button
         type="button"
         onClick={(event) =>
-          onOpen(event.currentTarget.parentElement as HTMLElement)
+          onOpen(
+            event.currentTarget.parentElement as HTMLElement,
+            event.currentTarget,
+          )
         }
         aria-label={`Centralizar e abrir detalhes de ${product.title}`}
         aria-expanded={open}
@@ -500,6 +520,7 @@ export function ProductShowcase() {
   const sectionRef = useRef<HTMLElement>(null);
   const pagerRef = useRef<HTMLElement>(null);
   const anchorRef = useRef<HTMLElement | null>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
   const originScrollRef = useRef<number | null>(null);
   const wide = useSyncExternalStore(
     subscribeToWidePopup,
@@ -614,21 +635,24 @@ export function ProductShowcase() {
 
   const close = useCallback(() => {
     const originScroll = originScrollRef.current;
+    const returnFocus = returnFocusRef.current;
     setOpenSlug(null);
     setPlacement(null);
     anchorRef.current = null;
     originScrollRef.current = null;
+    returnFocusRef.current = null;
 
-    if (originScroll !== null) {
-      window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      if (originScroll !== null) {
         window.scrollTo({
           top: originScroll,
           behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
             ? "auto"
             : "smooth",
         });
-      });
-    }
+      }
+      returnFocus?.focus({ preventScroll: true });
+    });
   }, []);
 
   // Popups are viewport-anchored, so freeze the page while one is open instead
@@ -637,11 +661,63 @@ export function ProductShowcase() {
     if (!openSlug || (wide && !placement)) return;
     const root = document.documentElement;
     const prev = root.style.overflow;
+    const page = sectionRef.current?.closest("main");
+    const pageWasInert = page?.hasAttribute("inert") ?? false;
+    const modalRoot = document.querySelector<HTMLElement>(
+      "[data-product-modal-root]",
+    );
+    const focusableSelector = [
+      "a[href]",
+      "button:not([disabled])",
+      "iframe",
+      "input:not([disabled])",
+      "select:not([disabled])",
+      "textarea:not([disabled])",
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(",");
+    const focusableElements = () =>
+      modalRoot
+        ? Array.from(
+            modalRoot.querySelectorAll<HTMLElement>(focusableSelector),
+          ).filter((element) => element.getClientRects().length > 0)
+        : [];
+
     root.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
+    page?.setAttribute("inert", "");
+
+    const focusFrame = window.requestAnimationFrame(() => {
+      modalRoot
+        ?.querySelector<HTMLElement>("[data-product-dialog-close]")
+        ?.focus({ preventScroll: true });
+    });
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        close();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const focusable = focusableElements();
+      if (focusable.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const [first] = focusable;
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener("keydown", onKey);
     return () => {
+      window.cancelAnimationFrame(focusFrame);
       root.style.overflow = prev;
+      if (!pageWasInert) page?.removeAttribute("inert");
       window.removeEventListener("keydown", onKey);
     };
   }, [openSlug, placement, wide, close]);
@@ -698,8 +774,13 @@ export function ProductShowcase() {
     };
   }, [openSlug, portraitVideo, wide]);
 
-  const openCard = (slug: string, el: HTMLElement) => {
+  const openCard = (
+    slug: string,
+    el: HTMLElement,
+    trigger: HTMLButtonElement,
+  ) => {
     anchorRef.current = el;
+    returnFocusRef.current = trigger;
     originScrollRef.current = wide ? window.scrollY : null;
     setPlacement(null);
     setOpenSlug(slug);
@@ -725,7 +806,7 @@ export function ProductShowcase() {
         >
           Nossos Softwares
         </h2>
-        <p className="mx-auto max-w-2xl text-muted">
+        <p className="mx-auto max-w-2xl text-white/72">
           Explore cada variação e teste o fluxo de compra antes da integração
           bancária real.
         </p>
@@ -743,7 +824,7 @@ export function ProductShowcase() {
             open={openSlug === product.slug}
             obscured={wide && openSlug !== null && openSlug !== product.slug}
             centered={orderedVisible.length === 1}
-            onOpen={(el) => openCard(product.slug, el)}
+            onOpen={(el, trigger) => openCard(product.slug, el, trigger)}
           />
         ))}
       </div>
@@ -846,7 +927,7 @@ export function ProductShowcase() {
 
       {typeof document !== "undefined" && openProduct
         ? createPortal(
-            <>
+            <div data-product-modal-root>
               <div
                 className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md"
                 onClick={close}
@@ -863,7 +944,7 @@ export function ProductShowcase() {
               ) : (
                 <MobileSheet product={openProduct} onClose={close} />
               )}
-            </>,
+            </div>,
             document.body,
           )
         : null}
@@ -886,6 +967,7 @@ function MobileSheet({
   return (
     <section
       role="dialog"
+      aria-modal="true"
       aria-label={`Detalhes de ${product.title}`}
       className="fixed left-1/2 top-1/2 z-[80] flex max-h-[86vh] w-[min(30rem,92vw)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden border border-primary/40 bg-surface shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)]"
     >
@@ -900,6 +982,8 @@ function MobileSheet({
           type="button"
           onClick={onClose}
           aria-label="Fechar"
+          autoFocus
+          data-product-dialog-close
           className="shrink-0 border border-white/15 px-2 py-0.5 text-sm text-muted"
         >
           ✕

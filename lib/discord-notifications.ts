@@ -1,7 +1,5 @@
 import "server-only";
 
-import type { Product, Variant } from "@/lib/products";
-import { formatBRL } from "@/lib/products";
 import type { TestCheckoutSession } from "@/lib/checkout/test-store";
 
 type DiscordDelivery = {
@@ -54,7 +52,10 @@ async function sendTicket(payload: unknown): Promise<DiscordDelivery> {
     }
     return { delivered: true };
   } catch (error) {
-    console.error("Falha ao enviar notificação ao TICKET do Discord:", error);
+    console.error(
+      "Falha ao enviar notificação ao TICKET do Discord:",
+      error instanceof Error ? error.name : "UnknownError",
+    );
     return { delivered: false, reason: "network" };
   }
 }
@@ -64,51 +65,6 @@ function saoPauloTimestamp(value = new Date()) {
     dateStyle: "short",
     timeStyle: "medium",
     timeZone: "America/Sao_Paulo",
-  });
-}
-
-export async function notifyDiscordLead({
-  product,
-  variant,
-}: {
-  product: Product;
-  variant?: Variant;
-}) {
-  const price =
-    typeof variant?.priceBRL === "number"
-      ? formatBRL(variant.priceBRL)
-      : "sob consulta";
-
-  return sendTicket({
-    username: "6DNX",
-    allowed_mentions: { parse: [] },
-    content:
-      "🎉 **Chegando gente nova pelo site!**\nO cliente abriu o atendimento da 6DNX.",
-    embeds: [
-      {
-        title: "🎁 Novo cliente vindo da vitrine 6DNX",
-        description:
-          "Alguém escolheu um produto no site e está entrando no servidor.",
-        color: 0xdc2626,
-        fields: [
-          { name: "🎮 Produto", value: product.title, inline: true },
-          {
-            name: "🏷️ Variação",
-            value: variant?.name ?? "não especificada",
-            inline: true,
-          },
-          { name: "💰 Preço", value: price, inline: true },
-          {
-            name: "🕒 Horário",
-            value: saoPauloTimestamp(),
-            inline: false,
-          },
-        ],
-        footer: {
-          text: "Enviado automaticamente pelo site 6DNX",
-        },
-      },
-    ],
   });
 }
 
