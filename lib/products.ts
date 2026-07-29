@@ -25,208 +25,348 @@ export type Product = {
   videoOrientation?: "landscape" | "portrait";
 };
 
-/**
- * Catálogo legítimo de referência.
- *
- * Os valores abaixo são rascunhos editoriais para testar a vitrine e o
- * checkout de laboratório. Eles não autorizam cobrança real nem substituem a
- * confirmação comercial do responsável pela 6DNX.
- */
 export const products: Product[] = [
   {
-    slug: "performance-audit",
-    title: "PC Performance Audit",
-    category: "Diagnóstico e desempenho",
-    tagline: "Um diagnóstico claro para jogar com estabilidade",
-    description:
-      "Análise guiada de desempenho do computador, temperaturas, uso de memória, armazenamento e configurações do sistema. A entrega inclui um relatório objetivo e um plano de melhorias sem prometer resultados incompatíveis com o hardware.",
-    image: "/products/card-art/performance-audit-6dnx.webp",
-    status: "available",
-    variants: [
-      {
-        name: "Essencial",
-        note: "Checklist e diagnóstico remoto",
-        priceBRL: 49.9,
-      },
-      {
-        name: "Completo",
-        note: "Diagnóstico e relatório priorizado",
-        priceBRL: 89.9,
-        badge: "POPULAR",
-      },
-      {
-        name: "Acompanhado",
-        note: "Relatório e sessão de orientação",
-        priceBRL: 149.9,
-      },
-    ],
+    "slug": "dayz-priv8-software",
+    "title": "DayZ (Priv8 Software)",
+    "category": "DayZ",
+    "tagline": "DayZ (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/performance-audit-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
   },
   {
-    slug: "game-setup-pro",
-    title: "Game Setup Pro",
-    category: "Configuração de jogos",
-    tagline: "Controles, vídeo e áudio ajustados ao seu setup",
-    description:
-      "Configuração assistida de opções permitidas pelo próprio jogo: controles, sensibilidade, acessibilidade, qualidade visual e áudio. O serviço respeita as regras de cada plataforma e não instala automações ou vantagens indevidas.",
-    image: "/products/card-art/game-setup-pro-6dnx.webp",
-    status: "available",
-    variants: [
-      {
-        name: "1 Jogo",
-        note: "Configuração de um título",
-        priceBRL: 39.9,
-      },
-      {
-        name: "3 Jogos",
-        note: "Pacote para três títulos",
-        priceBRL: 79.9,
-        badge: "PACOTE",
-      },
-      {
-        name: "Setup Completo",
-        note: "Jogos e periféricos compatíveis",
-        priceBRL: 129.9,
-      },
-    ],
+    "slug": "dayz-dupper",
+    "title": "DayZ Dupper",
+    "category": "DayZ",
+    "tagline": "DayZ Dupper Acesso",
+    "description": "Duplication loot in DAYZ.",
+    "image": "/products/card-art/game-setup-pro-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
   },
   {
-    slug: "aim-training-lab",
-    title: "Aim Training Lab",
-    category: "Treino e evolução",
-    tagline: "Rotina legítima para precisão e consistência",
-    description:
-      "Plano de treino personalizado para ferramentas e modos de prática permitidos. A proposta organiza metas, sensibilidade, aquecimento e acompanhamento de evolução sem alterar o jogo ou automatizar movimentos.",
-    image: "/products/card-art/aim-training-lab-6dnx.webp",
-    status: "custom",
-    variants: [
-      {
-        name: "Starter",
-        note: "Rotina inicial de treino",
-        priceBRL: 29.9,
-      },
-      {
-        name: "Pro",
-        note: "Plano evolutivo de quatro semanas",
-        priceBRL: 59.9,
-        badge: "RECOMENDADO",
-      },
-      {
-        name: "Coaching",
-        note: "Plano e sessão individual",
-        priceBRL: 99.9,
-      },
-    ],
+    "slug": "dead-by-daylight-priv8-software",
+    "title": "Dead by Daylight (Priv8 Software)",
+    "category": "Dead by Daylight",
+    "tagline": "Dead by Daylight (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/aim-training-lab-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
   },
   {
-    slug: "creator-identity-pack",
-    title: "Creator Identity Pack",
-    category: "Design para criadores",
-    tagline: "Uma identidade visual pronta para se destacar",
-    description:
-      "Criação de peças visuais originais para perfis, comunidades e canais: avatar, banner e elementos coordenados dentro da estética escolhida. A arte final é ajustada aos formatos combinados antes da entrega.",
-    image: "/products/card-art/creator-identity-pack-6dnx.webp",
-    status: "custom",
-    variants: [
-      { name: "Avatar", note: "Uma peça principal", priceBRL: 34.9 },
-      {
-        name: "Combo",
-        note: "Avatar e banner coordenados",
-        priceBRL: 69.9,
-        badge: "POPULAR",
-      },
-      {
-        name: "Identidade Completa",
-        note: "Kit visual para múltiplos formatos",
-        priceBRL: 119.9,
-      },
-    ],
+    "slug": "deadlock-priv8-software",
+    "title": "Deadlock (Priv8 Software)",
+    "category": "Deadlock",
+    "tagline": "Deadlock (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/creator-identity-pack-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
   },
   {
-    slug: "custom-steam-profile",
-    title: "Custom Steam Profile",
-    category: "Personalização Steam",
-    tagline: "Seu perfil Steam com identidade própria",
-    description:
-      "Personalização visual de perfil da Steam com recursos oficiais da plataforma. Escolha um modelo, encomende uma composição autoral ou faça uma consultoria de requisitos antes de definir o projeto.",
-    image: "/products/card-art/steam-profile-6dnx.webp",
-    status: "custom",
-    youtubeId: "BqPwa1SXowE",
-    videoOrientation: "portrait",
-    variants: [
-      {
-        name: "Modelo Pronto",
-        note: "Composição baseada no catálogo",
-        priceBRL: 49.9,
-      },
-      {
-        name: "Perfil Autoral",
-        note: "Direção visual sob encomenda",
-        priceBRL: 149.9,
-        badge: "EXCLUSIVO",
-      },
-      {
-        name: "Consultoria",
-        note: "Tema, requisitos e planejamento",
-        priceBRL: 29.9,
-      },
-    ],
+    "slug": "delta-force-priv8-software",
+    "title": "Delta Force (Priv8 Software)",
+    "category": "Delta Force",
+    "tagline": "Delta Force (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/steam-profile-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
   },
   {
-    slug: "reshades",
-    title: "Visual Presets",
-    category: "Visual e presets",
-    tagline: "Uma direção de cor para cada experiência",
-    description:
-      "Presets visuais para capturas, experiências offline e jogos que permitam filtros externos. A configuração é feita com foco estético e de legibilidade, sempre respeitando os termos do título e da plataforma.",
-    image: "/products/card-art/reshades-6dnx.webp",
-    status: "custom",
-    variants: [
-      {
-        name: "Preset Essencial",
-        note: "Perfil visual pronto",
-        priceBRL: 24.9,
-      },
-      {
-        name: "Preset Autoral",
-        note: "Ajuste criado para o seu estilo",
-        priceBRL: 59.9,
-        badge: "AUTORAL",
-      },
-      {
-        name: "Pacote Criador",
-        note: "Três variações para conteúdo",
-        priceBRL: 99.9,
-      },
-    ],
+    "slug": "escape-from-tarkov-priv8-software",
+    "title": "Escape From Tarkov (Priv8 Software)",
+    "category": "Escape From Tarkov",
+    "tagline": "Escape From Tarkov (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/reshades-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
   },
   {
-    slug: "stream-studio-setup",
-    title: "Stream Studio Setup",
-    category: "Conteúdo e transmissão",
-    tagline: "Áudio, câmera e cenas em uma experiência coesa",
-    description:
-      "Organização assistida do ambiente de transmissão: cenas, áudio, câmera, atalhos e identidade básica. O objetivo é entregar um fluxo compreensível e fácil de manter com as ferramentas já disponíveis ao criador.",
-    image: "/products/card-art/stream-studio-6dnx.webp",
-    status: "custom",
-    variants: [
-      {
-        name: "Revisão",
-        note: "Diagnóstico do ambiente atual",
-        priceBRL: 49.9,
-      },
-      {
-        name: "Studio Setup",
-        note: "Organização completa de cenas e áudio",
-        priceBRL: 109.9,
-        badge: "POPULAR",
-      },
-      {
-        name: "Creator Plus",
-        note: "Setup, identidade e orientação",
-        priceBRL: 179.9,
-      },
-    ],
+    "slug": "farlight-84-priv8-software",
+    "title": "Farlight 84 (Priv8 Software)",
+    "category": "Farlight 84",
+    "tagline": "Farlight 84 (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/stream-studio-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
   },
+  {
+    "slug": "fivem-priv8-software",
+    "title": "FiveM (Priv8 Software)",
+    "category": "FiveM",
+    "tagline": "FiveM (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/performance-audit-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "fortnite-priv8-software",
+    "title": "Fortnite (Priv8 Software)",
+    "category": "Fortnite",
+    "tagline": "Fortnite (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Não suportado\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11...",
+    "image": "/products/card-art/game-setup-pro-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "freezing",
+    "title": "Freezing",
+    "category": "Utilitário de gameplay",
+    "tagline": "Freezing Acesso",
+    "description": "Freezing players to kill.",
+    "image": "/products/card-art/aim-training-lab-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "hell-let-loose-priv8-software",
+    "title": "Hell Let Loose (Priv8 Software)",
+    "category": "Hell Let Loose",
+    "tagline": "Hell Let Loose (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/creator-identity-pack-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "marvel-rivals-priv8-software",
+    "title": "Marvel Rivals (Priv8 Software)",
+    "category": "Marvel Rivals",
+    "tagline": "Marvel Rivals (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/steam-profile-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "meccha-chameleon-priv8-software",
+    "title": "Meccha Chameleon (Priv8 Software)",
+    "category": "Meccha Chameleon",
+    "tagline": "Meccha Chameleon (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/reshades-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "overwatch-2-priv8-software",
+    "title": "Overwatch 2 (Priv8 Software)",
+    "category": "Overwatch 2",
+    "tagline": "Overwatch 2 (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/stream-studio-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "point-blank-priv8-software",
+    "title": "Point Blank (Priv8 Software)",
+    "category": "Point Blank",
+    "tagline": "Point Blank (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/performance-audit-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "pubg-priv8-software",
+    "title": "PUBG (Priv8 Software)",
+    "category": "PUBG",
+    "tagline": "PUBG (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Apenas Windows 11\nModo de...",
+    "image": "/products/card-art/game-setup-pro-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "recoil-ia",
+    "title": "Recoil \\[IA\\]",
+    "category": "Geral",
+    "tagline": "Recoil \\[IA\\] Acesso",
+    "description": "Full control recoil.",
+    "image": "/products/card-art/aim-training-lab-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "redm-priv8-software",
+    "title": "RedM (Priv8 Software)",
+    "category": "RedM",
+    "tagline": "RedM (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/creator-identity-pack-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "roblox-priv8-software",
+    "title": "Roblox (Priv8 Software)",
+    "category": "Roblox",
+    "tagline": "Roblox (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/steam-profile-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "rust-priv8-software",
+    "title": "Rust (Priv8 Software)",
+    "category": "Rust",
+    "tagline": "Rust (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Não suportado\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11...",
+    "image": "/products/card-art/reshades-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "sand-raiders-of-sophie-priv8-software",
+    "title": "SAND: Raiders of Sophie (Priv8 Software)",
+    "category": "SAND: Raiders of Sophie",
+    "tagline": "SAND: Raiders of Sophie (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/stream-studio-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "squad-priv8-software",
+    "title": "Squad (Priv8 Software)",
+    "category": "Squad",
+    "tagline": "Squad (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/performance-audit-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "spoofer-hwid",
+    "title": "Spoofer \\[HWID\\]",
+    "category": "Geral",
+    "tagline": "Spoofer \\[HWID\\] Acesso",
+    "description": "Permanent & Temporary Support Supported Anti-Cheats ✅ Easy Anti-Cheat\n(EAC)\n✅ BattlEye (BE)\nOption 1 --- Permanent Spoof If you choose the Permanent Spoof (Option\n1), you will need to:\nFormat your computer.\nFlash your motherboard BIOS.\nAfter completing the procedure, you will no longer need to run t...",
+    "image": "/products/card-art/game-setup-pro-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "spoofer-warzone-ranked-hwid",
+    "title": "Spoofer Warzone + Ranked \\[HWID\\]",
+    "category": "Geral",
+    "tagline": "Spoofer Warzone + Ranked \\[HWID\\] Acesso",
+    "description": "Support All PC's. Support All COD's.",
+    "image": "/products/card-art/aim-training-lab-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "unturned-priv8-software",
+    "title": "Unturned (Priv8 Software)",
+    "category": "Unturned",
+    "tagline": "Unturned (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/creator-identity-pack-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "valorant-priv8-software",
+    "title": "Valorant (Priv8 Software)",
+    "category": "Valorant",
+    "tagline": "Valorant (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/steam-profile-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "warface-spoofer-priv8-software",
+    "title": "Warface + Spoofer (Priv8 Software)",
+    "category": "Warface",
+    "tagline": "Warface + Spoofer (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Windows: All Windows 10/11\nCPU: All Processors\nGPU: All Graphics...",
+    "image": "/products/card-art/reshades-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "warzone-full-control-aim-priv8-software",
+    "title": "Warzone \\[FULL + CONTROL AIM\\] (Priv8 Software)",
+    "category": "Geral",
+    "tagline": "Warzone \\[FULL + CONTROL AIM\\] (Priv8 Software) Acesso",
+    "description": "Aimbot funcional no controle / Aimbot working on control\nPRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Platafo...",
+    "image": "/products/card-art/stream-studio-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "warzone-full-priv8-software",
+    "title": "Warzone \\[FULL\\] (Priv8 Software)",
+    "category": "Geral",
+    "tagline": "Warzone \\[FULL\\] (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...",
+    "image": "/products/card-art/performance-audit-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "warzone-esp-priv8-software",
+    "title": "Warzone \\[ESP\\] (Priv8 Software)",
+    "category": "Geral",
+    "tagline": "Warzone \\[ESP\\] (Priv8 Software) Acesso",
+    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Não suportado\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11...",
+    "image": "/products/card-art/game-setup-pro-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    "slug": "zoom-ia",
+    "title": "Zoom \\[IA\\]",
+    "category": "Geral",
+    "tagline": "Zoom \\[IA\\] Acesso",
+    "description": "Super ZOOM hack.\nCompartilhando \" Zoom \\[IA\\] - Priv8 Software Cheats \\| R\\$ 15,99 \\|\nKill Your Enemies \" Pular para o resultado mais recente do Gemini\nFormato de Exibição dos Links Para garantir que os links não sejam\n\"devorados\" ao copiar, você pode utilizar o formato de link visível ou\nbloco de t...",
+    "image": "/products/card-art/aim-training-lab-6dnx.webp",
+    "status": "available",
+    "variants": [],
+    "youtubeId": "BqPwa1SXowE"
+  }
 ];
 
 export function productStatusLabel(status: ProductStatus) {
