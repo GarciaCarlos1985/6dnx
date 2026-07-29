@@ -11,12 +11,21 @@ export type Variant = {
   badge?: string;
 };
 
+export type ProductFeature = {
+  label: string;
+  value: string;
+};
+
 export type Product = {
   slug: string;
   title: string;
   category: string;
   tagline: string;
   description: string;
+  features?: ProductFeature[];
+  systemSupport?: ProductFeature[];
+  menuKeys?: ProductFeature[];
+  tutorialSteps?: string[];
   image: string;
   status: ProductStatus;
   variants: Variant[];
@@ -31,7 +40,94 @@ export const products: Product[] = [
     "title": "DayZ (Priv8 Software)",
     "category": "DayZ",
     "tagline": "DayZ (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/performance-audit-6dnx.webp",
     "status": "available",
     "variants": [
@@ -55,7 +151,11 @@ export const products: Product[] = [
     "title": "DayZ Dupper",
     "category": "DayZ",
     "tagline": "DayZ Dupper Acesso",
-    "description": "Duplication loot in DAYZ.\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "Duplication loot in DAYZ.",
+    "features": [],
+    "systemSupport": [],
+    "menuKeys": [],
+    "tutorialSteps": [],
     "image": "/products/card-art/game-setup-pro-6dnx.webp",
     "status": "available",
     "variants": [
@@ -79,7 +179,94 @@ export const products: Product[] = [
     "title": "Dead by Daylight (Priv8 Software)",
     "category": "Dead by Daylight",
     "tagline": "Dead by Daylight (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/aim-training-lab-6dnx.webp",
     "status": "available",
     "variants": [
@@ -103,7 +290,94 @@ export const products: Product[] = [
     "title": "Deadlock (Priv8 Software)",
     "category": "Deadlock",
     "tagline": "Deadlock (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/creator-identity-pack-6dnx.webp",
     "status": "available",
     "variants": [
@@ -119,7 +393,94 @@ export const products: Product[] = [
     "title": "Delta Force (Priv8 Software)",
     "category": "Delta Force",
     "tagline": "Delta Force (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/steam-profile-6dnx.webp",
     "status": "available",
     "variants": [
@@ -139,7 +500,94 @@ export const products: Product[] = [
     "title": "Escape From Tarkov (Priv8 Software)",
     "category": "Escape From Tarkov",
     "tagline": "Escape From Tarkov (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/reshades-6dnx.webp",
     "status": "available",
     "variants": [
@@ -159,7 +607,94 @@ export const products: Product[] = [
     "title": "Farlight 84 (Priv8 Software)",
     "category": "Farlight 84",
     "tagline": "Farlight 84 (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/stream-studio-6dnx.webp",
     "status": "available",
     "variants": [
@@ -183,7 +718,94 @@ export const products: Product[] = [
     "title": "FiveM (Priv8 Software)",
     "category": "FiveM",
     "tagline": "FiveM (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/performance-audit-6dnx.webp",
     "status": "available",
     "variants": [
@@ -207,7 +829,94 @@ export const products: Product[] = [
     "title": "Fortnite (Priv8 Software)",
     "category": "Fortnite",
     "tagline": "Fortnite (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Não suportado\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Não suportado"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/game-setup-pro-6dnx.webp",
     "status": "available",
     "variants": [
@@ -231,7 +940,11 @@ export const products: Product[] = [
     "title": "Freezing",
     "category": "Utilitário de gameplay",
     "tagline": "Freezing Acesso",
-    "description": "Freezing players to kill.\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "Freezing players to kill.",
+    "features": [],
+    "systemSupport": [],
+    "menuKeys": [],
+    "tutorialSteps": [],
     "image": "/products/card-art/aim-training-lab-6dnx.webp",
     "status": "available",
     "variants": [],
@@ -242,7 +955,94 @@ export const products: Product[] = [
     "title": "Hell Let Loose (Priv8 Software)",
     "category": "Hell Let Loose",
     "tagline": "Hell Let Loose (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/creator-identity-pack-6dnx.webp",
     "status": "available",
     "variants": [
@@ -266,7 +1066,94 @@ export const products: Product[] = [
     "title": "Marvel Rivals (Priv8 Software)",
     "category": "Marvel Rivals",
     "tagline": "Marvel Rivals (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/steam-profile-6dnx.webp",
     "status": "available",
     "variants": [
@@ -290,7 +1177,94 @@ export const products: Product[] = [
     "title": "Meccha Chameleon (Priv8 Software)",
     "category": "Meccha Chameleon",
     "tagline": "Meccha Chameleon (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/reshades-6dnx.webp",
     "status": "available",
     "variants": [
@@ -306,7 +1280,94 @@ export const products: Product[] = [
     "title": "Overwatch 2 (Priv8 Software)",
     "category": "Overwatch 2",
     "tagline": "Overwatch 2 (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/stream-studio-6dnx.webp",
     "status": "available",
     "variants": [
@@ -330,7 +1391,94 @@ export const products: Product[] = [
     "title": "Point Blank (Priv8 Software)",
     "category": "Point Blank",
     "tagline": "Point Blank (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/performance-audit-6dnx.webp",
     "status": "available",
     "variants": [
@@ -350,7 +1498,94 @@ export const products: Product[] = [
     "title": "PUBG (Priv8 Software)",
     "category": "PUBG",
     "tagline": "PUBG (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Apenas Windows 11\nModo de...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Apenas Windows 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/game-setup-pro-6dnx.webp",
     "status": "available",
     "variants": [
@@ -374,7 +1609,11 @@ export const products: Product[] = [
     "title": "Recoil \\[IA\\]",
     "category": "Geral",
     "tagline": "Recoil \\[IA\\] Acesso",
-    "description": "Full control recoil.\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "Full control recoil.",
+    "features": [],
+    "systemSupport": [],
+    "menuKeys": [],
+    "tutorialSteps": [],
     "image": "/products/card-art/aim-training-lab-6dnx.webp",
     "status": "available",
     "variants": [],
@@ -385,7 +1624,94 @@ export const products: Product[] = [
     "title": "RedM (Priv8 Software)",
     "category": "RedM",
     "tagline": "RedM (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/creator-identity-pack-6dnx.webp",
     "status": "available",
     "variants": [
@@ -401,7 +1727,94 @@ export const products: Product[] = [
     "title": "Roblox (Priv8 Software)",
     "category": "Roblox",
     "tagline": "Roblox (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/steam-profile-6dnx.webp",
     "status": "available",
     "variants": [
@@ -425,7 +1838,94 @@ export const products: Product[] = [
     "title": "Rust (Priv8 Software)",
     "category": "Rust",
     "tagline": "Rust (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Não suportado\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Não suportado"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/reshades-6dnx.webp",
     "status": "available",
     "variants": [
@@ -449,7 +1949,94 @@ export const products: Product[] = [
     "title": "SAND: Raiders of Sophie (Priv8 Software)",
     "category": "SAND: Raiders of Sophie",
     "tagline": "SAND: Raiders of Sophie (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/stream-studio-6dnx.webp",
     "status": "available",
     "variants": [
@@ -465,7 +2052,94 @@ export const products: Product[] = [
     "title": "Squad (Priv8 Software)",
     "category": "Squad",
     "tagline": "Squad (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/performance-audit-6dnx.webp",
     "status": "available",
     "variants": [
@@ -489,7 +2163,11 @@ export const products: Product[] = [
     "title": "Spoofer \\[HWID\\]",
     "category": "Geral",
     "tagline": "Spoofer \\[HWID\\] Acesso",
-    "description": "Permanent & Temporary Support Supported Anti-Cheats ✅ Easy Anti-Cheat\n(EAC)\n✅ BattlEye (BE)\nOption 1 --- Permanent Spoof If you choose the Permanent Spoof (Option\n1), you will need to:\nFormat your computer.\nFlash your motherboard BIOS.\nAfter completing the procedure, you will no longer need to run t...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "Permanent & Temporary Support Supported Anti-Cheats ✅ Easy Anti-Cheat\n(EAC)\n✅ BattlEye (BE)\nOption 1 --- Permanent Spoof If you choose the Permanent Spoof (Option\n1), you will need to:\nFormat your computer.\nFlash your motherboard BIOS.\nAfter completing the procedure, you will no longer need to run the\nspoofer every time you turn on your PC.\nTutorial Permanente\nOption 2 --- Temporary Spoof If you choose the Temporary Spoof (Option\n2), you will need to run the spoofer every time you restart your\ncomputer.\nTemporary Tutorial:\nOpen the spoofer.\nSelect Option 2.\nPress Y on every confirmation request.\nWait until all operations turn green.\nClose the program.\nDone. Your temporary spoof will be active until the next system restart.",
+    "features": [],
+    "systemSupport": [],
+    "menuKeys": [],
+    "tutorialSteps": [],
     "image": "/products/card-art/game-setup-pro-6dnx.webp",
     "status": "available",
     "variants": [],
@@ -500,7 +2178,11 @@ export const products: Product[] = [
     "title": "Spoofer Warzone + Ranked \\[HWID\\]",
     "category": "Geral",
     "tagline": "Spoofer Warzone + Ranked \\[HWID\\] Acesso",
-    "description": "Support All PC's. Support All COD's.\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "Support All PC's. Support All COD's.",
+    "features": [],
+    "systemSupport": [],
+    "menuKeys": [],
+    "tutorialSteps": [],
     "image": "/products/card-art/aim-training-lab-6dnx.webp",
     "status": "available",
     "variants": [],
@@ -511,7 +2193,94 @@ export const products: Product[] = [
     "title": "Unturned (Priv8 Software)",
     "category": "Unturned",
     "tagline": "Unturned (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/creator-identity-pack-6dnx.webp",
     "status": "available",
     "variants": [
@@ -531,7 +2300,94 @@ export const products: Product[] = [
     "title": "Valorant (Priv8 Software)",
     "category": "Valorant",
     "tagline": "Valorant (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/steam-profile-6dnx.webp",
     "status": "available",
     "variants": [
@@ -555,7 +2411,88 @@ export const products: Product[] = [
     "title": "Warface + Spoofer (Priv8 Software)",
     "category": "Warface",
     "tagline": "Warface + Spoofer (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Windows: All Windows 10/11\nCPU: All Processors\nGPU: All Graphics...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      },
+      {
+        "label": "System Support Windows",
+        "value": "All Windows 10/11"
+      },
+      {
+        "label": "CPU",
+        "value": "All Processors"
+      },
+      {
+        "label": "GPU",
+        "value": "All Graphics Cards"
+      },
+      {
+        "label": "Controller",
+        "value": "Not Supported"
+      },
+      {
+        "label": "Smartphone",
+        "value": "Not Supported"
+      }
+    ],
+    "systemSupport": [],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Close application + clean traces"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Hide / Show menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Password to extract: 123",
+      "Open first Loader and login using your details.",
+      "After loader displays \"Waiting game\", open the game.",
+      "Menu opens automatically in-game.",
+      "Disable Core Isolation (HVCI) if crashes happen.",
+      "Use END to clean traces from device.",
+      "Keep the program on Disk C or Desktop. DO NOT USE USB OR ANOTHER DRIVE.",
+      "Session login lasts 5 hours maximum.",
+      "If bluescreen happens, delete everything, restart and download again.",
+      "Avoid passwords with special characters: !@#\\$%",
+      "WARCHAOS - A PIADA DO ANTI-CHEAT SE REPETE 01/07/2026 CARDOZO DA PRIV8 ·",
+      "906 visualizações",
+      "WARCHAOS - A PIADA DO ANTI-CHEAT SE REPETE 01/07/2026 Abre em uma nova",
+      "janela"
+    ],
     "image": "/products/card-art/reshades-6dnx.webp",
     "status": "available",
     "variants": [
@@ -579,7 +2516,98 @@ export const products: Product[] = [
     "title": "Warzone \\[FULL + CONTROL AIM\\] (Priv8 Software)",
     "category": "Geral",
     "tagline": "Warzone \\[FULL + CONTROL AIM\\] (Priv8 Software) Acesso",
-    "description": "Aimbot funcional no controle / Aimbot working on control\nPRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Platafo...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo.",
+      "YouTube FIZ UM CHEAT IGUAL O DOS \"STRUMERS\" PARA VOCÊS DO CONTROLE",
+      "FIZ UM CHEAT IGUAL O DOS \"STRUMERS\" PARA VOCÊS DO CONTROLE Agora o",
+      "minimapa é seu melhor amigo também, bejos Seninha !! Vocês pediram então",
+      "deixem o like !!!"
+    ],
     "image": "/products/card-art/stream-studio-6dnx.webp",
     "status": "available",
     "variants": [],
@@ -590,7 +2618,98 @@ export const products: Product[] = [
     "title": "Warzone \\[FULL\\] (Priv8 Software)",
     "category": "Geral",
     "tagline": "Warzone \\[FULL\\] (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Sim\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11\nModo de J...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Sim"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo.",
+      "YouTube FIZ UM CHEAT IGUAL O DOS \"STRUMERS\" PARA VOCÊS DO CONTROLE",
+      "FIZ UM CHEAT IGUAL O DOS \"STRUMERS\" PARA VOCÊS DO CONTROLE Agora o",
+      "minimapa é seu melhor amigo também, bejos Seninha !! Vocês pediram então",
+      "deixem o like !!!"
+    ],
     "image": "/products/card-art/performance-audit-6dnx.webp",
     "status": "available",
     "variants": [],
@@ -601,7 +2720,94 @@ export const products: Product[] = [
     "title": "Warzone \\[ESP\\] (Priv8 Software)",
     "category": "Geral",
     "tagline": "Warzone \\[ESP\\] (Priv8 Software) Acesso",
-    "description": "PRIV 8 \\| PRIVATE • ELITE • UNDETECT Private Plus Edition Private\nDrivers: Sim\nStream Protected: Sim\nOptimized Overlay: Sim\nPremium Features Included:\nAimbot: Não suportado\nESP Visuals: Sim\nLibrary: External\nScreen Protection: Sim\nSystem Support Plataforma: Steam\nSistema Operacional: Windows 10 & 11...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "",
+    "features": [
+      {
+        "label": "Drivers",
+        "value": "Sim"
+      },
+      {
+        "label": "Stream Protected",
+        "value": "Sim"
+      },
+      {
+        "label": "Optimized Overlay",
+        "value": "Sim"
+      },
+      {
+        "label": "Premium Features Included",
+        "value": ""
+      },
+      {
+        "label": "Aimbot",
+        "value": "Não suportado"
+      },
+      {
+        "label": "ESP Visuals",
+        "value": "Sim"
+      },
+      {
+        "label": "Library",
+        "value": "External"
+      },
+      {
+        "label": "Screen Protection",
+        "value": "Sim"
+      }
+    ],
+    "systemSupport": [
+      {
+        "label": "Plataforma",
+        "value": "Steam"
+      },
+      {
+        "label": "Sistema Operacional",
+        "value": "Windows 10 & 11"
+      },
+      {
+        "label": "Modo de Janela",
+        "value": "Borderless"
+      },
+      {
+        "label": "Overlay Exigido",
+        "value": "Discord Required"
+      },
+      {
+        "label": "GPU",
+        "value": "Nvidia & AMD"
+      },
+      {
+        "label": "Mobile",
+        "value": "Não suportado"
+      }
+    ],
+    "menuKeys": [
+      {
+        "label": "🔴 END",
+        "value": "Fecha a aplicação + limpa rastros"
+      },
+      {
+        "label": "🟣 INSERT",
+        "value": "Oculta / Exibe o menu"
+      }
+    ],
+    "tutorialSteps": [
+      "Feche o Discord completamente.",
+      "Execute o Discord como Administrador.",
+      "Entre em qualquer sala de voz do Discord.",
+      "Sua foto de perfil deve aparecer no canto superior esquerdo. Isso",
+      "confirma que o overlay está funcionando.",
+      "Esta versão usa o novo sistema de Overlay do Discord.",
+      "A aceleração de hardware do Discord é recomendada. Alguns monitores",
+      "podem exigir a desativação do HDR ou HDR+.",
+      "Baixe os arquivos.",
+      "Extraia os arquivos usando a senha: 123.",
+      "Abra o jogo.",
+      "Permaneça no Lobby ou Modo de Treinamento.",
+      "Abra o programa.",
+      "Faça login usando os detalhes da sua conta.",
+      "O menu abrirá automaticamente dentro do jogo."
+    ],
     "image": "/products/card-art/game-setup-pro-6dnx.webp",
     "status": "available",
     "variants": [],
@@ -612,7 +2818,11 @@ export const products: Product[] = [
     "title": "Zoom \\[IA\\]",
     "category": "Geral",
     "tagline": "Zoom \\[IA\\] Acesso",
-    "description": "Super ZOOM hack.\nCompartilhando \" Zoom \\[IA\\] - Priv8 Software Cheats \\| R\\$ 15,99 \\|\nKill Your Enemies \" Pular para o resultado mais recente do Gemini\nFormato de Exibição dos Links Para garantir que os links não sejam\n\"devorados\" ao copiar, você pode utilizar o formato de link visível ou\nbloco de t...\n\n**Links Gerais de Suporte / Utilidade (Priv8 Software)**\nAo copiar qualquer tutorial padrão do produto, os links de apoio são:\n\nInstalar Drivers: [https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc](https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc)\nDownload: [https://priv8software.com.br/downloads](https://priv8software.com.br/downloads)\nPágina de Tutorial: [https://priv8software.com/tutorial](https://priv8software.com/tutorial)\nRedes Sociais: [https://priv8software.com/socials](https://priv8software.com/socials)\nComunidade do WhatsApp: [https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L](https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L)",
+    "description": "Super ZOOM hack.\nCompartilhando \" Zoom \\[IA\\] - Priv8 Software Cheats \\| R\\$ 15,99 \\|\nKill Your Enemies \" Pular para o resultado mais recente do Gemini\nFormato de Exibição dos Links Para garantir que os links não sejam\n\"devorados\" ao copiar, você pode utilizar o formato de link visível ou\nbloco de texto/código:\nLink em Texto Explícito: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\nFormatado com Rótulo e URL: ▶ Vídeo Tutorial\n(<https://www.youtube.com/watch?v=vVZvtLHwQwk>)\nLista Consolidada de Produtos com Links Visíveis 1. DayZ Título: DayZ\n(Priv8 Software)\nPreços: 1 Dia: R\\$ 30,99 \\| 7 Dias: R\\$ 66,99 \\| 30 Dias: R\\$ 173,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n2.  DayZ Dupper Título: DayZ Dupper\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=_2cS7WUqKM4>\n3.  Dead by Daylight Título: Dead by Daylight (Priv8 Software)\nPreços: 1 Dia: R\\$ 20,99 \\| 7 Dias: R\\$ 61,99 \\| 30 Dias: R\\$ 137,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=iSq-wFY_rr8>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n4.  Deadlock Título: Deadlock (Priv8 Software)\nPreços: 30 Dias: R\\$ 91,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n5.  Delta Force Título: Delta Force (Priv8 Software)\nPreços: 7 Dias: R\\$ 152,99 \\| 30 Dias: R\\$ 203,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n6.  Escape From Tarkov Título: Escape From Tarkov (Priv8 Software)\nPreços: 7 Dias: R\\$ 101,99 \\| 30 Dias: R\\$ 203,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n7.  Farlight 84 Título: Farlight 84 (Priv8 Software)\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=Q4Ti1Bf07Lg>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n8.  FiveM Título: FiveM (Priv8 Software)\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 86,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=k1cWobVvgKo>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n9.  Fortnite Título: Fortnite (Priv8 Software)\nPreços: 1 Dia: R\\$ 35,99 \\| 7 Dias: R\\$ 107,99 \\| 30 Dias: R\\$ 202,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n10. Hell Let Loose Título: Hell Let Loose (Priv8 Software)\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n11. Marvel Rivals Título: Marvel Rivals (Priv8 Software)\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 71,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n12. Meccha Chameleon Título: Meccha Chameleon (Priv8 Software)\nPreços: 30 Dias: R\\$ 61,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n13. Overwatch 2 Título: Overwatch 2 (Priv8 Software)\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 31,99 \\| 30 Dias: R\\$ 87,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=-oL9_VtGJgE>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n14. Point Blank Título: Point Blank (Priv8 Software)\nPreços: 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n15. PUBG Título: PUBG (Priv8 Software)\nPreços: 1 Dia: R\\$ 46,99 \\| 7 Dias: R\\$ 134,99 \\| 30 Dias: R\\$ 252,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=sf6Kux6QdSI>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n16. Recoil \\[IA\\] Título: Recoil \\[IA\\]\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo: Sem vídeo disponível.\n17. RedM Título: RedM (Priv8 Software)\nPreços: 30 Dias: R\\$ 132,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n18. Roblox Título: Roblox (Priv8 Software)\nPreços: 1 Dia: R\\$ 11,99 \\| 7 Dias: R\\$ 31,99 \\| 30 Dias: R\\$ 88,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n19. Rust Título: Rust (Priv8 Software)\nPreços: 1 Dia: R\\$ 21,99 \\| 7 Dias: R\\$ 67,99 \\| 30 Dias: R\\$ 111,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=s8D7QlxiHmE>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n20. SAND: Raiders of Sophie Título: SAND: Raiders of Sophie (Priv8\nSoftware)\nPreços: 30 Dias: R\\$ 152,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n21. Squad Título: Squad (Priv8 Software)\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 71,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=-Ltrv13yRE8>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n22. Spoofer \\[HWID\\] Título: Spoofer \\[HWID\\]\nPreços: 1 Dia: R\\$ 21,99 \\| 7 Dias: R\\$ 47,99 \\| 30 Dias: R\\$ 122,99\nLinks Relacionados:\nTutorial Permanente:\n<https://teste13367928312343.my.canva.site/robot-spoofer>\n23. Spoofer Warzone + Ranked \\[HWID\\] Título: Spoofer Warzone + Ranked\n\\[HWID\\]\nPreços: 1 Dia: R\\$ 37,99 \\| 7 Dias: R\\$ 69,99 \\| 30 Dias: R\\$ 216,99\nLinks de Vídeo: Sem vídeo disponível.\n24. Unturned Título: Unturned (Priv8 Software)\nPreços: 7 Dias: R\\$ 26,99 \\| 30 Dias: R\\$ 91,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n25. Valorant Título: Valorant (Priv8 Software)\nPreços: 1 Dia: R\\$ 46,99 \\| 7 Dias: R\\$ 178,99 \\| 30 Dias: R\\$ 330,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=z2ornKhoK1g>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n26. Warface + Spoofer Título: Warface + Spoofer (Priv8 Software)\nPreços: 1 Dia: R\\$ 17,99 \\| 7 Dias: R\\$ 70,99 \\| 30 Dias: R\\$ 101,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=9cmUqBtuDMk>\n27. Warzone \\[FULL + CONTROL AIM\\] Título: Warzone \\[FULL + CONTROL\nAIM\\] (Priv8 Software)\nPreços: 30 Dias: R\\$ 357,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=AX4rM8YSpJs>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n28. Warzone \\[FULL\\] Título: Warzone \\[FULL\\] (Priv8 Software)\nPreços: 1 Dia: R\\$ 53,99 \\| 7 Dias: R\\$ 164,99 \\| 30 Dias: R\\$ 317,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=AX4rM8YSpJs>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n29. Warzone \\[ESP\\] Título: Warzone \\[ESP\\] (Priv8 Software)\nPreços: 7 Dias: R\\$ 102,99 \\| 30 Dias: R\\$ 204,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n30. Zoom \\[IA\\] Título: Zoom \\[IA\\]\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=s8D7QlxiHmE>\nLinks Gerais de Suporte / Utilidade (Priv8 Software) Ao copiar qualquer\ntutorial padrão do produto, os links de apoio são:\nInstalar Drivers:\n<https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc>\nDownload: <https://priv8software.com.br/downloads>\nPágina de Tutorial: <https://priv8software.com/tutorial>\nRedes Sociais: <https://priv8software.com/socials>\nComunidade do WhatsApp:\n<https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L>",
+    "features": [],
+    "systemSupport": [],
+    "menuKeys": [],
+    "tutorialSteps": [],
     "image": "/products/card-art/aim-training-lab-6dnx.webp",
     "status": "available",
     "variants": [],

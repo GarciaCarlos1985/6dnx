@@ -351,9 +351,151 @@ function Popups({
         </header>
 
         <div className="product-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-3">
-          <p className="mb-4 text-sm leading-relaxed text-muted">
-            {product.description}
-          </p>
+          {product.description && (
+            <p className="mb-6 text-sm leading-relaxed text-muted">
+              {product.description}
+            </p>
+          )}
+
+          {product.features && product.features.length > 0 && (
+            <div className="mb-6">
+              <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+                AI Aimbot — Universal Edition
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                {product.features.map((f, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col rounded-md border border-white/5 bg-black/40 p-2 shadow-[inset_0_0_12px_rgba(255,255,255,0.02)]"
+                  >
+                    <span className="mb-0.5 text-[0.6rem] font-medium tracking-wide text-muted/80 uppercase">
+                      {f.label}
+                    </span>
+                    <span
+                      className={`text-[0.75rem] font-bold ${
+                        f.value.toLowerCase().includes("sim") ||
+                        f.value.toLowerCase().includes("yes") ||
+                        f.value.toLowerCase().includes("external")
+                          ? "text-green-400/90"
+                          : "text-ink"
+                      }`}
+                    >
+                      {f.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {product.systemSupport && product.systemSupport.length > 0 && (
+            <div className="mb-6">
+              <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+                Requisitos do Sistema
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                {product.systemSupport.map((f, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col rounded-md border border-primary/20 bg-primary/[0.03] p-2"
+                  >
+                    <span className="mb-0.5 text-[0.6rem] font-medium tracking-wide text-primary/70 uppercase">
+                      {f.label}
+                    </span>
+                    <span className="text-[0.75rem] font-bold text-ink">
+                      {f.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {product.menuKeys && product.menuKeys.length > 0 && (
+            <div className="mb-6">
+              <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+                Teclas do Menu
+              </h4>
+              <div className="flex flex-col gap-2">
+                {product.menuKeys.map((k, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 rounded-md border border-white/10 bg-black/60 p-2"
+                  >
+                    <span className="shrink-0 rounded bg-primary/20 px-2 py-0.5 text-[0.65rem] font-black tracking-widest text-primary">
+                      {k.label}
+                    </span>
+                    <span className="text-[0.7rem] leading-tight text-muted">
+                      {k.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {product.tutorialSteps && product.tutorialSteps.length > 0 && (
+            <div className="mb-6">
+              <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+                Tutorial de Inicialização
+              </h4>
+              <ul className="space-y-2">
+                {product.tutorialSteps.map((step, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2.5 text-[0.7rem] text-muted/90 rounded-md border border-white/5 bg-black/20 p-2.5"
+                  >
+                    <span className="flex mt-0.5 h-4 w-4 shrink-0 items-center justify-center rounded border border-primary/30 text-[0.55rem] font-black text-primary">
+                      {i + 1}
+                    </span>
+                    <span className="leading-relaxed">{step}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="mb-6">
+            <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+              Links Oficiais Priv8
+            </h4>
+            <div className="flex flex-col gap-2">
+              <a
+                href="https://priv8software.com.br/downloads"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between rounded-md border border-white/10 bg-surface/80 px-4 py-3 transition-colors hover:border-primary/50 hover:bg-primary/10"
+              >
+                <span className="text-[0.65rem] font-black uppercase tracking-widest text-ink">
+                  Download Manager
+                </span>
+                <span className="text-primary text-xs">↗</span>
+              </a>
+              <a
+                href="https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between rounded-md border border-white/10 bg-surface/80 px-4 py-3 transition-colors hover:border-primary/50 hover:bg-primary/10"
+              >
+                <span className="text-[0.65rem] font-black uppercase tracking-widest text-ink">
+                  Instalar Drivers
+                </span>
+                <span className="text-primary text-xs">↗</span>
+              </a>
+              <a
+                href="https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between rounded-md border border-green-500/20 bg-[#075e54]/20 px-4 py-3 transition-colors hover:border-green-500/50 hover:bg-[#075e54]/40"
+              >
+                <span className="text-[0.65rem] font-black uppercase tracking-widest text-green-400">
+                  Comunidade WhatsApp
+                </span>
+                <span className="text-green-500 text-xs">↗</span>
+              </a>
+            </div>
+          </div>
+
           <p className="mb-4 border border-amber-300/20 bg-amber-300/[0.06] px-3 py-2 text-[0.64rem] leading-relaxed text-amber-100/75">
             Valores de referência para montagem da vitrine. Confirme escopo e
             preço final antes de qualquer venda real.
