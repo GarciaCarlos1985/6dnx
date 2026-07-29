@@ -139,9 +139,9 @@ isolated test checkout, and an automated games-and-AI news area.
   and Mercado Pago remains intentionally empty. `VERCEL_ENVIRONMENT.md` now
   separates Production, Preview, GitHub, local tooling, and external panels.
 - Confirmed 23 variables in the linked Vercel project. All are marked Sensitive,
-  so Vercel exposes their names/scopes but not their values. The three StorM
-  variables exist in both Production and Preview; the live credentials must be
-  removed from Preview until a sandbox set is available.
+  so Vercel exposes their names/scopes but not their values. The three live
+  StorM variables are now scoped exclusively to Production; Preview has no live
+  StorM credential.
 
 ## Pending human or business input
 
@@ -159,14 +159,15 @@ isolated test checkout, and an automated games-and-AI news area.
   authentication later requests one.
 - The local branch is now `main`; merge `78c3fa7` preserves both local and
   remote histories without a force-push, and the latest sales/environment work
-  is committed locally. The current Git credential is `carloshg-dev`; GitHub
-  rejects its push with HTTP 403 because it has no write permission.
+  is committed locally. `carloshg-dev` is now an accepted collaborator and a
+  dry-run push confirms write permission to `GarciaCarlos1985/6dnx`.
 - Confirm StorM Wallet accepts the catalog and provides sandbox documentation
   before enabling real payments. The current laboratory must never be
   presented as a real charge.
 - Implement `/api/webhooks/storm-wallet`, raw-body HMAC verification, canonical
-  Supabase orders, idempotency, and server-side charge creation before copying
-  the StorM live credentials into Vercel or activating the provider webhook.
+  Supabase orders, idempotency, and server-side charge creation before using
+  the StorM live credentials in application code or activating the provider
+  webhook.
 - Follow `COMMERCE_ARCHITECTURE.md`: Supabase is the order source of truth,
   signed provider webhooks confirm payment, and Discord is
   notification/support, never proof of payment.
@@ -175,10 +176,8 @@ isolated test checkout, and an automated games-and-AI news area.
 
 ## Safety status
 
-- Commit and push to `main` were authorized; the push is still blocked by
-  GitHub permissions and no production deployment has occurred.
-- Vercel is still serving the repository's old `6fd770b` snapshot, whose
-  project framework was not detected and whose deployment returns
-  `404: NOT_FOUND`. The local storefront cannot become public until the newer
-  `main` reaches GitHub and triggers a fresh Vercel deployment.
+- Commit and push to `main` were authorized, and GitHub write permission has
+  been verified without mutating the remote.
+- Every successful `main` push must be followed through the Vercel deployment
+  until the production domain returns the new commit successfully.
 - `.env.local` is ignored by Git and must remain secret.
