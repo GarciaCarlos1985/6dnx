@@ -113,9 +113,7 @@ function restrictedResponse(
 
 export function proxy(request: NextRequest) {
   const configuredReviewMode = process.env.SITE_REVIEW_ENABLED;
-  const reviewEnabled =
-    configuredReviewMode === "true" ||
-    (configuredReviewMode !== "false" && process.env.VERCEL === "1");
+  const reviewEnabled = configuredReviewMode === "true";
 
   if (!reviewEnabled || isServerToServerRoute(request.nextUrl.pathname)) {
     return applySecurityHeaders(NextResponse.next(), request);
