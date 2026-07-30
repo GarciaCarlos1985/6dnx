@@ -520,24 +520,40 @@ function Popups({
           ) : null}
         </div>
 
-        <footer className="grid border-t border-primary sm:grid-cols-[1fr_auto]">
-          <button
-            type="button"
-            onClick={checkout.openCheckout}
-            disabled={!checkout.selectedVariant || checkout.checkoutLoading}
-            className="min-h-12 bg-primary px-4 text-sm font-bold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-transparent hover:text-primary disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-muted"
-          >
-            {checkout.checkoutLoading
-              ? "Abrindo laboratório…"
-              : checkout.selectedVariant
-                ? "Simular compra · R$ 1"
-                : "Selecione uma variação"}
-          </button>
+        <footer className="flex flex-col border-t border-primary">
+          {!checkout.selectedVariant ? (
+            <button
+              type="button"
+              disabled
+              className="min-h-[3.25rem] bg-white/5 px-4 text-sm font-bold uppercase tracking-[0.12em] text-muted cursor-not-allowed"
+            >
+              Selecione uma variação
+            </button>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2">
+              <a
+                href={process.env.NEXT_PUBLIC_STORM_STORE_URL || "#"}
+                target="_blank"
+                rel="noreferrer"
+                className="flex min-h-[3.25rem] items-center justify-center bg-primary px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-white hover:text-ink"
+              >
+                Comprar via StorM Wallet
+              </a>
+              <a
+                href={process.env.NEXT_PUBLIC_DISCORD_WELCOME_URL || "https://discord.gg/9sdvEWxdR"}
+                target="_blank"
+                rel="noreferrer"
+                className="flex min-h-[3.25rem] items-center justify-center border-t border-primary/50 bg-transparent px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-primary transition-colors hover:bg-primary/10 sm:border-l sm:border-t-0"
+              >
+                Comprar pelo Discord
+              </a>
+            </div>
+          )}
           <a
             href={supportUrl}
-            className="inline-flex min-h-12 items-center justify-center border-t border-primary/50 px-4 text-[0.62rem] font-bold uppercase tracking-[0.13em] text-muted transition-colors hover:text-ink sm:border-l sm:border-t-0"
+            className="flex min-h-10 items-center justify-center border-t border-primary/20 bg-black/40 px-4 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-muted transition-colors hover:text-white"
           >
-            Suporte Discord
+            Dúvidas? Fale com o suporte
           </a>
         </footer>
       </section>

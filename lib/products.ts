@@ -131,18 +131,25 @@ export const products: Product[] = [
     "image": "/products/card-art/performance-audit-6dnx.webp",
     "status": "available",
     "variants": [
-      {
-        "name": "1 Dia",
-        "priceBRL": 30.99
-      },
-      {
-        "name": "7 Dias",
-        "priceBRL": 66.99
-      },
-      {
-        "name": "30 Dias",
-        "priceBRL": 173.99
-      }
+      { "name": "Spoofer", "priceBRL": 99.90 },
+      { "name": "Moonwalk", "priceBRL": 22.00, "note": "Lifetime" },
+      { "name": "Private - 1 Dia", "priceBRL": 20.34 },
+      { "name": "Private - 7 Dias", "priceBRL": 56.98 },
+      { "name": "Private - 30 Dias", "priceBRL": 108.99 },
+      { "name": "GG - 1 Dia", "priceBRL": 21.42 },
+      { "name": "GG - 7 Dias", "priceBRL": 59.89 },
+      { "name": "GG - 30 Dias", "priceBRL": 118.63 },
+      { "name": "Rage - 1 Dia", "priceBRL": 29.90 },
+      { "name": "Rage - 7 Dias", "priceBRL": 119.90 },
+      { "name": "Rage - 30 Dias", "priceBRL": 249.90 },
+      { "name": "Shadow - 1 Dia", "priceBRL": 10.00 },
+      { "name": "Shadow - 7 Dias", "priceBRL": 49.90 },
+      { "name": "Shadow - 30 Dias", "priceBRL": 90.00 },
+      { "name": "Shadow - Lifetime", "priceBRL": 399.00 },
+      { "name": "Elisyum - 1 Dia", "priceBRL": 14.98 },
+      { "name": "Elisyum - 7 Dias", "priceBRL": 49.90 },
+      { "name": "Elisyum - 30 Dias", "priceBRL": 89.90 },
+      { "name": "Elisyum - Lifetime", "priceBRL": 299.00 }
     ],
     "youtubeId": "vVZvtLHwQwk"
   },
