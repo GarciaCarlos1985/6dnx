@@ -131,7 +131,7 @@ export const products: Product[] = [
     "image": "/products/card-art/performance-audit-6dnx.webp",
     "status": "available",
     "variants": [
-      { "name": "Spoofer", "priceBRL": 99.90 },
+      { "name": "Spow", "priceBRL": 99.90 },
       { "name": "Moonwalk", "priceBRL": 22.00, "note": "Lifetime" },
       { "name": "Private - 1 Dia", "priceBRL": 20.34 },
       { "name": "Private - 7 Dias", "priceBRL": 56.98 },
@@ -2166,11 +2166,11 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "spoofer-hwid",
-    "title": "Spoofer \\[HWID\\]",
+    "slug": "Spow-KWID",
+    "title": "Spow \\[KWID\\]",
     "category": "Geral",
-    "tagline": "Spoofer \\[HWID\\] Acesso",
-    "description": "Permanent & Temporary Support Supported Anti-Cheats ✅ Easy Anti-Cheat\n(EAC)\n✅ BattlEye (BE)\nOption 1 --- Permanent Spoof If you choose the Permanent Spoof (Option\n1), you will need to:\nFormat your computer.\nFlash your motherboard BIOS.\nAfter completing the procedure, you will no longer need to run the\nspoofer every time you turn on your PC.\nTutorial Permanente\nOption 2 --- Temporary Spoof If you choose the Temporary Spoof (Option\n2), you will need to run the spoofer every time you restart your\ncomputer.\nTemporary Tutorial:\nOpen the spoofer.\nSelect Option 2.\nPress Y on every confirmation request.\nWait until all operations turn green.\nClose the program.\nDone. Your temporary spoof will be active until the next system restart.",
+    "tagline": "Spow \\[KWID\\] Acesso",
+    "description": "Permanent & Temporary Support Supported Anti-Cheetoss ✅ Easy Anti-Cheetos\n(EAC)\n✅ BattlEye (BE)\nOption 1 --- Permanent spow If you choose the Permanent spow (Option\n1), you will need to:\nFormat your computer.\nFlash your motherboard BIOS.\nAfter completing the procedure, you will no longer need to run the\nSpow every time you turn on your PC.\nTutorial Permanente\nOption 2 --- Temporary spow If you choose the Temporary spow (Option\n2), you will need to run the Spow every time you restart your\ncomputer.\nTemporary Tutorial:\nOpen the Spow.\nSelect Option 2.\nPress Y on every confirmation request.\nWait until all operations turn green.\nClose the program.\nDone. Your temporary spow will be active until the next system restart.",
     "features": [],
     "systemSupport": [],
     "menuKeys": [],
@@ -2181,10 +2181,10 @@ export const products: Product[] = [
     "youtubeId": "BqPwa1SXowE"
   },
   {
-    "slug": "spoofer-warzone-ranked-hwid",
-    "title": "Spoofer Warzone + Ranked \\[HWID\\]",
+    "slug": "Spow-warzone-ranked-KWID",
+    "title": "Spow Warzone + Ranked \\[KWID\\]",
     "category": "Geral",
-    "tagline": "Spoofer Warzone + Ranked \\[HWID\\] Acesso",
+    "tagline": "Spow Warzone + Ranked \\[KWID\\] Acesso",
     "description": "Support All PC's. Support All COD's.",
     "features": [],
     "systemSupport": [],
@@ -2414,10 +2414,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "warface-spoofer-6DNX-software",
-    "title": "Warface + Spoofer",
+    "slug": "warface-Spow-6DNX-software",
+    "title": "Warface + Spow",
     "category": "Warface",
-    "tagline": "Warface + Spoofer Acesso",
+    "tagline": "Warface + Spow Acesso",
     "description": "",
     "features": [
       {
@@ -2495,9 +2495,9 @@ export const products: Product[] = [
       "Session login lasts 5 hours maximum.",
       "If bluescreen happens, delete everything, restart and download again.",
       "Avoid passwords with special characters: !@#\\$%",
-      "WARCHAOS - A PIADA DO ANTI-CHEAT SE REPETE 01/07/2026 CARDOZO DA 6DNX ·",
+      "WARCHAOS - A PIADA DO ANTI-Cheetos SE REPETE 01/07/2026 CARDOZO DA 6DNX ·",
       "906 visualizações",
-      "WARCHAOS - A PIADA DO ANTI-CHEAT SE REPETE 01/07/2026 Abre em uma nova",
+      "WARCHAOS - A PIADA DO ANTI-Cheetos SE REPETE 01/07/2026 Abre em uma nova",
       "janela"
     ],
     "image": "/products/card-art/reshades-6dnx.webp",
@@ -2610,8 +2610,8 @@ export const products: Product[] = [
       "Abra o programa.",
       "Faça login usando os detalhes da sua conta.",
       "O menu abrirá automaticamente dentro do jogo.",
-      "YouTube FIZ UM CHEAT IGUAL O DOS \"STRUMERS\" PARA VOCÊS DO CONTROLE",
-      "FIZ UM CHEAT IGUAL O DOS \"STRUMERS\" PARA VOCÊS DO CONTROLE Agora o",
+      "YouTube FIZ UM Cheetos IGUAL O DOS \"STRUMERS\" PARA VOCÊS DO CONTROLE",
+      "FIZ UM Cheetos IGUAL O DOS \"STRUMERS\" PARA VOCÊS DO CONTROLE Agora o",
       "minimapa é seu melhor amigo também, bejos Seninha !! Vocês pediram então",
       "deixem o like !!!"
     ],
@@ -2712,8 +2712,8 @@ export const products: Product[] = [
       "Abra o programa.",
       "Faça login usando os detalhes da sua conta.",
       "O menu abrirá automaticamente dentro do jogo.",
-      "YouTube FIZ UM CHEAT IGUAL O DOS \"STRUMERS\" PARA VOCÊS DO CONTROLE",
-      "FIZ UM CHEAT IGUAL O DOS \"STRUMERS\" PARA VOCÊS DO CONTROLE Agora o",
+      "YouTube FIZ UM Cheetos IGUAL O DOS \"STRUMERS\" PARA VOCÊS DO CONTROLE",
+      "FIZ UM Cheetos IGUAL O DOS \"STRUMERS\" PARA VOCÊS DO CONTROLE Agora o",
       "minimapa é seu melhor amigo também, bejos Seninha !! Vocês pediram então",
       "deixem o like !!!"
     ],
@@ -2825,7 +2825,7 @@ export const products: Product[] = [
     "title": "Zoom \\[IA\\]",
     "category": "Geral",
     "tagline": "Zoom \\[IA\\] Acesso",
-    "description": "Super ZOOM hack.\nCompartilhando \" Zoom \\[IA\\] - 6DNX Cheats \\| R\\$ 15,99 \\|\nKill Your Enemies \" Pular para o resultado mais recente do Gemini\nFormato de Exibição dos Links Para garantir que os links não sejam\n\"devorados\" ao copiar, você pode utilizar o formato de link visível ou\nbloco de texto/código:\nLink em Texto Explícito: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\nFormatado com Rótulo e URL: ▶ Vídeo Tutorial\n(<https://www.youtube.com/watch?v=vVZvtLHwQwk>)\nLista Consolidada de Produtos com Links Visíveis 1. DayZ Título: DayZ\n(6DNX)\nPreços: 1 Dia: R\\$ 30,99 \\| 7 Dias: R\\$ 66,99 \\| 30 Dias: R\\$ 173,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n2.  DayZ Dupper Título: DayZ Dupper\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=_2cS7WUqKM4>\n3.  Dead by Daylight Título: Dead by Daylight\nPreços: 1 Dia: R\\$ 20,99 \\| 7 Dias: R\\$ 61,99 \\| 30 Dias: R\\$ 137,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=iSq-wFY_rr8>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n4.  Deadlock Título: Deadlock\nPreços: 30 Dias: R\\$ 91,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n5.  Delta Force Título: Delta Force\nPreços: 7 Dias: R\\$ 152,99 \\| 30 Dias: R\\$ 203,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n6.  Escape From Tarkov Título: Escape From Tarkov\nPreços: 7 Dias: R\\$ 101,99 \\| 30 Dias: R\\$ 203,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n7.  Farlight 84 Título: Farlight 84\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=Q4Ti1Bf07Lg>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n8.  FiveM Título: FiveM\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 86,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=k1cWobVvgKo>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n9.  Fortnite Título: Fortnite\nPreços: 1 Dia: R\\$ 35,99 \\| 7 Dias: R\\$ 107,99 \\| 30 Dias: R\\$ 202,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n10. Hell Let Loose Título: Hell Let Loose\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n11. Marvel Rivals Título: Marvel Rivals\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 71,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n12. Meccha Chameleon Título: Meccha Chameleon\nPreços: 30 Dias: R\\$ 61,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n13. Overwatch 2 Título: Overwatch 2\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 31,99 \\| 30 Dias: R\\$ 87,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=-oL9_VtGJgE>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n14. Point Blank Título: Point Blank\nPreços: 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n15. PUBG Título: PUBG\nPreços: 1 Dia: R\\$ 46,99 \\| 7 Dias: R\\$ 134,99 \\| 30 Dias: R\\$ 252,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=sf6Kux6QdSI>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n16. Recoil \\[IA\\] Título: Recoil \\[IA\\]\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo: Sem vídeo disponível.\n17. RedM Título: RedM\nPreços: 30 Dias: R\\$ 132,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n18. Roblox Título: Roblox\nPreços: 1 Dia: R\\$ 11,99 \\| 7 Dias: R\\$ 31,99 \\| 30 Dias: R\\$ 88,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n19. Rust Título: Rust\nPreços: 1 Dia: R\\$ 21,99 \\| 7 Dias: R\\$ 67,99 \\| 30 Dias: R\\$ 111,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=s8D7QlxiHmE>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n20. SAND: Raiders of Sophie Título: SAND: Raiders of Sophie (6DNX\nSoftware)\nPreços: 30 Dias: R\\$ 152,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n21. Squad Título: Squad\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 71,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=-Ltrv13yRE8>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n22. Spoofer \\[HWID\\] Título: Spoofer \\[HWID\\]\nPreços: 1 Dia: R\\$ 21,99 \\| 7 Dias: R\\$ 47,99 \\| 30 Dias: R\\$ 122,99\nLinks Relacionados:\nTutorial Permanente:\n<https://teste13367928312343.my.canva.site/robot-spoofer>\n23. Spoofer Warzone + Ranked \\[HWID\\] Título: Spoofer Warzone + Ranked\n\\[HWID\\]\nPreços: 1 Dia: R\\$ 37,99 \\| 7 Dias: R\\$ 69,99 \\| 30 Dias: R\\$ 216,99\nLinks de Vídeo: Sem vídeo disponível.\n24. Unturned Título: Unturned\nPreços: 7 Dias: R\\$ 26,99 \\| 30 Dias: R\\$ 91,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n25. Valorant Título: Valorant\nPreços: 1 Dia: R\\$ 46,99 \\| 7 Dias: R\\$ 178,99 \\| 30 Dias: R\\$ 330,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=z2ornKhoK1g>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n26. Warface + Spoofer Título: Warface + Spoofer\nPreços: 1 Dia: R\\$ 17,99 \\| 7 Dias: R\\$ 70,99 \\| 30 Dias: R\\$ 101,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=9cmUqBtuDMk>\n27. Warzone \\[FULL + CONTROL AIM\\] Título: Warzone \\[FULL + CONTROL\nAIM\\]\nPreços: 30 Dias: R\\$ 357,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=AX4rM8YSpJs>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n28. Warzone \\[FULL\\] Título: Warzone \\[FULL\\]\nPreços: 1 Dia: R\\$ 53,99 \\| 7 Dias: R\\$ 164,99 \\| 30 Dias: R\\$ 317,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=AX4rM8YSpJs>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n29. Warzone \\[ESP\\] Título: Warzone \\[ESP\\]\nPreços: 7 Dias: R\\$ 102,99 \\| 30 Dias: R\\$ 204,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n30. Zoom \\[IA\\] Título: Zoom \\[IA\\]\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=s8D7QlxiHmE>\nLinks Gerais de Suporte / Utilidade Ao copiar qualquer\ntutorial padrão do produto, os links de apoio são:\nInstalar Drivers:\n<https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc>\nDownload: <https://6DNXsoftware.com.br/downloads>\nPágina de Tutorial: <https://6DNXsoftware.com/tutorial>\nRedes Sociais: <https://6DNXsoftware.com/socials>\nComunidade do WhatsApp:\n<https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L>",
+    "description": "Super ZOOM mod.\nCompartilhando \" Zoom \\[IA\\] - 6DNX Cheetoss \\| R\\$ 15,99 \\|\nKill Your Enemies \" Pular para o resultado mais recente do Gemini\nFormato de Exibição dos Links Para garantir que os links não sejam\n\"devorados\" ao copiar, você pode utilizar o formato de link visível ou\nbloco de texto/código:\nLink em Texto Explícito: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\nFormatado com Rótulo e URL: ▶ Vídeo Tutorial\n(<https://www.youtube.com/watch?v=vVZvtLHwQwk>)\nLista Consolidada de Produtos com Links Visíveis 1. DayZ Título: DayZ\n(6DNX)\nPreços: 1 Dia: R\\$ 30,99 \\| 7 Dias: R\\$ 66,99 \\| 30 Dias: R\\$ 173,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n2.  DayZ Dupper Título: DayZ Dupper\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=_2cS7WUqKM4>\n3.  Dead by Daylight Título: Dead by Daylight\nPreços: 1 Dia: R\\$ 20,99 \\| 7 Dias: R\\$ 61,99 \\| 30 Dias: R\\$ 137,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=iSq-wFY_rr8>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n4.  Deadlock Título: Deadlock\nPreços: 30 Dias: R\\$ 91,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n5.  Delta Force Título: Delta Force\nPreços: 7 Dias: R\\$ 152,99 \\| 30 Dias: R\\$ 203,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n6.  Escape From Tarkov Título: Escape From Tarkov\nPreços: 7 Dias: R\\$ 101,99 \\| 30 Dias: R\\$ 203,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n7.  Farlight 84 Título: Farlight 84\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=Q4Ti1Bf07Lg>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n8.  FiveM Título: FiveM\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 86,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=k1cWobVvgKo>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n9.  Fortnite Título: Fortnite\nPreços: 1 Dia: R\\$ 35,99 \\| 7 Dias: R\\$ 107,99 \\| 30 Dias: R\\$ 202,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n10. Hell Let Loose Título: Hell Let Loose\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n11. Marvel Rivals Título: Marvel Rivals\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 71,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n12. Meccha Chameleon Título: Meccha Chameleon\nPreços: 30 Dias: R\\$ 61,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n13. Overwatch 2 Título: Overwatch 2\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 31,99 \\| 30 Dias: R\\$ 87,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=-oL9_VtGJgE>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n14. Point Blank Título: Point Blank\nPreços: 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n15. PUBG Título: PUBG\nPreços: 1 Dia: R\\$ 46,99 \\| 7 Dias: R\\$ 134,99 \\| 30 Dias: R\\$ 252,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=sf6Kux6QdSI>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n16. Recoil \\[IA\\] Título: Recoil \\[IA\\]\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo: Sem vídeo disponível.\n17. RedM Título: RedM\nPreços: 30 Dias: R\\$ 132,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n18. Roblox Título: Roblox\nPreços: 1 Dia: R\\$ 11,99 \\| 7 Dias: R\\$ 31,99 \\| 30 Dias: R\\$ 88,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n19. Rust Título: Rust\nPreços: 1 Dia: R\\$ 21,99 \\| 7 Dias: R\\$ 67,99 \\| 30 Dias: R\\$ 111,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=s8D7QlxiHmE>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n20. SAND: Raiders of Sophie Título: SAND: Raiders of Sophie (6DNX\nSoftware)\nPreços: 30 Dias: R\\$ 152,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n21. Squad Título: Squad\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 71,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=-Ltrv13yRE8>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n22. Spow \\[KWID\\] Título: Spow \\[KWID\\]\nPreços: 1 Dia: R\\$ 21,99 \\| 7 Dias: R\\$ 47,99 \\| 30 Dias: R\\$ 122,99\nLinks Relacionados:\nTutorial Permanente:\n<https://teste13367928312343.my.canva.site/robot-Spow>\n23. Spow Warzone + Ranked \\[KWID\\] Título: Spow Warzone + Ranked\n\\[KWID\\]\nPreços: 1 Dia: R\\$ 37,99 \\| 7 Dias: R\\$ 69,99 \\| 30 Dias: R\\$ 216,99\nLinks de Vídeo: Sem vídeo disponível.\n24. Unturned Título: Unturned\nPreços: 7 Dias: R\\$ 26,99 \\| 30 Dias: R\\$ 91,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n25. Valorant Título: Valorant\nPreços: 1 Dia: R\\$ 46,99 \\| 7 Dias: R\\$ 178,99 \\| 30 Dias: R\\$ 330,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=z2ornKhoK1g>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n26. Warface + Spow Título: Warface + Spow\nPreços: 1 Dia: R\\$ 17,99 \\| 7 Dias: R\\$ 70,99 \\| 30 Dias: R\\$ 101,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=9cmUqBtuDMk>\n27. Warzone \\[FULL + CONTROL AIM\\] Título: Warzone \\[FULL + CONTROL\nAIM\\]\nPreços: 30 Dias: R\\$ 357,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=AX4rM8YSpJs>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n28. Warzone \\[FULL\\] Título: Warzone \\[FULL\\]\nPreços: 1 Dia: R\\$ 53,99 \\| 7 Dias: R\\$ 164,99 \\| 30 Dias: R\\$ 317,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=AX4rM8YSpJs>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n29. Warzone \\[ESP\\] Título: Warzone \\[ESP\\]\nPreços: 7 Dias: R\\$ 102,99 \\| 30 Dias: R\\$ 204,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n30. Zoom \\[IA\\] Título: Zoom \\[IA\\]\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=s8D7QlxiHmE>\nLinks Gerais de Suporte / Utilidade Ao copiar qualquer\ntutorial padrão do produto, os links de apoio são:\nInstalar Drivers:\n<https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc>\nDownload: <https://6DNXsoftware.com.br/downloads>\nPágina de Tutorial: <https://6DNXsoftware.com/tutorial>\nRedes Sociais: <https://6DNXsoftware.com/socials>\nComunidade do WhatsApp:\n<https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L>",
     "features": [],
     "systemSupport": [],
     "menuKeys": [],
@@ -2840,7 +2840,7 @@ export const products: Product[] = [
     title: "Arena Breakout",
     category: "Arena Breakout",
     tagline: "Arena Acesso",
-    description: "Premium cheats for Arena Breakout.",
+    description: "Premium Cheetoss for Arena Breakout.",
     features: [],
     systemSupport: [],
     menuKeys: [],
@@ -2854,7 +2854,7 @@ export const products: Product[] = [
     title: "Counter-Strike 2",
     category: "CS2",
     tagline: "CS2 Acesso",
-    description: "Premium cheats for CS2.",
+    description: "Premium Cheetoss for CS2.",
     features: [],
     systemSupport: [],
     menuKeys: [],

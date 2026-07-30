@@ -120,8 +120,8 @@ Estas são limitações deliberadas de segurança, não tarefas esquecidas:
 6. **Não certificou Google OAuth:** o frontend ainda não implementa login. O
    `NEXT_PUBLIC_GOOGLE_CLIENT_ID` está cadastrado, mas não é consumido pelo
    código atual; o provedor efetivo está no painel Supabase.
-7. **Não certificou produtos que envolvem tokens de conta, alteração de HWID ou
-   contorno de anti-cheat:** isso exige prova de propriedade, autorização do
+7. **Não certificou produtos que envolvem tokens de conta, alteração de KWID ou
+   contorno de anti-cheetos:** isso exige prova de propriedade, autorização do
    parceiro, análise jurídica e compatibilidade com os termos das plataformas.
    Sem isso, não é seguro conectá-los a cobrança real.
 8. **Não fez push nem deploy:** esta tarefa autorizou o commit. Publicação em

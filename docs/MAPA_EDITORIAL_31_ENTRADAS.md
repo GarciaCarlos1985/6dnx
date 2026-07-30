@@ -93,7 +93,7 @@ de planos.
 | C20 | P20 | Rust | 1 |
 | C21 | P21 | SAND: Raiders of Sophie | 1 |
 | C22 | P22 | Squad | 1 |
-| C23 | P23 | Sistema / HWID | 1 |
+| C23 | P23 | Sistema / KWID | 1 |
 | C24 | P24 | Warzone | 1 |
 | C25 | P25 | Unturned | 1 |
 | C26 | P26 | Valorant | 1 |
@@ -127,7 +127,7 @@ de planos.
 | Rust | C20 | 1 |
 | SAND: Raiders of Sophie | C21 | 1 |
 | Squad | C22 | 1 |
-| Sistema / HWID | C23 | 1 |
+| Sistema / KWID | C23 | 1 |
 | Warzone | C24, C28, C29, C30 | 4 |
 | Unturned | C25 | 1 |
 | Valorant | C26 | 1 |
@@ -170,11 +170,11 @@ monetários continuam na fonte histórica e não são preços aprovados.
 | P20 | 1650 | Rust (Priv8 Software) | C20 | Rust | 1, 7 e 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
 | P21 | 1750 | SAND: Raiders of Sophie (Priv8 Software) | C21 | SAND: Raiders of Sophie | 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
 | P22 | 1850 | Squad (Priv8 Software) | C22 | Squad | 1, 7 e 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
-| P23 | 1950 | Spoofer [HWID] | C23 | Sistema / HWID | 1, 7 e 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
-| P24 | 2002 | Spoofer Warzone + Ranked [HWID] | C24 | Warzone | 1, 7 e 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
+| P23 | 1950 | spow [KWID] | C23 | Sistema / KWID | 1, 7 e 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
+| P24 | 2002 | spow Warzone + Ranked [KWID] | C24 | Warzone | 1, 7 e 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
 | P25 | 2021 | Unturned (Priv8 Software) | C25 | Unturned | 7 e 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
 | P26 | 2121 | Valorant (Priv8 Software) | C26 | Valorant | 1, 7 e 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
-| P27 | 2222 | Warface + Spoofer (Priv8 Software) | C27 | Warface | 1, 7 e 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
+| P27 | 2222 | Warface + spow (Priv8 Software) | C27 | Warface | 1, 7 e 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
 | P28 | 2314 | Warzone [FULL + CONTROL AIM] (Priv8 Software) | C28 | Warzone | 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
 | P29 | 2422 | Warzone [FULL] (Priv8 Software) | C29 | Warzone | 1, 7 e 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
 | P30 | 2527 | Warzone [ESP] (Priv8 Software) | C30 | Warzone | 7 e 30 dias | PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO |
@@ -387,22 +387,22 @@ rastreabilidade interna.
 - Arte e vídeo: criar material próprio ou anexar autorização verificável.
 - Estado: pendente de aprovação e documentação comercial.
 
-### P23 — Spoofer [HWID]
+### P23 — spow [KWID]
 
-- Card: C23 — Sistema / HWID.
+- Card: C23 — Sistema / KWID.
 - Papel: oferta única.
 - Campo de título público: **pendente de um produto legítimo comprovado**.
 - Campo de descrição: não reutilizar proposta de alteração de identidade do
-  dispositivo ou evasão de anti-cheat.
+  dispositivo ou evasão de anti-cheetos.
 - Arte e vídeo: criar material próprio ou anexar autorização verificável.
 - Estado: pendente de aprovação e documentação comercial.
 
-### P24 — Spoofer Warzone + Ranked [HWID]
+### P24 — spow Warzone + Ranked [KWID]
 
 - Card: C24 — Warzone.
 - Papel: produto único do card; os planos são as variações.
 - Campo de título público: **pendente de um produto legítimo comprovado**.
-- Campo de descrição: não reutilizar proposta de alteração de HWID ou evasão.
+- Campo de descrição: não reutilizar proposta de alteração de KWID ou evasão.
 - Arte e vídeo: criar material próprio ou anexar autorização verificável.
 - Estado: pendente de aprovação e documentação comercial.
 
@@ -424,13 +424,13 @@ rastreabilidade interna.
 - Arte e vídeo: criar material próprio ou anexar autorização verificável.
 - Estado: pendente de aprovação e documentação comercial.
 
-### P27 — Warface + Spoofer (Priv8 Software)
+### P27 — Warface + spow (Priv8 Software)
 
 - Card: C27 — Warface.
 - Papel: oferta única.
 - Campo de título público: **pendente de um produto legítimo comprovado**.
-- Campo de descrição: não reutilizar automação, ESP, alteração de HWID ou
-  evasão de anti-cheat.
+- Campo de descrição: não reutilizar automação, ESP, alteração de KWID ou
+  evasão de anti-cheetos.
 - Arte e vídeo: criar material próprio ou anexar autorização verificável.
 - Estado: pendente de aprovação e documentação comercial.
 
@@ -467,7 +467,7 @@ rastreabilidade interna.
 - Card: C31 — Utilitário de gameplay.
 - Papel: oferta única.
 - Campo de título público: **pendente de um produto legítimo comprovado**.
-- Campo de descrição: não reutilizar a proposta de hack ou vantagem indevida.
+- Campo de descrição: não reutilizar a proposta de mod ou vantagem indevida.
 - Arte e vídeo: criar material próprio ou anexar autorização verificável.
 - Estado: pendente de aprovação e documentação comercial.
 

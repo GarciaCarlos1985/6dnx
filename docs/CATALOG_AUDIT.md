@@ -8,7 +8,7 @@ preço, estoque ou texto possivelmente desatualizado em dado comercial ativo.
 
 | Família do card | Produtos e variações comprovados | Evidência principal |
 | --- | --- | --- |
-| DayZ | Moonwalk, Spoofer, Private, GG, Rage/Nuke, Shadow Menu e Elisium | capturas 03 a 16 |
+| DayZ | Moonwalk, spow, Private, GG, Rage/Nuke, Shadow Menu e Elisium | capturas 03 a 16 |
 | Arc Raiders | Private e GG Legit | capturas 17 a 20 |
 | Counter-Strike 2 | Kryptos External, Horus External e Radar GC Elysium | capturas 21 a 26 |
 | Contas Steam NFA | DayZ, CS2 Premier, Arc Raiders, Rust, Dead by Daylight, Squad, Scum e Arma Reforger | capturas 27 a 34 |

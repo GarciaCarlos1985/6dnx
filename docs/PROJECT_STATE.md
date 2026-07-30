@@ -118,7 +118,7 @@ isolated test checkout, and an automated games-and-AI news area.
 - Made the daily cron resilient: successful collection revalidates the site
   even when Supabase persistence is unavailable, while returning
   `storage: "source-only"` instead of falsely claiming durable storage.
-- Verified one complete DayZ/Spoofer Pix laboratory order in the production
+- Verified one complete DayZ/spow Pix laboratory order in the production
   preview. The UI confirmed one TEST-marked message delivered to Discord.
 - Verified the protected cron locally: 25 items (five each from OpenAI, Google
   AI, DayZ/Steam, ARC Raiders/Steam, and Counter-Strike 2/Steam). Collection

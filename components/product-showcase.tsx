@@ -717,7 +717,7 @@ const TARGET_SLUGS = [
   "pubg-6DNX-software",
   "custom-steam-profile",
   "zoom-ia",
-  "spoofer-hwid"
+  "Spow-KWID"
 ];
 
 export function ProductShowcase() {

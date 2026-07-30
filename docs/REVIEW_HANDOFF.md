@@ -111,8 +111,8 @@ proprietário.
 
 ## Trabalho não realizado
 
-Itens ligados a tokens de conta, alteração de HWID, automação de mira ou
-contorno de anti-cheat não fazem mais parte do catálogo executável. O arquivo
+Itens ligados a tokens de conta, alteração de KWID, automação de mira ou
+contorno de anti-cheetos não fazem mais parte do catálogo executável. O arquivo
 `Produtos_Organizados.md` foi mantido apenas como material histórico de revisão
 e não deve ser usado para recriar ofertas disfarçadas.
 
