@@ -10,9 +10,11 @@ export default function HomePage() {
       <HeroSection />
       <CinematicCompanions />
       <ProductShowcase />
-      <Suspense fallback={<NewsRadarSkeleton />}>
-        <NewsRadar />
-      </Suspense>
+      <div className="hidden">
+        <Suspense fallback={<NewsRadarSkeleton />}>
+          <NewsRadar />
+        </Suspense>
+      </div>
     </main>
   );
 }

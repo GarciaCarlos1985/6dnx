@@ -2834,6 +2834,48 @@ export const products: Product[] = [
     "status": "available",
     "variants": [],
     "youtubeId": "BqPwa1SXowE"
+  },
+  {
+    slug: "arena-breakout",
+    title: "Arena Breakout",
+    category: "Arena Breakout",
+    tagline: "Arena Acesso",
+    description: "Premium cheats for Arena Breakout.",
+    features: [],
+    systemSupport: [],
+    menuKeys: [],
+    tutorialSteps: [],
+    image: "/products/card-art/game-setup-pro-6dnx.webp",
+    status: "available",
+    variants: [{ name: "30 Dias", priceBRL: 150.00 }]
+  },
+  {
+    slug: "cs-2",
+    title: "Counter-Strike 2",
+    category: "CS2",
+    tagline: "CS2 Acesso",
+    description: "Premium cheats for CS2.",
+    features: [],
+    systemSupport: [],
+    menuKeys: [],
+    tutorialSteps: [],
+    image: "/products/card-art/performance-audit-6dnx.webp",
+    status: "available",
+    variants: [{ name: "30 Dias", priceBRL: 120.00 }]
+  },
+  {
+    slug: "custom-steam-profile",
+    title: "Custom Steam Profile",
+    category: "Steam",
+    tagline: "Custom Profile",
+    description: "Personalize seu perfil Steam.",
+    features: [],
+    systemSupport: [],
+    menuKeys: [],
+    tutorialSteps: [],
+    image: "/products/card-art/custom-steam-profile-6dnx.webp",
+    status: "available",
+    variants: [{ name: "Unitário", priceBRL: 50.00 }]
   }
 ];
 

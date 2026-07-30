@@ -708,8 +708,19 @@ function Card({
   );
 }
 
+const TARGET_SLUGS = [
+  "dayz-6DNX-software",
+  "arena-breakout",
+  "escape-from-tarkov-6DNX-software",
+  "cs-2",
+  "fivem-6DNX-software",
+  "pubg-6DNX-software",
+  "custom-steam-profile",
+  "zoom-ia",
+  "spoofer-hwid"
+];
+
 export function ProductShowcase() {
-  const [page, setPage] = useState(DEFAULT_PRODUCT_PAGE);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [placement, setPlacement] = useState<Placement | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
@@ -723,35 +734,28 @@ export function ProductShowcase() {
     getWidePopupServerSnapshot,
   );
 
-  const pages = Math.ceil(products.length / PER_PAGE);
-  const overflowPageIndexes = Array.from(
-    { length: Math.max(0, pages - 2) },
-    (_, index) => index + 2,
-  );
   const visible = useMemo(
-    () => products.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE),
-    [page],
+    () => TARGET_SLUGS.map((slug) => products.find((p) => p.slug === slug)).filter((p): p is Product => Boolean(p)),
+    [],
   );
+
   const openProduct = products.find((p) => p.slug === openSlug) ?? null;
   const portraitVideo = openProduct?.videoOrientation === "portrait";
   const orderedVisible = useMemo(() => {
     if (!wide || !openSlug) return visible;
     const selectedIndex = visible.findIndex((product) => product.slug === openSlug);
-    if (selectedIndex < 0 || selectedIndex === 1) return visible;
+    if (selectedIndex < 0) return visible;
+
+    const col = selectedIndex % 3;
+    if (col === 1) return visible;
 
     const ordered = [...visible];
-    const [selected] = ordered.splice(selectedIndex, 1);
-    ordered.splice(Math.min(1, ordered.length), 0, selected);
+    const centerIndex = selectedIndex - col + 1;
+    const temp = ordered[selectedIndex];
+    ordered[selectedIndex] = ordered[centerIndex];
+    ordered[centerIndex] = temp;
     return ordered;
   }, [openSlug, visible, wide]);
-
-  useEffect(() => {
-    const resetRestoredPage = (event: PageTransitionEvent) => {
-      if (event.persisted) setPage(DEFAULT_PRODUCT_PAGE);
-    };
-    window.addEventListener("pageshow", resetRestoredPage);
-    return () => window.removeEventListener("pageshow", resetRestoredPage);
-  }, []);
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
@@ -982,14 +986,6 @@ export function ProductShowcase() {
     setOpenSlug(slug);
   };
 
-  const changePage = (next: number) => {
-    if (openSlug) {
-      originScrollRef.current = null;
-      close();
-    }
-    setPage(((next % pages) + pages) % pages);
-  };
-
   return (
     <section
       ref={sectionRef}
@@ -1011,21 +1007,6 @@ export function ProductShowcase() {
       </div>
 
       <div className="relative mx-auto flex w-full max-w-7xl items-center justify-center gap-2 lg:gap-8">
-        {/* Seta Esquerda */}
-        <button
-          type="button"
-          onClick={() => changePage(page - 1)}
-          disabled={page === 0}
-          aria-label="Página anterior"
-          className={`relative hidden md:flex shrink-0 h-24 w-16 items-center justify-center text-7xl font-light transition-all ${
-            openSlug
-              ? "opacity-0 pointer-events-none"
-              : "text-primary/70 hover:text-red-800 disabled:opacity-20 disabled:pointer-events-none"
-          }`}
-        >
-          ‹
-        </button>
-
         <div
           className={`relative w-full max-w-5xl grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 ${
             wide && openSlug ? "z-[80]" : "z-[var(--z-content)]"
@@ -1042,124 +1023,9 @@ export function ProductShowcase() {
             />
           ))}
         </div>
-
-        {/* Seta Direita */}
-        <button
-          type="button"
-          onClick={() => changePage(page + 1)}
-          disabled={page === pages - 1}
-          aria-label="Próxima página"
-          className={`relative hidden md:flex shrink-0 h-24 w-16 items-center justify-center text-7xl font-light transition-all ${
-            openSlug
-              ? "opacity-0 pointer-events-none"
-              : "text-primary/70 hover:text-red-800 disabled:opacity-20 disabled:pointer-events-none"
-          }`}
-        >
-          ›
-        </button>
       </div>
 
-      {/* Pager: the brand mark itself is the control — 6 back, D/N the pages, X forward. */}
-      <nav
-        ref={pagerRef}
-        className="relative z-[var(--z-content)] mx-auto mt-14 flex max-w-5xl items-center justify-center gap-3"
-        aria-label="Navegar produtos"
-      >
-        {[...overflowPageIndexes].reverse().map((pageIndex) => (
-          <button
-            key={`left-${pageIndex}`}
-            type="button"
-            onClick={() => changePage(pageIndex)}
-            aria-label={`Abrir página ${pageIndex + 1} pela esquerda`}
-            className={`relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
-              page === pageIndex
-                ? "text-primary drop-shadow-[0_0_18px_var(--primary-glow)]"
-                : "text-primary/70 hover:text-red-800"
-            }`}
-          >
-            <span className="relative z-[1]">‹</span>
-            <span aria-hidden data-pager-shadow="left-small" className="product-pager__shadow">
-              ‹
-            </span>
-          </button>
-        ))}
-
-        <button
-          type="button"
-          onClick={() => changePage(page - 1)}
-          aria-label="Produtos anteriores"
-          className="relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none text-muted transition-colors hover:text-primary"
-        >
-          <span className="relative z-[1]">6</span>
-          <span
-            aria-hidden
-            data-pager-shadow="6"
-            className="product-pager__shadow"
-          >
-            6
-          </span>
-        </button>
-
-        {Array.from({ length: Math.min(pages, 2) }, (_, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => changePage(i)}
-            aria-label={`Página ${i + 1}`}
-            aria-current={page === i}
-            className={`relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
-              page === i
-                ? "text-primary drop-shadow-[0_0_18px_var(--primary-glow)]"
-                : "text-muted/50 hover:text-muted"
-            }`}
-          >
-            <span className="relative z-[1]">{["D", "N"][i] ?? i + 1}</span>
-            <span
-              aria-hidden
-              data-pager-shadow={["D", "N"][i]}
-              className="product-pager__shadow"
-            >
-              {["D", "N"][i]}
-            </span>
-          </button>
-        ))}
-
-        <button
-          type="button"
-          onClick={() => changePage(page + 1)}
-          aria-label="Próximos produtos"
-          className="relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none text-muted transition-colors hover:text-primary"
-        >
-          <span className="relative z-[1]">X</span>
-          <span
-            aria-hidden
-            data-pager-shadow="X"
-            className="product-pager__shadow"
-          >
-            X
-          </span>
-        </button>
-
-        {overflowPageIndexes.map((pageIndex) => (
-          <button
-            key={`right-${pageIndex}`}
-            type="button"
-            onClick={() => changePage(pageIndex)}
-            aria-label={`Abrir página ${pageIndex + 1} pela direita`}
-            aria-current={page === pageIndex ? "page" : undefined}
-            className={`relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
-              page === pageIndex
-                ? "text-primary drop-shadow-[0_0_18px_var(--primary-glow)]"
-                : "text-primary/70 hover:text-red-800"
-            }`}
-          >
-            <span className="relative z-[1]">›</span>
-            <span aria-hidden data-pager-shadow="right-small" className="product-pager__shadow">
-              ›
-            </span>
-          </button>
-        ))}
-      </nav>
+      {/* Pager removed for 9-card fixed layout */}
 
       {typeof document !== "undefined" && openProduct
         ? createPortal(
