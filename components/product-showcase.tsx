@@ -742,8 +742,9 @@ export function ProductShowcase() {
     const pager = pagerRef.current;
     if (!section || !pager) return;
 
+    // Only target shadows inside the pager nav, not the big side arrows
     const shadows = Array.from(
-      section.querySelectorAll<HTMLElement>("[data-pager-shadow]"),
+      pager.querySelectorAll<HTMLElement>("[data-pager-shadow]"),
     );
     if (!shadows.length) return;
 
@@ -966,8 +967,10 @@ export function ProductShowcase() {
   };
 
   const changePage = (next: number) => {
-    originScrollRef.current = null;
-    close();
+    if (openSlug) {
+      originScrollRef.current = null;
+      close();
+    }
     setPage(((next % pages) + pages) % pages);
   };
 
@@ -998,16 +1001,13 @@ export function ProductShowcase() {
           onClick={() => changePage(page - 1)}
           disabled={page === 0}
           aria-label="Página anterior"
-          className={`relative isolate hidden md:flex shrink-0 h-24 w-16 items-center justify-center text-7xl font-light transition-all ${
+          className={`relative hidden md:flex shrink-0 h-24 w-16 items-center justify-center text-7xl font-light transition-all ${
             openSlug
               ? "opacity-0 pointer-events-none"
-              : "text-primary/70 hover:text-red-800 disabled:opacity-0 disabled:pointer-events-none"
+              : "text-primary/70 hover:text-red-800 disabled:opacity-20 disabled:pointer-events-none"
           }`}
         >
-          <span className="relative z-[1]">‹</span>
-          <span aria-hidden data-pager-shadow="left-big" className="product-pager__shadow">
-            ‹
-          </span>
+          ‹
         </button>
 
         <div
@@ -1033,16 +1033,13 @@ export function ProductShowcase() {
           onClick={() => changePage(page + 1)}
           disabled={page === pages - 1}
           aria-label="Próxima página"
-          className={`relative isolate hidden md:flex shrink-0 h-24 w-16 items-center justify-center text-7xl font-light transition-all ${
+          className={`relative hidden md:flex shrink-0 h-24 w-16 items-center justify-center text-7xl font-light transition-all ${
             openSlug
               ? "opacity-0 pointer-events-none"
-              : "text-primary/70 hover:text-red-800 disabled:opacity-0 disabled:pointer-events-none"
+              : "text-primary/70 hover:text-red-800 disabled:opacity-20 disabled:pointer-events-none"
           }`}
         >
-          <span className="relative z-[1]">›</span>
-          <span aria-hidden data-pager-shadow="right-big" className="product-pager__shadow">
-            ›
-          </span>
+          ›
         </button>
       </div>
 
