@@ -107,13 +107,14 @@ export function HeroSection() {
         });
         gsap.fromTo(
           cueArrowRef.current,
-          { scaleY: 0.2, transformOrigin: "top", opacity: 0.2 },
+          { y: -6, opacity: 0.3 },
           {
-            scaleY: 1,
+            y: 2,
             opacity: 1,
-            duration: 1.6,
+            duration: 1.2,
             repeat: -1,
-            ease: "power2.inOut",
+            yoyo: true,
+            ease: "sine.inOut",
           },
         );
 
@@ -699,10 +700,10 @@ export function HeroSection() {
 
       <p
         ref={cueRef}
-        className="absolute bottom-8 left-1/2 z-[var(--z-hero-copy)] flex -translate-x-1/2 flex-col items-center gap-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/75 drop-shadow-[0_1px_10px_rgba(255,255,255,0.16)]"
+        className="absolute bottom-8 left-1/2 z-[var(--z-hero-copy)] flex -translate-x-1/2 flex-col items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-white/90 drop-shadow-[0_1px_10px_rgba(255,255,255,0.16)]"
       >
         Role para desvendar
-        <span ref={cueArrowRef} className="block h-4 w-px bg-primary/70" aria-hidden />
+        <span ref={cueArrowRef} className="text-xl font-bold text-primary/70" aria-hidden>↓</span>
       </p>
     </section>
   );
