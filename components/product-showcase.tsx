@@ -743,7 +743,7 @@ export function ProductShowcase() {
     if (!section || !pager) return;
 
     const shadows = Array.from(
-      pager.querySelectorAll<HTMLElement>("[data-pager-shadow]"),
+      section.querySelectorAll<HTMLElement>("[data-pager-shadow]"),
     );
     if (!shadows.length) return;
 
@@ -998,13 +998,16 @@ export function ProductShowcase() {
           onClick={() => changePage(page - 1)}
           disabled={page === 0}
           aria-label="Página anterior"
-          className={`absolute left-0 sm:left-4 xl:left-12 top-1/2 z-[var(--z-content)] -translate-y-1/2 hidden md:flex h-24 w-16 items-center justify-center text-7xl font-light transition-all ${
+          className={`relative isolate absolute left-0 sm:left-4 xl:left-12 top-1/2 z-[var(--z-content)] -translate-y-1/2 hidden md:flex h-24 w-16 items-center justify-center text-7xl font-light transition-all ${
             openSlug
               ? "opacity-0 pointer-events-none"
-              : "text-muted/30 hover:text-primary disabled:opacity-0 disabled:pointer-events-none"
+              : "text-primary/70 hover:text-red-800 disabled:opacity-0 disabled:pointer-events-none"
           }`}
         >
-          ‹
+          <span className="relative z-[1]">‹</span>
+          <span aria-hidden data-pager-shadow="left-big" className="product-pager__shadow">
+            ‹
+          </span>
         </button>
 
         <div
@@ -1030,13 +1033,16 @@ export function ProductShowcase() {
           onClick={() => changePage(page + 1)}
           disabled={page === pages - 1}
           aria-label="Próxima página"
-          className={`absolute right-0 sm:right-4 xl:right-12 top-1/2 z-[var(--z-content)] -translate-y-1/2 hidden md:flex h-24 w-16 items-center justify-center text-7xl font-light transition-all ${
+          className={`relative isolate absolute right-0 sm:right-4 xl:right-12 top-1/2 z-[var(--z-content)] -translate-y-1/2 hidden md:flex h-24 w-16 items-center justify-center text-7xl font-light transition-all ${
             openSlug
               ? "opacity-0 pointer-events-none"
-              : "text-muted/30 hover:text-primary disabled:opacity-0 disabled:pointer-events-none"
+              : "text-primary/70 hover:text-red-800 disabled:opacity-0 disabled:pointer-events-none"
           }`}
         >
-          ›
+          <span className="relative z-[1]">›</span>
+          <span aria-hidden data-pager-shadow="right-big" className="product-pager__shadow">
+            ›
+          </span>
         </button>
       </div>
 
@@ -1052,13 +1058,16 @@ export function ProductShowcase() {
             type="button"
             onClick={() => changePage(pageIndex)}
             aria-label={`Abrir página ${pageIndex + 1} pela esquerda`}
-            className={`inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
+            className={`relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
               page === pageIndex
                 ? "text-primary drop-shadow-[0_0_18px_var(--primary-glow)]"
-                : "text-muted/50 hover:text-muted"
+                : "text-primary/70 hover:text-red-800"
             }`}
           >
-            ‹
+            <span className="relative z-[1]">‹</span>
+            <span aria-hidden data-pager-shadow="left-small" className="product-pager__shadow">
+              ‹
+            </span>
           </button>
         ))}
 
@@ -1125,13 +1134,16 @@ export function ProductShowcase() {
             onClick={() => changePage(pageIndex)}
             aria-label={`Abrir página ${pageIndex + 1} pela direita`}
             aria-current={page === pageIndex ? "page" : undefined}
-            className={`inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
+            className={`relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
               page === pageIndex
                 ? "text-primary drop-shadow-[0_0_18px_var(--primary-glow)]"
-                : "text-muted/50 hover:text-muted"
+                : "text-primary/70 hover:text-red-800"
             }`}
           >
-            ›
+            <span className="relative z-[1]">›</span>
+            <span aria-hidden data-pager-shadow="right-small" className="product-pager__shadow">
+              ›
+            </span>
           </button>
         ))}
       </nav>
