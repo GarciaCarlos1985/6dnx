@@ -457,11 +457,11 @@ function Popups({
 
           <div className="mb-6">
             <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
-              Links Oficiais Priv8
+              Links Oficiais 6DNX
             </h4>
             <div className="flex flex-col gap-2">
               <a
-                href="https://priv8software.com.br/downloads"
+                href="https://6DNXsoftware.com.br/downloads"
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center justify-between rounded-md border border-white/10 bg-surface/80 px-4 py-3 transition-colors hover:border-primary/50 hover:bg-primary/10"

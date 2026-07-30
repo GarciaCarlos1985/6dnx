@@ -36,10 +36,10 @@ export type Product = {
 
 export const products: Product[] = [
   {
-    "slug": "dayz-priv8-software",
-    "title": "DayZ (Priv8 Software)",
+    "slug": "dayz-6DNX-software",
+    "title": "DayZ",
     "category": "DayZ",
-    "tagline": "DayZ (Priv8 Software) Acesso",
+    "tagline": "DayZ Acesso",
     "description": "",
     "features": [
       {
@@ -175,10 +175,10 @@ export const products: Product[] = [
     "youtubeId": "_2cS7WUqKM4"
   },
   {
-    "slug": "dead-by-daylight-priv8-software",
-    "title": "Dead by Daylight (Priv8 Software)",
+    "slug": "dead-by-daylight-6DNX-software",
+    "title": "Dead by Daylight",
     "category": "Dead by Daylight",
-    "tagline": "Dead by Daylight (Priv8 Software) Acesso",
+    "tagline": "Dead by Daylight Acesso",
     "description": "",
     "features": [
       {
@@ -286,10 +286,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "deadlock-priv8-software",
-    "title": "Deadlock (Priv8 Software)",
+    "slug": "deadlock-6DNX-software",
+    "title": "Deadlock",
     "category": "Deadlock",
-    "tagline": "Deadlock (Priv8 Software) Acesso",
+    "tagline": "Deadlock Acesso",
     "description": "",
     "features": [
       {
@@ -389,10 +389,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "delta-force-priv8-software",
-    "title": "Delta Force (Priv8 Software)",
+    "slug": "delta-force-6DNX-software",
+    "title": "Delta Force",
     "category": "Delta Force",
-    "tagline": "Delta Force (Priv8 Software) Acesso",
+    "tagline": "Delta Force Acesso",
     "description": "",
     "features": [
       {
@@ -496,10 +496,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "escape-from-tarkov-priv8-software",
-    "title": "Escape From Tarkov (Priv8 Software)",
+    "slug": "escape-from-tarkov-6DNX-software",
+    "title": "Escape From Tarkov",
     "category": "Escape From Tarkov",
-    "tagline": "Escape From Tarkov (Priv8 Software) Acesso",
+    "tagline": "Escape From Tarkov Acesso",
     "description": "",
     "features": [
       {
@@ -603,10 +603,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "farlight-84-priv8-software",
-    "title": "Farlight 84 (Priv8 Software)",
+    "slug": "farlight-84-6DNX-software",
+    "title": "Farlight 84",
     "category": "Farlight 84",
-    "tagline": "Farlight 84 (Priv8 Software) Acesso",
+    "tagline": "Farlight 84 Acesso",
     "description": "",
     "features": [
       {
@@ -714,10 +714,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "fivem-priv8-software",
-    "title": "FiveM (Priv8 Software)",
+    "slug": "fivem-6DNX-software",
+    "title": "FiveM",
     "category": "FiveM",
-    "tagline": "FiveM (Priv8 Software) Acesso",
+    "tagline": "FiveM Acesso",
     "description": "",
     "features": [
       {
@@ -825,10 +825,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "fortnite-priv8-software",
-    "title": "Fortnite (Priv8 Software)",
+    "slug": "fortnite-6DNX-software",
+    "title": "Fortnite",
     "category": "Fortnite",
-    "tagline": "Fortnite (Priv8 Software) Acesso",
+    "tagline": "Fortnite Acesso",
     "description": "",
     "features": [
       {
@@ -951,10 +951,10 @@ export const products: Product[] = [
     "youtubeId": "BqPwa1SXowE"
   },
   {
-    "slug": "hell-let-loose-priv8-software",
-    "title": "Hell Let Loose (Priv8 Software)",
+    "slug": "hell-let-loose-6DNX-software",
+    "title": "Hell Let Loose",
     "category": "Hell Let Loose",
-    "tagline": "Hell Let Loose (Priv8 Software) Acesso",
+    "tagline": "Hell Let Loose Acesso",
     "description": "",
     "features": [
       {
@@ -1062,10 +1062,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "marvel-rivals-priv8-software",
-    "title": "Marvel Rivals (Priv8 Software)",
+    "slug": "marvel-rivals-6DNX-software",
+    "title": "Marvel Rivals",
     "category": "Marvel Rivals",
-    "tagline": "Marvel Rivals (Priv8 Software) Acesso",
+    "tagline": "Marvel Rivals Acesso",
     "description": "",
     "features": [
       {
@@ -1173,10 +1173,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "meccha-chameleon-priv8-software",
-    "title": "Meccha Chameleon (Priv8 Software)",
+    "slug": "meccha-chameleon-6DNX-software",
+    "title": "Meccha Chameleon",
     "category": "Meccha Chameleon",
-    "tagline": "Meccha Chameleon (Priv8 Software) Acesso",
+    "tagline": "Meccha Chameleon Acesso",
     "description": "",
     "features": [
       {
@@ -1276,10 +1276,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "overwatch-2-priv8-software",
-    "title": "Overwatch 2 (Priv8 Software)",
+    "slug": "overwatch-2-6DNX-software",
+    "title": "Overwatch 2",
     "category": "Overwatch 2",
-    "tagline": "Overwatch 2 (Priv8 Software) Acesso",
+    "tagline": "Overwatch 2 Acesso",
     "description": "",
     "features": [
       {
@@ -1387,10 +1387,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "point-blank-priv8-software",
-    "title": "Point Blank (Priv8 Software)",
+    "slug": "point-blank-6DNX-software",
+    "title": "Point Blank",
     "category": "Point Blank",
-    "tagline": "Point Blank (Priv8 Software) Acesso",
+    "tagline": "Point Blank Acesso",
     "description": "",
     "features": [
       {
@@ -1494,10 +1494,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "pubg-priv8-software",
-    "title": "PUBG (Priv8 Software)",
+    "slug": "pubg-6DNX-software",
+    "title": "PUBG",
     "category": "PUBG",
-    "tagline": "PUBG (Priv8 Software) Acesso",
+    "tagline": "PUBG Acesso",
     "description": "",
     "features": [
       {
@@ -1620,10 +1620,10 @@ export const products: Product[] = [
     "youtubeId": "BqPwa1SXowE"
   },
   {
-    "slug": "redm-priv8-software",
-    "title": "RedM (Priv8 Software)",
+    "slug": "redm-6DNX-software",
+    "title": "RedM",
     "category": "RedM",
-    "tagline": "RedM (Priv8 Software) Acesso",
+    "tagline": "RedM Acesso",
     "description": "",
     "features": [
       {
@@ -1723,10 +1723,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "roblox-priv8-software",
-    "title": "Roblox (Priv8 Software)",
+    "slug": "roblox-6DNX-software",
+    "title": "Roblox",
     "category": "Roblox",
-    "tagline": "Roblox (Priv8 Software) Acesso",
+    "tagline": "Roblox Acesso",
     "description": "",
     "features": [
       {
@@ -1834,10 +1834,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "rust-priv8-software",
-    "title": "Rust (Priv8 Software)",
+    "slug": "rust-6DNX-software",
+    "title": "Rust",
     "category": "Rust",
-    "tagline": "Rust (Priv8 Software) Acesso",
+    "tagline": "Rust Acesso",
     "description": "",
     "features": [
       {
@@ -1945,10 +1945,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "sand-raiders-of-sophie-priv8-software",
-    "title": "SAND: Raiders of Sophie (Priv8 Software)",
+    "slug": "sand-raiders-of-sophie-6DNX-software",
+    "title": "SAND: Raiders of Sophie",
     "category": "SAND: Raiders of Sophie",
-    "tagline": "SAND: Raiders of Sophie (Priv8 Software) Acesso",
+    "tagline": "SAND: Raiders of Sophie Acesso",
     "description": "",
     "features": [
       {
@@ -2048,10 +2048,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "squad-priv8-software",
-    "title": "Squad (Priv8 Software)",
+    "slug": "squad-6DNX-software",
+    "title": "Squad",
     "category": "Squad",
-    "tagline": "Squad (Priv8 Software) Acesso",
+    "tagline": "Squad Acesso",
     "description": "",
     "features": [
       {
@@ -2189,10 +2189,10 @@ export const products: Product[] = [
     "youtubeId": "BqPwa1SXowE"
   },
   {
-    "slug": "unturned-priv8-software",
-    "title": "Unturned (Priv8 Software)",
+    "slug": "unturned-6DNX-software",
+    "title": "Unturned",
     "category": "Unturned",
-    "tagline": "Unturned (Priv8 Software) Acesso",
+    "tagline": "Unturned Acesso",
     "description": "",
     "features": [
       {
@@ -2296,10 +2296,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "valorant-priv8-software",
-    "title": "Valorant (Priv8 Software)",
+    "slug": "valorant-6DNX-software",
+    "title": "Valorant",
     "category": "Valorant",
-    "tagline": "Valorant (Priv8 Software) Acesso",
+    "tagline": "Valorant Acesso",
     "description": "",
     "features": [
       {
@@ -2407,10 +2407,10 @@ export const products: Product[] = [
     "youtubeId": "vVZvtLHwQwk"
   },
   {
-    "slug": "warface-spoofer-priv8-software",
-    "title": "Warface + Spoofer (Priv8 Software)",
+    "slug": "warface-spoofer-6DNX-software",
+    "title": "Warface + Spoofer",
     "category": "Warface",
-    "tagline": "Warface + Spoofer (Priv8 Software) Acesso",
+    "tagline": "Warface + Spoofer Acesso",
     "description": "",
     "features": [
       {
@@ -2488,7 +2488,7 @@ export const products: Product[] = [
       "Session login lasts 5 hours maximum.",
       "If bluescreen happens, delete everything, restart and download again.",
       "Avoid passwords with special characters: !@#\\$%",
-      "WARCHAOS - A PIADA DO ANTI-CHEAT SE REPETE 01/07/2026 CARDOZO DA PRIV8 ·",
+      "WARCHAOS - A PIADA DO ANTI-CHEAT SE REPETE 01/07/2026 CARDOZO DA 6DNX ·",
       "906 visualizações",
       "WARCHAOS - A PIADA DO ANTI-CHEAT SE REPETE 01/07/2026 Abre em uma nova",
       "janela"
@@ -2512,10 +2512,10 @@ export const products: Product[] = [
     "youtubeId": "9cmUqBtuDMk"
   },
   {
-    "slug": "warzone-full-control-aim-priv8-software",
-    "title": "Warzone \\[FULL + CONTROL AIM\\] (Priv8 Software)",
+    "slug": "warzone-full-control-aim-6DNX-software",
+    "title": "Warzone \\[FULL + CONTROL AIM\\]",
     "category": "Geral",
-    "tagline": "Warzone \\[FULL + CONTROL AIM\\] (Priv8 Software) Acesso",
+    "tagline": "Warzone \\[FULL + CONTROL AIM\\] Acesso",
     "description": "",
     "features": [
       {
@@ -2614,10 +2614,10 @@ export const products: Product[] = [
     "youtubeId": "BqPwa1SXowE"
   },
   {
-    "slug": "warzone-full-priv8-software",
-    "title": "Warzone \\[FULL\\] (Priv8 Software)",
+    "slug": "warzone-full-6DNX-software",
+    "title": "Warzone \\[FULL\\]",
     "category": "Geral",
-    "tagline": "Warzone \\[FULL\\] (Priv8 Software) Acesso",
+    "tagline": "Warzone \\[FULL\\] Acesso",
     "description": "",
     "features": [
       {
@@ -2716,10 +2716,10 @@ export const products: Product[] = [
     "youtubeId": "BqPwa1SXowE"
   },
   {
-    "slug": "warzone-esp-priv8-software",
-    "title": "Warzone \\[ESP\\] (Priv8 Software)",
+    "slug": "warzone-esp-6DNX-software",
+    "title": "Warzone \\[ESP\\]",
     "category": "Geral",
-    "tagline": "Warzone \\[ESP\\] (Priv8 Software) Acesso",
+    "tagline": "Warzone \\[ESP\\] Acesso",
     "description": "",
     "features": [
       {
@@ -2818,7 +2818,7 @@ export const products: Product[] = [
     "title": "Zoom \\[IA\\]",
     "category": "Geral",
     "tagline": "Zoom \\[IA\\] Acesso",
-    "description": "Super ZOOM hack.\nCompartilhando \" Zoom \\[IA\\] - Priv8 Software Cheats \\| R\\$ 15,99 \\|\nKill Your Enemies \" Pular para o resultado mais recente do Gemini\nFormato de Exibição dos Links Para garantir que os links não sejam\n\"devorados\" ao copiar, você pode utilizar o formato de link visível ou\nbloco de texto/código:\nLink em Texto Explícito: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\nFormatado com Rótulo e URL: ▶ Vídeo Tutorial\n(<https://www.youtube.com/watch?v=vVZvtLHwQwk>)\nLista Consolidada de Produtos com Links Visíveis 1. DayZ Título: DayZ\n(Priv8 Software)\nPreços: 1 Dia: R\\$ 30,99 \\| 7 Dias: R\\$ 66,99 \\| 30 Dias: R\\$ 173,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n2.  DayZ Dupper Título: DayZ Dupper\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=_2cS7WUqKM4>\n3.  Dead by Daylight Título: Dead by Daylight (Priv8 Software)\nPreços: 1 Dia: R\\$ 20,99 \\| 7 Dias: R\\$ 61,99 \\| 30 Dias: R\\$ 137,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=iSq-wFY_rr8>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n4.  Deadlock Título: Deadlock (Priv8 Software)\nPreços: 30 Dias: R\\$ 91,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n5.  Delta Force Título: Delta Force (Priv8 Software)\nPreços: 7 Dias: R\\$ 152,99 \\| 30 Dias: R\\$ 203,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n6.  Escape From Tarkov Título: Escape From Tarkov (Priv8 Software)\nPreços: 7 Dias: R\\$ 101,99 \\| 30 Dias: R\\$ 203,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n7.  Farlight 84 Título: Farlight 84 (Priv8 Software)\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=Q4Ti1Bf07Lg>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n8.  FiveM Título: FiveM (Priv8 Software)\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 86,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=k1cWobVvgKo>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n9.  Fortnite Título: Fortnite (Priv8 Software)\nPreços: 1 Dia: R\\$ 35,99 \\| 7 Dias: R\\$ 107,99 \\| 30 Dias: R\\$ 202,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n10. Hell Let Loose Título: Hell Let Loose (Priv8 Software)\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n11. Marvel Rivals Título: Marvel Rivals (Priv8 Software)\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 71,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n12. Meccha Chameleon Título: Meccha Chameleon (Priv8 Software)\nPreços: 30 Dias: R\\$ 61,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n13. Overwatch 2 Título: Overwatch 2 (Priv8 Software)\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 31,99 \\| 30 Dias: R\\$ 87,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=-oL9_VtGJgE>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n14. Point Blank Título: Point Blank (Priv8 Software)\nPreços: 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n15. PUBG Título: PUBG (Priv8 Software)\nPreços: 1 Dia: R\\$ 46,99 \\| 7 Dias: R\\$ 134,99 \\| 30 Dias: R\\$ 252,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=sf6Kux6QdSI>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n16. Recoil \\[IA\\] Título: Recoil \\[IA\\]\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo: Sem vídeo disponível.\n17. RedM Título: RedM (Priv8 Software)\nPreços: 30 Dias: R\\$ 132,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n18. Roblox Título: Roblox (Priv8 Software)\nPreços: 1 Dia: R\\$ 11,99 \\| 7 Dias: R\\$ 31,99 \\| 30 Dias: R\\$ 88,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n19. Rust Título: Rust (Priv8 Software)\nPreços: 1 Dia: R\\$ 21,99 \\| 7 Dias: R\\$ 67,99 \\| 30 Dias: R\\$ 111,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=s8D7QlxiHmE>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n20. SAND: Raiders of Sophie Título: SAND: Raiders of Sophie (Priv8\nSoftware)\nPreços: 30 Dias: R\\$ 152,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n21. Squad Título: Squad (Priv8 Software)\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 71,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=-Ltrv13yRE8>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n22. Spoofer \\[HWID\\] Título: Spoofer \\[HWID\\]\nPreços: 1 Dia: R\\$ 21,99 \\| 7 Dias: R\\$ 47,99 \\| 30 Dias: R\\$ 122,99\nLinks Relacionados:\nTutorial Permanente:\n<https://teste13367928312343.my.canva.site/robot-spoofer>\n23. Spoofer Warzone + Ranked \\[HWID\\] Título: Spoofer Warzone + Ranked\n\\[HWID\\]\nPreços: 1 Dia: R\\$ 37,99 \\| 7 Dias: R\\$ 69,99 \\| 30 Dias: R\\$ 216,99\nLinks de Vídeo: Sem vídeo disponível.\n24. Unturned Título: Unturned (Priv8 Software)\nPreços: 7 Dias: R\\$ 26,99 \\| 30 Dias: R\\$ 91,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n25. Valorant Título: Valorant (Priv8 Software)\nPreços: 1 Dia: R\\$ 46,99 \\| 7 Dias: R\\$ 178,99 \\| 30 Dias: R\\$ 330,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=z2ornKhoK1g>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n26. Warface + Spoofer Título: Warface + Spoofer (Priv8 Software)\nPreços: 1 Dia: R\\$ 17,99 \\| 7 Dias: R\\$ 70,99 \\| 30 Dias: R\\$ 101,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=9cmUqBtuDMk>\n27. Warzone \\[FULL + CONTROL AIM\\] Título: Warzone \\[FULL + CONTROL\nAIM\\] (Priv8 Software)\nPreços: 30 Dias: R\\$ 357,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=AX4rM8YSpJs>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n28. Warzone \\[FULL\\] Título: Warzone \\[FULL\\] (Priv8 Software)\nPreços: 1 Dia: R\\$ 53,99 \\| 7 Dias: R\\$ 164,99 \\| 30 Dias: R\\$ 317,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=AX4rM8YSpJs>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n29. Warzone \\[ESP\\] Título: Warzone \\[ESP\\] (Priv8 Software)\nPreços: 7 Dias: R\\$ 102,99 \\| 30 Dias: R\\$ 204,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n30. Zoom \\[IA\\] Título: Zoom \\[IA\\]\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=s8D7QlxiHmE>\nLinks Gerais de Suporte / Utilidade (Priv8 Software) Ao copiar qualquer\ntutorial padrão do produto, os links de apoio são:\nInstalar Drivers:\n<https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc>\nDownload: <https://priv8software.com.br/downloads>\nPágina de Tutorial: <https://priv8software.com/tutorial>\nRedes Sociais: <https://priv8software.com/socials>\nComunidade do WhatsApp:\n<https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L>",
+    "description": "Super ZOOM hack.\nCompartilhando \" Zoom \\[IA\\] - 6DNX Cheats \\| R\\$ 15,99 \\|\nKill Your Enemies \" Pular para o resultado mais recente do Gemini\nFormato de Exibição dos Links Para garantir que os links não sejam\n\"devorados\" ao copiar, você pode utilizar o formato de link visível ou\nbloco de texto/código:\nLink em Texto Explícito: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\nFormatado com Rótulo e URL: ▶ Vídeo Tutorial\n(<https://www.youtube.com/watch?v=vVZvtLHwQwk>)\nLista Consolidada de Produtos com Links Visíveis 1. DayZ Título: DayZ\n(6DNX)\nPreços: 1 Dia: R\\$ 30,99 \\| 7 Dias: R\\$ 66,99 \\| 30 Dias: R\\$ 173,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n2.  DayZ Dupper Título: DayZ Dupper\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=_2cS7WUqKM4>\n3.  Dead by Daylight Título: Dead by Daylight\nPreços: 1 Dia: R\\$ 20,99 \\| 7 Dias: R\\$ 61,99 \\| 30 Dias: R\\$ 137,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=iSq-wFY_rr8>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n4.  Deadlock Título: Deadlock\nPreços: 30 Dias: R\\$ 91,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n5.  Delta Force Título: Delta Force\nPreços: 7 Dias: R\\$ 152,99 \\| 30 Dias: R\\$ 203,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n6.  Escape From Tarkov Título: Escape From Tarkov\nPreços: 7 Dias: R\\$ 101,99 \\| 30 Dias: R\\$ 203,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n7.  Farlight 84 Título: Farlight 84\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=Q4Ti1Bf07Lg>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n8.  FiveM Título: FiveM\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 86,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=k1cWobVvgKo>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n9.  Fortnite Título: Fortnite\nPreços: 1 Dia: R\\$ 35,99 \\| 7 Dias: R\\$ 107,99 \\| 30 Dias: R\\$ 202,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n10. Hell Let Loose Título: Hell Let Loose\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n11. Marvel Rivals Título: Marvel Rivals\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 71,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n12. Meccha Chameleon Título: Meccha Chameleon\nPreços: 30 Dias: R\\$ 61,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n13. Overwatch 2 Título: Overwatch 2\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 31,99 \\| 30 Dias: R\\$ 87,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=-oL9_VtGJgE>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n14. Point Blank Título: Point Blank\nPreços: 7 Dias: R\\$ 30,99 \\| 30 Dias: R\\$ 81,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n15. PUBG Título: PUBG\nPreços: 1 Dia: R\\$ 46,99 \\| 7 Dias: R\\$ 134,99 \\| 30 Dias: R\\$ 252,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=sf6Kux6QdSI>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n16. Recoil \\[IA\\] Título: Recoil \\[IA\\]\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo: Sem vídeo disponível.\n17. RedM Título: RedM\nPreços: 30 Dias: R\\$ 132,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n18. Roblox Título: Roblox\nPreços: 1 Dia: R\\$ 11,99 \\| 7 Dias: R\\$ 31,99 \\| 30 Dias: R\\$ 88,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n19. Rust Título: Rust\nPreços: 1 Dia: R\\$ 21,99 \\| 7 Dias: R\\$ 67,99 \\| 30 Dias: R\\$ 111,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=s8D7QlxiHmE>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n20. SAND: Raiders of Sophie Título: SAND: Raiders of Sophie (6DNX\nSoftware)\nPreços: 30 Dias: R\\$ 152,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n21. Squad Título: Squad\nPreços: 1 Dia: R\\$ 10,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 71,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=-Ltrv13yRE8>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n22. Spoofer \\[HWID\\] Título: Spoofer \\[HWID\\]\nPreços: 1 Dia: R\\$ 21,99 \\| 7 Dias: R\\$ 47,99 \\| 30 Dias: R\\$ 122,99\nLinks Relacionados:\nTutorial Permanente:\n<https://teste13367928312343.my.canva.site/robot-spoofer>\n23. Spoofer Warzone + Ranked \\[HWID\\] Título: Spoofer Warzone + Ranked\n\\[HWID\\]\nPreços: 1 Dia: R\\$ 37,99 \\| 7 Dias: R\\$ 69,99 \\| 30 Dias: R\\$ 216,99\nLinks de Vídeo: Sem vídeo disponível.\n24. Unturned Título: Unturned\nPreços: 7 Dias: R\\$ 26,99 \\| 30 Dias: R\\$ 91,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n25. Valorant Título: Valorant\nPreços: 1 Dia: R\\$ 46,99 \\| 7 Dias: R\\$ 178,99 \\| 30 Dias: R\\$ 330,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=z2ornKhoK1g>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n26. Warface + Spoofer Título: Warface + Spoofer\nPreços: 1 Dia: R\\$ 17,99 \\| 7 Dias: R\\$ 70,99 \\| 30 Dias: R\\$ 101,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=9cmUqBtuDMk>\n27. Warzone \\[FULL + CONTROL AIM\\] Título: Warzone \\[FULL + CONTROL\nAIM\\]\nPreços: 30 Dias: R\\$ 357,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=AX4rM8YSpJs>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n28. Warzone \\[FULL\\] Título: Warzone \\[FULL\\]\nPreços: 1 Dia: R\\$ 53,99 \\| 7 Dias: R\\$ 164,99 \\| 30 Dias: R\\$ 317,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=AX4rM8YSpJs>\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n29. Warzone \\[ESP\\] Título: Warzone \\[ESP\\]\nPreços: 7 Dias: R\\$ 102,99 \\| 30 Dias: R\\$ 204,99\nLinks de Vídeo:\nVídeo Tutorial: <https://www.youtube.com/watch?v=vVZvtLHwQwk>\n30. Zoom \\[IA\\] Título: Zoom \\[IA\\]\nPreços: 1 Dia: R\\$ 15,99 \\| 7 Dias: R\\$ 25,99 \\| 30 Dias: R\\$ 50,99\nLinks de Vídeo:\nVídeo Demonstrativo: <https://www.youtube.com/watch?v=s8D7QlxiHmE>\nLinks Gerais de Suporte / Utilidade Ao copiar qualquer\ntutorial padrão do produto, os links de apoio são:\nInstalar Drivers:\n<https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc>\nDownload: <https://6DNXsoftware.com.br/downloads>\nPágina de Tutorial: <https://6DNXsoftware.com/tutorial>\nRedes Sociais: <https://6DNXsoftware.com/socials>\nComunidade do WhatsApp:\n<https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L>",
     "features": [],
     "systemSupport": [],
     "menuKeys": [],

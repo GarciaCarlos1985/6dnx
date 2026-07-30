@@ -55,7 +55,7 @@ function parseDescriptionText(descText) {
     if (line.includes('Tutorial de Inicialização') || line.includes('Program Initialization:') || line.includes('Discord Initialize:')) {
       currentContext = 'tutorial';
     }
-    if (line.includes('Links Relacionados') || line.includes('Priv8 Software - TUTORIAL') || line.includes('Abre em uma nova janela')) {
+    if (line.includes('Links Relacionados') || line.includes('6DNX - TUTORIAL') || line.includes('Abre em uma nova janela')) {
       currentContext = 'ignore';
     }
 
