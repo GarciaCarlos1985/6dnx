@@ -123,6 +123,10 @@ isolated test checkout, and an automated games-and-AI news area.
   angel and explicit "Demonstração em preparação" copy instead of contacting
   YouTube or leaving a broken player. Existing `youtubeId` and orientation data
   stay stored but are not rendered, keeping later reactivation reversible.
+- Restored `public/anjo1-premium.webp`, the shared transparent angel used by
+  product cards, the branded media preview and the checkout atmosphere. The
+  restored binary was verified against the last tracked good version before
+  publication; unrelated legacy angel files remain outside the release.
 - Activated `logo-asas-optimized.webp` as the hero brand. Its transparent WebP
   copy preserves the original PNG while reducing the transfer source from
   2.71 MB to 435 KB. A crimson underglow improves separation, the existing
