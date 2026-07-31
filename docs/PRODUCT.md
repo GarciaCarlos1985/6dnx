@@ -14,7 +14,9 @@ Jogadores de PC (foco DayZ e títulos táticos) que buscam softwares utilitário
 
 ## Product Purpose
 
-Vitrine imersiva da **6DNX** — softwares incríveis, seguros e profissionais para jogos. Sucesso = o visitante entende a identidade em 5s, rola o hero cinematográfico e clica em Get Access / Discord no produto certo.
+Vitrine imersiva da **6DNX** — soluções para jogos apresentadas com identidade
+cinematográfica. Sucesso = o visitante entende a identidade em 5s, percorre o
+hero, escolhe produto e variação e inicia um pedido assistido no Discord.
 
 O **Radar 6DNX** prolonga a relação depois da decisão de compra: reúne lançamentos,
 patches e movimentos dos jogos acompanhados pela marca, sempre apontando para a
@@ -27,7 +29,8 @@ Softwares utilitários de elite para PC, com presença visual cinematográfica e
 
 ## Conversion & proof
 
-- Primary CTA: Get Access → `POST /api/redirect` → Discord
+- Primary CTA: iniciar pedido → `GET /api/redirect?slug=...` → Discord. A rota
+  não confirma pagamento, não entrega arquivo e não dispara webhook em `GET`.
 - Secondary: indicador de scroll no hero + Radar 6DNX
 - Linha memorável: Softwares Incríveis, Seguros e Profissionais
 - Belief ladder: (1) marca premium e segura → (2) produtos com status transparente → (3) preço claro em R$ → (4) acesso via Discord

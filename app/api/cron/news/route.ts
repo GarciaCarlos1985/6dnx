@@ -37,17 +37,24 @@ export async function GET(request: Request) {
       return counts;
     }, {});
     let persisted = 0;
-    let storage: "supabase" | "source-only" = "supabase";
-    let persistenceWarning: string | undefined;
 
     try {
       persisted = await persistNewsArticles(articles);
     } catch (error) {
-      storage = "source-only";
-      persistenceWarning = "Supabase persistence failed";
       console.error(
         "Notícias coletadas, mas não persistidas no Supabase:",
         error instanceof Error ? error.name : "UnknownError",
+      );
+      return jsonNoStore(
+        {
+          ok: false,
+          error: "News persistence failed",
+          collected: articles.length,
+          sources,
+          persisted: 0,
+          completedAt: new Date().toISOString(),
+        },
+        503,
       );
     }
 
@@ -58,8 +65,7 @@ export async function GET(request: Request) {
       collected: articles.length,
       sources,
       persisted,
-      storage,
-      ...(persistenceWarning ? { persistenceWarning } : {}),
+      storage: "supabase",
       completedAt: new Date().toISOString(),
     });
   } catch (error) {

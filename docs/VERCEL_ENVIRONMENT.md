@@ -54,6 +54,27 @@ painel StorM nunca deve receber uma URL de webhook do Discord. O backend 6DNX
 primeiro verifica a assinatura e só então envia uma notificação sanitizada para
 `DISCORD_TICKET_WEBHOOK_URL`.
 
+Em 2026-07-31, uma captura do proprietário confirmou que o campo de webhook da
+StorM estava apontando diretamente para uma URL `discord.com/api/webhooks/...`.
+Essa configuração é incorreta: remova esse destino e não cadastre a futura URL
+6DNX até a rota existir, estar publicada e ter passado por teste de assinatura.
+Se uma URL completa do Discord tiver aparecido em captura, log ou conversa,
+rotacione o webhook no Discord, porque o trecho depois do ID funciona como
+credencial de envio.
+
+Não falta outra variável. O que falta é o contrato da API e a implementação:
+
+- método/endpoint e payload para criar uma cobrança Pix;
+- unidade do valor, campos obrigatórios e formato do QR/copia e cola;
+- identificador, estados, expiração e consulta da cobrança;
+- eventos e esquema do webhook;
+- cálculo canônico da assinatura `X-Storm-Signature` sobre o corpo bruto;
+- proteção contra repetição, idempotência, sandbox, cancelamento e reembolso.
+
+Não deduza esses campos a partir de uma chave live. Peça a documentação
+expandida na seção **Documentação da API** da própria Wallet e compartilhe
+somente o texto técnico, nunca chaves ou secrets.
+
 ## 3. Não precisam ficar na Vercel agora
 
 Estas variáveis aparecem ou já apareceram no projeto Vercel, mas o código

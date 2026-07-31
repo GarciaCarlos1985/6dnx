@@ -12,11 +12,7 @@ export default async function HomePage() {
   return (
     <main className="site-flow">
       <SiteAtmosphere />
-      <HeroSection
-        showBrandOverlay={false}
-        showCinematicEffects={false}
-        showVideoOverlay
-      />
+      <HeroSection />
       <CinematicCompanions scene="products" />
       <ProductShowcase catalogProducts={catalogProducts} />
       <div className="hidden">

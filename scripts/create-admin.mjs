@@ -44,15 +44,55 @@ if (!url || !serviceKey) {
 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
   throw new Error("Configure ADMIN_BOOTSTRAP_EMAIL com um e-mail válido.");
 }
-if (!passwordIsStrong) {
-  throw new Error(
-    "ADMIN_BOOTSTRAP_PASSWORD precisa ter 16+ caracteres, maiúscula, minúscula, número e símbolo.",
-  );
-}
-
 const supabase = createClient(url, serviceKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
+
+const { data: listedUsers, error: listError } =
+  await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+
+if (listError) {
+  throw new Error(`Supabase recusou a consulta: ${listError.message}`);
+}
+
+const existingUser = listedUsers.users.find(
+  (user) => user.email?.trim().toLowerCase() === email,
+);
+
+if (existingUser) {
+  const { data, error } = await supabase.auth.admin.updateUserById(
+    existingUser.id,
+    {
+      app_metadata: {
+        ...existingUser.app_metadata,
+        role: "admin",
+      },
+    },
+  );
+
+  if (error) {
+    throw new Error(`Supabase recusou a promoção: ${error.message}`);
+  }
+
+  console.log(
+    JSON.stringify({
+      action:
+        existingUser.app_metadata.role === "admin"
+          ? "already-admin"
+          : "promoted",
+      role: data.user.app_metadata.role,
+      next: "Entre em /admin/login. ADMIN_BOOTSTRAP_PASSWORD não é necessária para uma conta existente.",
+    }),
+  );
+  process.exit(0);
+}
+
+if (!passwordIsStrong) {
+  throw new Error(
+    "Para criar uma conta nova, ADMIN_BOOTSTRAP_PASSWORD precisa ter 16+ caracteres, maiúscula, minúscula, número e símbolo.",
+  );
+}
+
 const { data, error } = await supabase.auth.admin.createUser({
   email,
   password,
@@ -61,18 +101,12 @@ const { data, error } = await supabase.auth.admin.createUser({
 });
 
 if (error) {
-  throw new Error(
-    error.message.toLowerCase().includes("already")
-      ? "Esta conta já existe. Promova-a manualmente conforme docs/ADMIN.md."
-      : `Supabase recusou a criação: ${error.message}`,
-  );
+  throw new Error(`Supabase recusou a criação: ${error.message}`);
 }
 
 console.log(
   JSON.stringify({
-    created: true,
-    userId: data.user.id,
-    email: data.user.email,
+    action: "created",
     role: data.user.app_metadata.role,
     next: "Apague ADMIN_BOOTSTRAP_PASSWORD de .env.local e entre em /admin/login.",
   }),

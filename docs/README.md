@@ -13,8 +13,9 @@ guardam arquitetura, regras, decisões, auditorias e fontes históricas.
 5. [`PROJECT_STATE.md`](PROJECT_STATE.md)
 6. [`COMMERCE_ARCHITECTURE.md`](COMMERCE_ARCHITECTURE.md)
 7. [`ADMIN.md`](ADMIN.md)
-8. [`MAPA_EDITORIAL_31_ENTRADAS.md`](MAPA_EDITORIAL_31_ENTRADAS.md)
-9. [`ESTADO_BANCO_SUPABASE_6DNX.md`](ESTADO_BANCO_SUPABASE_6DNX.md)
+8. [`GUIA_ADMIN_MAYCON.md`](GUIA_ADMIN_MAYCON.md)
+9. [`MAPA_EDITORIAL_31_ENTRADAS.md`](MAPA_EDITORIAL_31_ENTRADAS.md)
+10. [`ESTADO_BANCO_SUPABASE_6DNX.md`](ESTADO_BANCO_SUPABASE_6DNX.md)
 
 ## Governança
 
@@ -34,6 +35,7 @@ continua sendo a regra operacional autoritativa para agentes.
 | [`PROJECT_STATE.md`](PROJECT_STATE.md) | memória operacional, decisões confirmadas, trabalho concluído e pendências |
 | [`COMMERCE_ARCHITECTURE.md`](COMMERCE_ARCHITECTURE.md) | fluxo profissional de compra, estados e invariantes financeiros |
 | [`ADMIN.md`](ADMIN.md) | operação do CMS, autenticação, RLS, primeira conta e checklist de ativação |
+| [`GUIA_ADMIN_MAYCON.md`](GUIA_ADMIN_MAYCON.md) | manual leigo e seguro para Maycon editar produtos, imagens, preços e desfazer erros |
 
 ## Produto e design
 

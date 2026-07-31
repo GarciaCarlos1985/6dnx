@@ -13,13 +13,39 @@ Antes de qualquer push para `main`, configure a senha de revisão na Vercel. O
 novo código falha fechado na Vercel: sem configuração explícita, responderá
 `503` em vez de publicar o catálogo por acidente.
 
+## Atualização de endurecimento — 31 de julho de 2026
+
+Uma segunda revisão tratou falhas que conseguiam passar por lint, TypeScript e
+build sem demonstrar o comportamento seguro:
+
+- os links copiados de download e drivers foram removidos de todos os cards;
+- a vitrine deixou de apresentar a StorM Wallet ou o checkout de R$ 1 como
+  compra pública e passou a iniciar atendimento manual no Discord;
+- quando o Supabase já está configurado, erro, resposta vazia ou catálogo
+  inválido não reativam o catálogo estático antigo;
+- mutações administrativas agora rejeitam ausência de `Origin`, subdomínio
+  `same-site` e qualquer origem diferente da URL exata;
+- upload de imagem usa leitura limitada por stream e valida a assinatura dos
+  bytes, bloqueando MIME forjado e corpo maior que 5 MB;
+- o cron retorna `503` quando coleta notícias mas não consegue persistir, em vez
+  de comunicar sucesso falso;
+- o laboratório de pagamento é bloqueado de forma absoluta em Vercel
+  Production, mesmo se `PAYMENT_TEST_MODE=true` for configurado por engano;
+- a revisão privada voltou a falhar fechada na Vercel quando a variável está
+  ausente ou malformada;
+- testes unitários de invariantes de segurança e workflow de qualidade foram
+  adicionados; Dependabot e CODEOWNERS também foram preparados.
+
+Nenhuma configuração remota, migration, cobrança, webhook, commit, push ou
+deploy foi executado nessa atualização.
+
 ## Evidências verificadas
 
 | Verificação | Resultado |
 | --- | --- |
 | Segredos no working tree versionado | Nenhum padrão de alta confiança encontrado |
 | Segredos no histórico Git alcançável | Nenhum padrão de alta confiança encontrado |
-| `.env.local` | Ignorado pelo Git, não versionado, sem chaves duplicadas |
+| `.env.local` | Ignorado pelo Git, não versionado, sem chaves duplicadas e sem nomes de credenciais de bootstrap/admin |
 | Formato das chaves locais usadas | URLs, hosts e comprimentos essenciais coerentes; valores não foram exibidos |
 | Dependências de produção | `npm audit --omit=dev`: 0 vulnerabilidades |
 | Ferramentas de desenvolvimento | 9 alertas altos na árvore ESLint/minimatch; ver risco residual abaixo |
@@ -89,7 +115,15 @@ novo código falha fechado na Vercel: sem configuração explícita, responderá
 - A política CSP atual bloqueia incorporação em frames, mas ainda não restringe
   todas as origens de scripts, estilos e conexões. Uma CSP completa com nonce
   deve ser projetada e testada antes do lançamento público.
-- O projeto ainda não possui suíte automatizada de testes unitários/E2E.
+- A suíte unitária cobre os novos invariantes críticos, mas ainda falta E2E
+  autenticado do painel e do ciclo completo de pedido/pagamento.
+- O `/admin` ainda usa apenas senha + papel `admin`; MFA TOTP com exigência
+  `aal2` precisa de telas de inscrição/desafio e teste de recuperação antes de
+  ser imposto, para não trancar os administradores.
+- O cadastro público foi desligado manualmente pelo proprietário em
+  **Authentication > Sign In / Providers** em 2026-07-31. A captura também
+  mostrou login anônimo e vinculação manual desligados; essa pendência está
+  encerrada, sem apagar as contas administrativas existentes.
 
 ### Dependências de desenvolvimento
 
@@ -132,11 +166,19 @@ Estas são limitações deliberadas de segurança, não tarefas esquecidas:
    tentativa de contornar o bloqueio. Build, rotas e a implementação compilada
    do modal foram validados localmente; a conferência visual humana em desktop
    e mobile continua obrigatória antes do push.
+10. **Não impôs MFA no `/admin`:** ativar somente metade do fluxo pode bloquear
+    o único administrador. Primeiro é necessário cadastrar um fator TOTP em
+    conta reserva, implementar inscrição/desafio e só depois exigir `aal2` nas
+    APIs e RLS.
+11. **Cadastro público concluído pelo proprietário:** `Allow new users to sign
+    up` foi desligado em 2026-07-31. Nenhuma alteração remota foi executada pelo
+    agente.
 
 ## Validações locais executadas
 
 - `npm run lint`
-- `npx tsc --noEmit`
+- `npm run typecheck`
+- `npm test`
 - `npm run build`
 - servidor público de laboratório: respostas válidas para página, asset,
   `robots.txt`, cron sem Bearer e payloads JSON inválidos/válidos;

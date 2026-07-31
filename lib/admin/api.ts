@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { isTrustedMutationOrigin } from "@/lib/security/request-origin";
 
 export function noStoreJson(payload: unknown, status = 200) {
   return Response.json(payload, {
@@ -11,10 +12,7 @@ export function rejectCrossOriginMutation(request: NextRequest) {
   const origin = request.headers.get("origin");
   const fetchSite = request.headers.get("sec-fetch-site");
 
-  if (
-    (origin && origin !== request.nextUrl.origin) ||
-    (fetchSite && !["same-origin", "same-site", "none"].includes(fetchSite))
-  ) {
+  if (!isTrustedMutationOrigin(origin, fetchSite, request.nextUrl.origin)) {
     return noStoreJson({ error: "Origem da solicitação inválida." }, 403);
   }
   return null;

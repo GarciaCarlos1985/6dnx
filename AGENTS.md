@@ -71,8 +71,10 @@ without reconstructing the conversation.
 ## Non-negotiable interactions
 
 - On desktop, clicking any product moves that card into the middle column,
-  centers it vertically, then opens information on the left and video on the
-  right. The selected card stays above the modal backdrop at the same visual
+  centers it vertically, then opens information on the left and the official
+  6DNX media preview on the right. Product videos are temporarily disabled even
+  when a `youtubeId` remains stored for later use. The selected card stays above
+  the modal backdrop at the same visual
   level as the popups; sibling cards stay obscured. Closing restores the
   original product order and card position.
 - On narrow screens, use one accessible centered sheet; never force the desktop

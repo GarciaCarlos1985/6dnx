@@ -162,7 +162,10 @@ export async function getPublishedCatalog(): Promise<Product[]> {
       },
       next: { revalidate: 300, tags: [PRODUCT_CATALOG_CACHE_TAG] },
     });
-    if (!response.ok) return safeStaticCatalog();
+    if (!response.ok) {
+      console.error("Catálogo público indisponível:", response.status);
+      return [];
+    }
 
     const rows = (await response.json()) as CatalogRow[];
     const products = rows.flatMap((row) => {
@@ -170,11 +173,15 @@ export async function getPublishedCatalog(): Promise<Product[]> {
       return item ? [item.product] : [];
     });
 
-    if (!products.length) return safeStaticCatalog();
+    if (!products.length) return [];
     buildProductCatalogLayout(products, 3);
     return products;
-  } catch {
-    return safeStaticCatalog();
+  } catch (error) {
+    console.error(
+      "Falha ao validar o catálogo público:",
+      error instanceof Error ? error.name : "UnknownError",
+    );
+    return [];
   }
 }
 
@@ -206,21 +213,19 @@ export async function listAdminCatalog(
   return { state: items.length ? "ready" : "empty", items };
 }
 
-export async function insertAdminProduct(
+export async function getAdminProduct(
   supabase: SupabaseClient,
-  sourceKey: string,
-  mutation: CatalogMutation,
+  id: string,
 ) {
   const { data, error } = await supabase
     .from("product_catalog")
-    .insert(catalogMutationColumns(mutation, sourceKey))
     .select("*")
-    .single();
+    .eq("id", id)
+    .maybeSingle();
 
   if (error) return { item: null, error };
-  revalidateTag(PRODUCT_CATALOG_CACHE_TAG, { expire: 0 });
   return {
-    item: catalogRowToAdminItem(data as CatalogRow),
+    item: data ? catalogRowToAdminItem(data as CatalogRow) : null,
     error: null,
   };
 }
@@ -238,7 +243,9 @@ export async function updateAdminProduct(
     query = query.eq("revision", mutation.expectedRevision);
   }
 
-  const { data, error } = await query.select("*").maybeSingle();
+  const { data, error } = await query
+    .select("*")
+    .maybeSingle();
   if (error) return { item: null, error, conflict: false };
   if (!data) {
     return {
@@ -283,39 +290,6 @@ export async function listProductRevisions(
     ];
   });
   return { revisions, error: null };
-}
-
-export async function restoreProductRevision(
-  supabase: SupabaseClient,
-  productId: string,
-  revisionId: number,
-  expectedRevision: number,
-) {
-  const { data, error } = await supabase
-    .from("product_catalog_revisions")
-    .select("*")
-    .eq("id", revisionId)
-    .eq("product_id", productId)
-    .single();
-  if (error) return { item: null, error, conflict: false };
-
-  const revision = data as RevisionRow;
-  const snapshot = catalogRowToAdminItem(revision.snapshot);
-  if (!snapshot) {
-    return {
-      item: null,
-      error: { message: "A revisão armazenada é inválida." },
-      conflict: false,
-    };
-  }
-
-  return updateAdminProduct(supabase, productId, {
-    product: snapshot.product,
-    publicationState: snapshot.publicationState,
-    catalogOrder: snapshot.catalogOrder,
-    expectedRevision,
-    changeNote: `Restauração da revisão ${revision.revision}`,
-  });
 }
 
 export function staticCatalogBootstrapRows() {

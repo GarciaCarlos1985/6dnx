@@ -93,7 +93,6 @@ export function AdminLoginForm({
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Sua senha segura"
             disabled={!configured || busy}
-            minLength={16}
             required
           />
           <button
@@ -135,8 +134,8 @@ export function AdminLoginForm({
         </p>
         <span>02</span>
         <p>
-          <strong>Sem cadastro aberto</strong>
-          <small>Somente contas aprovadas entram</small>
+          <strong>Cadastro não concede acesso</strong>
+          <small>Só o papel de administrador libera o painel</small>
         </p>
       </div>
     </form>

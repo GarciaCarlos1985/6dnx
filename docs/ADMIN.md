@@ -1,5 +1,8 @@
 # Painel administrativo 6DNX
 
+Para o manual operacional em linguagem simples, consulte
+[`GUIA_ADMIN_MAYCON.md`](GUIA_ADMIN_MAYCON.md).
+
 ## Objetivo
 
 O painel em `/admin` transforma o catálogo em dados editáveis sem permitir que
@@ -9,32 +12,30 @@ desenhado para uma pessoa sem conhecimento de programação:
 1. escolhe um produto;
 2. percorre cinco etapas curtas;
 3. acompanha a prévia;
-4. decide entre rascunho, publicado ou arquivado;
-5. salva.
+4. confere o resumo protegido;
+5. confirma a prévia e salva.
 
-O site público continua usando `lib/products.ts` como fallback. Uma falha de
-rede, tabela ausente ou catálogo remoto inválido não deixa a vitrine vazia.
+`lib/products.ts` é usado como origem apenas quando o Supabase ainda não foi
+configurado (desenvolvimento/importação inicial). Depois de configurado, o
+Supabase é a fonte de verdade: falha, resposta vazia ou catálogo remoto inválido
+mostram uma indisponibilidade segura, sem ressuscitar produtos arquivados.
 
 ## O que pode ser editado
 
 - título, categoria, frase curta e descrição;
-- identificador usado pelos links internos, checkout e suporte, com validação
-  restrita a letras, números e hífens;
 - thumbnail local ou enviada ao bucket `product-assets`;
-- cor de destaque, texto e superfície do card;
 - estado comercial;
 - vídeo do YouTube e orientação horizontal/vertical;
 - recursos, compatibilidade, teclas e passos de tutorial;
-- variações, observações, selos e preços;
-- ordem editorial;
-- estado de publicação;
+- dados das variações existentes: nome, observação, selo e preço;
 - nota da alteração.
 
-O `source_key` não pode ser editado. Ele é o identificador interno usado para
-preservar a composição inicial do carrossel mesmo quando o slug muda.
-Os seis cards que definem a página `D` e a primeira página à direita são
-marcados como fixos e não podem ser despublicados pelo painel; isso evita
-quebrar a navegação aprovada.
+O modo cotidiano não oferece criação, duplicação, restauração, publicação,
+arquivamento, alteração de `slug`/`source_key`, reordenação, paleta arbitrária
+ou inclusão/remoção de variações. Esses campos não apenas sumiram da interface:
+a rota de atualização lê o registro atual e recusa qualquer tentativa de mudar
+essa estrutura. Criar uma nova família comercial ou retirar um produto exige
+revisão técnica deliberada fora do fluxo cotidiano.
 
 ## Proteções contra erro
 
@@ -42,10 +43,14 @@ quebrar a navegação aprovada.
 - autorização no servidor exige `app_metadata.role = admin`;
 - RLS repete a autorização dentro do banco;
 - não existe política de `DELETE` para produtos;
-- arquivamento é reversível;
 - cada atualização gera uma revisão automática;
+- histórico é somente leitura no painel cotidiano;
 - gravação usa controle otimista de revisão e bloqueia sobrescrita concorrente;
-- upload aceita somente JPG, PNG, WEBP ou AVIF, com teto de 5 MB;
+- a API preserva rota, ordem, publicação, paleta e quantidade de variações;
+- a API de produtos não aceita criação e a API de revisões não aceita
+  restauração pelo navegador;
+- upload é lido em stream com teto de 5 MB e confere a assinatura real de JPG,
+  PNG, WEBP ou AVIF, em vez de confiar somente no nome/MIME informado;
 - imagens remotas só podem vir do próprio projeto Supabase;
 - mutações validam origem para reduzir risco de CSRF;
 - rotas administrativas usam cache privado `no-store`;
@@ -87,10 +92,21 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 `NEXT_PUBLIC_*` contém somente URL e chave publicável protegida por RLS.
 `SUPABASE_SECRET_KEY` continua exclusivamente no servidor.
 
-### 3. Criar o primeiro administrador
+### 3. Criar ou promover o primeiro administrador
+
+O caminho mais simples é o mesmo fluxo visual do Supabase:
+
+1. abra **Authentication > Users > Add user**;
+2. crie o usuário com e-mail confirmado e uma senha forte;
+3. coloque somente o mesmo e-mail em `ADMIN_BOOTSTRAP_EMAIL` no computador;
+4. execute `npm run admin:create` para conceder o papel administrativo.
+
+O comando é idempotente: se a conta já existir, preserva sua senha e demais
+metadados e adiciona apenas `app_metadata.role=admin`. Se ela ainda não existir,
+o comando usa a senha temporária abaixo para criá-la.
 
 Não coloque senha em Git, Markdown, chat ou variável da Vercel. No computador
-local, preencha temporariamente:
+local, preencha temporariamente a senha somente se o usuário ainda não existir:
 
 ```dotenv
 ADMIN_BOOTSTRAP_EMAIL=
@@ -104,16 +120,20 @@ e símbolo. Então execute:
 npm run admin:create
 ```
 
-O script usa a chave secreta somente no processo local, cria uma conta
-confirmada e grava `app_metadata.role=admin`. Depois:
+O script usa a chave secreta somente no processo local, cria ou promove a conta
+e grava `app_metadata.role=admin`. Depois:
 
 1. apague imediatamente `ADMIN_BOOTSTRAP_PASSWORD` de `.env.local`;
 2. no Supabase Auth, desative novos cadastros públicos pelo provedor de e-mail;
 3. abra `/admin/login`;
 4. entre com a nova conta.
 
-Se a conta já existir, promova-a no Supabase com uma operação administrativa
-equivalente a:
+No painel atual do Supabase, a trava global fica em **Authentication >
+Configuration > General Configuration > Allow new users to sign up**. Desligar
+essa opção preserva os usuários existentes e impede novos cadastros. O manual
+do Maycon explica a conferência passo a passo.
+
+Internamente, a promoção usa uma operação administrativa equivalente a:
 
 ```json
 {
@@ -138,16 +158,17 @@ A operação:
 
 ## Fluxo editorial recomendado
 
-1. Duplique um produto parecido ou crie um novo.
-2. Mantenha como **Rascunho**.
-3. Preencha as etapas 01 a 04.
-4. Revise desktop e mobile.
-5. Escreva uma nota objetiva.
-6. Mude para **Publicado** e salve.
-7. Confira o card e o checkout no site.
+1. Escolha um produto existente.
+2. Preencha somente os campos cotidianos necessários nas etapas 01 a 04.
+3. Revise a prévia e os preços na etapa 05.
+4. Escreva uma nota objetiva.
+5. Marque a confirmação final e salve.
+6. Confira o card e o atendimento pelo Discord no site.
 
-Para retirar um produto, use **Arquivado**. Não remova linhas manualmente no
-banco.
+O produto mantém automaticamente seu estado atual: publicado continua
+publicado, rascunho continua rascunho e arquivado continua arquivado. Para
+criar, retirar, reposicionar ou restaurar um produto, abra uma tarefa técnica;
+não altere linhas manualmente no banco.
 
 ## Rotas
 
@@ -157,25 +178,29 @@ banco.
 | `/admin` | painel protegido |
 | `/admin/demo` | demonstração visual disponível somente em desenvolvimento |
 | `/api/admin/session` | validação da sessão e papel |
-| `/api/admin/products` | listagem e criação |
-| `/api/admin/products/[id]` | atualização com controle de revisão |
-| `/api/admin/products/[id]/revisions` | histórico e restauração |
+| `/api/admin/products` | listagem; criação cotidiana não é aceita |
+| `/api/admin/products/[id]` | atualização segura com revisão e campos estruturais protegidos |
+| `/api/admin/products/[id]/revisions` | histórico somente para consulta |
 | `/api/admin/assets` | upload limitado de thumbnail |
 | `/api/admin/catalog/bootstrap` | importação inicial única |
 
 ## Checklist antes de produção
 
 - [ ] Migração revisada em branch isolada.
-- [ ] Cadastro público por e-mail desativado no Supabase Auth.
+- [x] Cadastro público por e-mail desativado no Supabase Auth (confirmado pelo proprietário em 2026-07-31).
+- [ ] MFA ativado na conta que administra o projeto Supabase, com fator reserva.
+- [ ] MFA do `/admin` planejado/testado em conta reserva antes de exigir `aal2`.
 - [ ] RLS testada com usuário anônimo, autenticado comum e administrador.
 - [ ] Usuário comum recebe `403` nas APIs administrativas.
 - [ ] Rascunho e arquivado não aparecem no site.
-- [ ] Publicado aparece no card e é aceito pelo checkout.
+- [ ] Publicado aparece no card e o pedido manual abre o atendimento correto.
 - [ ] Duas edições simultâneas geram conflito em vez de sobrescrita.
-- [ ] Restauração cria nova revisão e preserva a versão substituída.
+- [ ] Tentativas de alterar rota, ordem, publicação, paleta ou quantidade de
+  variações recebem erro e não gravam nada.
 - [ ] Upload acima de 5 MB ou MIME inválido é recusado.
 - [ ] Desktop e mobile revisados.
-- [ ] `npm run lint`, `npx tsc --noEmit` e `npm run build` aprovados.
+- [ ] `npm run lint`, `npm run typecheck`, `npm test` e `npm run build`
+  aprovados.
 
 ## Limites deliberados
 
@@ -183,8 +208,8 @@ banco.
 - O painel não ativa pagamento real.
 - O painel não cria a primeira conta automaticamente no deploy.
 - O painel não aplica a migração sozinho.
-- Alterar o identificador não cria uma página pública `/produto/...` nem um
-  redirecionamento histórico automático; links externos antigos devem ser
-  revisados.
-- O fallback estático é de contingência. Após ativação, mantenha o catálogo
-  remoto completo e válido.
+- O modo cotidiano não cria, duplica, publica, arquiva, reordena nem restaura
+  produtos. Essas ações estruturais exigem revisão técnica separada.
+- O fallback estático existe somente sem configuração Supabase. Após ativação,
+  mantenha o catálogo remoto completo e válido; falhas ficam visíveis como
+  indisponibilidade em vez de publicar dados antigos.

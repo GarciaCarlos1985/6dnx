@@ -3,6 +3,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { getPublishedCatalog } from "@/lib/catalog/repository";
 import { formatBRL } from "@/lib/products";
+import { shouldEnablePaymentTestMode } from "@/lib/security/payment-test-mode";
 
 const SESSION_TTL_MS = 20 * 60 * 1_000;
 const RATE_WINDOW_MS = 10 * 60 * 1_000;
@@ -57,13 +58,7 @@ export class CheckoutRateLimitError extends Error {
 }
 
 export function isTestCheckoutEnabled() {
-  const configured = process.env.PAYMENT_TEST_MODE;
-  if (configured === "true") return true;
-  if (configured === "false") return false;
-
-  // Test checkout stays local by default. Enabling it on Vercel must always be
-  // an explicit environment decision after a human review.
-  return process.env.VERCEL !== "1";
+  return shouldEnablePaymentTestMode(process.env);
 }
 
 function pruneExpired(now = Date.now()) {

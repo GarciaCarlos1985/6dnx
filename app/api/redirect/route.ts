@@ -26,7 +26,8 @@ function discordInvite() {
 export async function GET(request: NextRequest) {
   const slug = request.nextUrl.searchParams.get("slug");
   const products = await getPublishedCatalog();
-  const productExists = products.some((item) => item.slug === slug);
+  const productExists =
+    slug === null || products.some((item) => item.slug === slug);
 
   return NextResponse.redirect(
     productExists ? discordInvite() : new URL("/", request.url).toString(),

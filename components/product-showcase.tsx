@@ -20,7 +20,6 @@ import {
   type Product,
   type Variant,
 } from "@/lib/products";
-import { burstConfetti } from "@/lib/confetti";
 import { buildProductCatalogLayout } from "@/lib/product-catalog-layout";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -35,7 +34,6 @@ const INFO_MAX_H = 640;
 const VIDEO_W = 420;
 const VIDEO_MIN_W = 300;
 const VIDEO_H = 280;
-const PORTRAIT_VIDEO_RATIO = 478 / 849;
 const WIDE_POPUP_QUERY = "(min-width: 1024px) and (min-height: 620px)";
 
 type Box = { top: number; left: number; width: number; height: number };
@@ -59,10 +57,10 @@ const getWidePopupServerSnapshot = () => false;
 
 /**
  * Desktop dialogs are authored as one invariant composition: information on
- * the left, selected card in the center, video on the right. The selected card
- * is moved to the middle column before this calculation runs.
+ * the left, selected card in the center, media preview on the right. The
+ * selected card is moved to the middle column before this calculation runs.
  */
-function place(card: DOMRect, portraitVideo = false): Placement {
+function place(card: DOMRect): Placement {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const roomLeft = Math.max(INFO_MIN_W, card.left - GAP - MARGIN);
@@ -73,12 +71,8 @@ function place(card: DOMRect, portraitVideo = false): Placement {
   const infoW = Math.min(INFO_W, roomLeft);
   const infoH = Math.min(INFO_MAX_H, Math.max(INFO_MIN_H, vh - MARGIN * 2));
   const maxVideoH = vh - MARGIN * 2;
-  const videoW = portraitVideo
-    ? Math.min(VIDEO_W, roomRight, maxVideoH * PORTRAIT_VIDEO_RATIO)
-    : Math.min(VIDEO_W, roomRight);
-  const videoH = portraitVideo
-    ? videoW / PORTRAIT_VIDEO_RATIO
-    : Math.min(VIDEO_H, maxVideoH);
+  const videoW = Math.min(VIDEO_W, roomRight);
+  const videoH = Math.min(VIDEO_H, maxVideoH);
   const centerY = card.top + card.height / 2;
 
   const info: Box = {
@@ -110,75 +104,14 @@ function place(card: DOMRect, portraitVideo = false): Placement {
   };
 }
 
-function useProductCheckout(product: Product) {
+function useProductSelection() {
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [checkoutError, setCheckoutError] = useState("");
 
   const selectVariant = (name: string) => {
     setSelectedVariant(name);
-    setCheckoutError("");
   };
 
-  const openCheckout = async () => {
-    if (!selectedVariant || checkoutLoading) return;
-    setCheckoutLoading(true);
-    setCheckoutError("");
-
-    try {
-      const response = await fetch("/api/checkout/test", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          productSlug: product.slug,
-          variantName: selectedVariant,
-        }),
-      });
-      const payload = (await response.json()) as {
-        checkoutUrl?: unknown;
-        error?: unknown;
-      };
-      if (!response.ok || typeof payload.checkoutUrl !== "string") {
-        throw new Error(
-          typeof payload.error === "string"
-            ? payload.error
-            : "Não foi possível abrir o checkout de teste.",
-        );
-      }
-
-      const checkoutUrl = new URL(payload.checkoutUrl, window.location.origin);
-      if (
-        checkoutUrl.origin !== window.location.origin ||
-        checkoutUrl.pathname !== "/checkout/test"
-      ) {
-        throw new Error("O servidor retornou um destino de checkout inválido.");
-      }
-
-      burstConfetti(window.innerWidth / 2, window.innerHeight / 2);
-      window.setTimeout(
-        () =>
-          window.location.assign(
-            `${checkoutUrl.pathname}${checkoutUrl.search}${checkoutUrl.hash}`,
-          ),
-        420,
-      );
-    } catch (reason) {
-      setCheckoutError(
-        reason instanceof Error
-          ? reason.message
-          : "Não foi possível abrir o checkout de teste.",
-      );
-      setCheckoutLoading(false);
-    }
-  };
-
-  return {
-    selectedVariant,
-    selectVariant,
-    checkoutLoading,
-    checkoutError,
-    openCheckout,
-  };
+  return { selectedVariant, selectVariant };
 }
 
 /** Cords: a dim base path plus a bright dash that loops, card → popup → around it. */
@@ -324,8 +257,9 @@ function Popups({
   placement: Placement;
   onClose: () => void;
 }) {
-  const checkout = useProductCheckout(product);
+  const selection = useProductSelection();
   const supportUrl = `/api/redirect?slug=${encodeURIComponent(product.slug)}`;
+  const requiresVariant = product.variants.length > 0;
 
   return (
     <>
@@ -465,31 +399,9 @@ function Popups({
 
           <div className="mb-6">
             <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
-              Links Oficiais 6DNX
+              Atendimento 6DNX
             </h4>
             <div className="flex flex-col gap-2">
-              <a
-                href="https://6DNXsoftware.com.br/downloads"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-between rounded-md border border-white/10 bg-surface/80 px-4 py-3 transition-colors hover:border-primary/50 hover:bg-primary/10"
-              >
-                <span className="text-[0.65rem] font-black uppercase tracking-widest text-ink">
-                  Download Manager
-                </span>
-                <span className="text-primary text-xs">↗</span>
-              </a>
-              <a
-                href="https://drive.google.com/drive/u/1/folders/11d8qCm1Vh-erPZqXxgc3aGRp3o_d08Rc"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-between rounded-md border border-white/10 bg-surface/80 px-4 py-3 transition-colors hover:border-primary/50 hover:bg-primary/10"
-              >
-                <span className="text-[0.65rem] font-black uppercase tracking-widest text-ink">
-                  Instalar Drivers
-                </span>
-                <span className="text-primary text-xs">↗</span>
-              </a>
               <a
                 href={supportUrl}
                 target="_blank"
@@ -501,31 +413,34 @@ function Popups({
                 </span>
                 <span className="text-primary text-xs">↗</span>
               </a>
+              <p className="rounded-md border border-white/10 bg-black/30 px-4 py-3 text-[0.68rem] leading-relaxed text-muted">
+                O pagamento e a entrega são combinados com o atendimento. O
+                site não libera arquivos automaticamente.
+              </p>
             </div>
           </div>
 
-          <p className="mb-2 text-[0.65rem] uppercase tracking-[0.2em] text-muted">
-            Variações · escolha uma opção
-          </p>
-          <ul className="space-y-1.5">
-            {product.variants.map((v) => (
-              <VariantRow
-                key={v.name}
-                variant={v}
-                selected={checkout.selectedVariant === v.name}
-                onPick={checkout.selectVariant}
-              />
-            ))}
-          </ul>
-          {checkout.checkoutError ? (
-            <p role="alert" className="mt-3 text-xs leading-relaxed text-red-300">
-              {checkout.checkoutError}
-            </p>
+          {requiresVariant ? (
+            <>
+              <p className="mb-2 text-[0.65rem] uppercase tracking-[0.2em] text-muted">
+                Variações · escolha uma opção
+              </p>
+              <ul className="space-y-1.5">
+                {product.variants.map((v) => (
+                  <VariantRow
+                    key={v.name}
+                    variant={v}
+                    selected={selection.selectedVariant === v.name}
+                    onPick={selection.selectVariant}
+                  />
+                ))}
+              </ul>
+            </>
           ) : null}
         </div>
 
         <footer className="flex flex-col border-t border-primary">
-          {!checkout.selectedVariant ? (
+          {requiresVariant && !selection.selectedVariant ? (
             <button
               type="button"
               disabled
@@ -534,24 +449,16 @@ function Popups({
               Selecione uma variação
             </button>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2">
-              <a
-                href={process.env.NEXT_PUBLIC_STORM_STORE_URL || "#"}
-                target="_blank"
-                rel="noreferrer"
-                className="flex min-h-[3.25rem] items-center justify-center bg-primary px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-white hover:text-ink"
-              >
-                Comprar via StorM Wallet
-              </a>
-              <a
-                href={supportUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="flex min-h-[3.25rem] items-center justify-center border-t border-primary/50 bg-transparent px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-primary transition-colors hover:bg-primary/10 sm:border-l sm:border-t-0"
-              >
-                Comprar pelo Discord
-              </a>
-            </div>
+            <a
+              href={supportUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex min-h-[3.25rem] items-center justify-center bg-primary px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-white hover:text-black"
+            >
+              {requiresVariant
+                ? "Iniciar pedido no Discord"
+                : "Consultar no Discord"}
+            </a>
           )}
           <a
             href={supportUrl}
@@ -563,23 +470,12 @@ function Popups({
       </section>
 
       <section
-        aria-label={`Vídeo de ${product.title}`}
+        aria-label={`Prévia de ${product.title}`}
         data-popup-side="right"
         className="product-popup product-popup--video-right fixed z-[80] overflow-hidden border border-primary/40 bg-black shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)]"
         style={placement.video}
       >
-        {product.youtubeId ? (
-          <iframe
-            className="h-full w-full"
-            src={`https://www.youtube-nocookie.com/embed/${product.youtubeId}`}
-            title={`Vídeo de ${product.title}`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
-        ) : (
-          <ProductMediaPreview product={product} />
-        )}
+        <ProductMediaPreview product={product} />
       </section>
     </>
   );
@@ -637,6 +533,7 @@ function Card({
           src={product.image}
           alt=""
           fill
+          loading="eager"
           sizes="(max-width: 639px) 92vw, (max-width: 1023px) 46vw, 31vw"
           className="product-card__art object-cover opacity-[0.82] saturate-[0.82] transition duration-700 group-hover:scale-[1.055] group-hover:opacity-100 group-hover:saturate-100"
         />
@@ -823,6 +720,49 @@ export function ProductShowcase({
 }: {
   catalogProducts: Product[];
 }) {
+  if (catalogProducts.length === 0) {
+    return (
+      <section
+        id="produtos"
+        className="product-showcase-section site-flow-section relative bg-transparent px-4 py-20 md:px-8 md:py-28"
+        aria-labelledby="produtos-heading"
+      >
+        <div className="relative z-[var(--z-content)] mx-auto max-w-3xl border border-primary/35 bg-surface/90 px-6 py-12 text-center shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.18)]">
+          <span className="text-[0.65rem] font-black uppercase tracking-[0.22em] text-primary">
+            Catálogo protegido
+          </span>
+          <h2
+            id="produtos-heading"
+            className="mt-3 text-[clamp(2rem,5vw,3.25rem)] tracking-tight text-ink"
+          >
+            Produtos temporariamente indisponíveis
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/72">
+            O site não vai exibir uma cópia antiga quando o banco estiver
+            indisponível. Fale com o atendimento enquanto o catálogo é
+            verificado.
+          </p>
+          <a
+            href="/api/redirect"
+            target="_blank"
+            rel="noreferrer"
+            className="mt-7 inline-flex min-h-12 items-center justify-center bg-primary px-7 text-xs font-bold uppercase tracking-[0.14em] text-ink transition-colors hover:bg-white hover:text-black"
+          >
+            Falar com o atendimento
+          </a>
+        </div>
+      </section>
+    );
+  }
+
+  return <ProductCatalogShowcase catalogProducts={catalogProducts} />;
+}
+
+function ProductCatalogShowcase({
+  catalogProducts,
+}: {
+  catalogProducts: Product[];
+}) {
   const productCatalog = useMemo(
     () => buildProductCatalogLayout(catalogProducts, PER_PAGE),
     [catalogProducts],
@@ -857,7 +797,6 @@ export function ProductShowcase({
 
   const openProduct =
     catalogProducts.find((product) => product.slug === openSlug) ?? null;
-  const portraitVideo = openProduct?.videoOrientation === "portrait";
   const orderedVisible = useMemo(() => {
     if (!wide || !openSlug) return visible;
     const selectedIndex = visible.findIndex(
@@ -993,7 +932,6 @@ export function ProductShowcase({
     const focusableSelector = [
       "a[href]",
       "button:not([disabled])",
-      "iframe",
       "input:not([disabled])",
       "select:not([disabled])",
       "textarea:not([disabled])",
@@ -1068,7 +1006,7 @@ export function ProductShowcase({
       });
 
       settleTimer = window.setTimeout(
-        () => setPlacement(place(card.getBoundingClientRect(), portraitVideo)),
+        () => setPlacement(place(card.getBoundingClientRect())),
         reducedMotion ? 0 : 460,
       );
     });
@@ -1077,16 +1015,14 @@ export function ProductShowcase({
       window.cancelAnimationFrame(animationFrame);
       window.clearTimeout(settleTimer);
     };
-  }, [openSlug, portraitVideo, wide]);
+  }, [openSlug, wide]);
 
   useEffect(() => {
     if (!openSlug || !wide) return;
 
     const syncPlacement = () => {
       if (anchorRef.current) {
-        setPlacement(
-          place(anchorRef.current.getBoundingClientRect(), portraitVideo),
-        );
+        setPlacement(place(anchorRef.current.getBoundingClientRect()));
       }
     };
 
@@ -1096,7 +1032,7 @@ export function ProductShowcase({
       window.removeEventListener("resize", syncPlacement);
       window.visualViewport?.removeEventListener("resize", syncPlacement);
     };
-  }, [openSlug, portraitVideo, wide]);
+  }, [openSlug, wide]);
 
   const openCard = (
     slug: string,
@@ -1379,8 +1315,9 @@ function MobileSheet({
   product: Product;
   onClose: () => void;
 }) {
-  const checkout = useProductCheckout(product);
+  const selection = useProductSelection();
   const supportUrl = `/api/redirect?slug=${encodeURIComponent(product.slug)}`;
+  const requiresVariant = product.variants.length > 0;
 
   return (
     <section
@@ -1409,62 +1346,54 @@ function MobileSheet({
       </header>
 
       <div className="product-scrollbar min-h-0 flex-1 overflow-y-auto">
-        <div
-          className={`w-full bg-black ${
-            product.videoOrientation === "portrait"
-              ? "aspect-[478/849]"
-              : "aspect-video"
-          }`}
-        >
-          {product.youtubeId ? (
-            <iframe
-              className="h-full w-full"
-              src={`https://www.youtube-nocookie.com/embed/${product.youtubeId}`}
-              title={`Vídeo de ${product.title}`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            />
-          ) : (
-            <ProductMediaPreview product={product} />
-          )}
+        <div className="aspect-video w-full bg-black">
+          <ProductMediaPreview product={product} />
         </div>
 
         <div className="px-4 py-3">
           <p className="mb-4 text-sm leading-relaxed text-muted">
             {product.description}
           </p>
-          <ul className="space-y-1.5">
-            {product.variants.map((v) => (
-              <VariantRow
-                key={v.name}
-                variant={v}
-                selected={checkout.selectedVariant === v.name}
-                onPick={checkout.selectVariant}
-              />
-            ))}
-          </ul>
-          {checkout.checkoutError ? (
-            <p role="alert" className="mt-3 text-xs leading-relaxed text-red-300">
-              {checkout.checkoutError}
+          {requiresVariant ? (
+            <ul className="space-y-1.5">
+              {product.variants.map((v) => (
+                <VariantRow
+                  key={v.name}
+                  variant={v}
+                  selected={selection.selectedVariant === v.name}
+                  onPick={selection.selectVariant}
+                />
+              ))}
+            </ul>
+          ) : (
+            <p className="rounded border border-white/10 bg-black/30 px-3 py-3 text-xs leading-relaxed text-muted">
+              Este item precisa de confirmação direta com o atendimento.
             </p>
-          ) : null}
+          )}
         </div>
       </div>
 
       <footer className="grid border-t border-primary">
-        <button
-          type="button"
-          onClick={checkout.openCheckout}
-          disabled={!checkout.selectedVariant || checkout.checkoutLoading}
-          className="min-h-12 bg-primary px-4 text-sm font-bold uppercase tracking-[0.12em] text-ink disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-muted"
-        >
-          {checkout.checkoutLoading
-            ? "Abrindo laboratório…"
-            : checkout.selectedVariant
-              ? "Simular compra · R$ 1"
-              : "Selecione uma variação"}
-        </button>
+        {requiresVariant && !selection.selectedVariant ? (
+          <button
+            type="button"
+            disabled
+            className="min-h-12 cursor-not-allowed bg-white/10 px-4 text-sm font-bold uppercase tracking-[0.12em] text-muted"
+          >
+            Selecione uma variação
+          </button>
+        ) : (
+          <a
+            href={supportUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-12 items-center justify-center bg-primary px-4 text-center text-sm font-bold uppercase tracking-[0.12em] text-ink"
+          >
+            {requiresVariant
+              ? "Iniciar pedido no Discord"
+              : "Consultar no Discord"}
+          </a>
+        )}
         <a
           href={supportUrl}
           className="inline-flex min-h-11 items-center justify-center border-t border-primary/40 text-[0.62rem] font-bold uppercase tracking-[0.13em] text-muted"

@@ -11,7 +11,6 @@ import type {
   CatalogRevision,
 } from "@/lib/catalog/types";
 import type { Product, ProductFeature, Variant } from "@/lib/products";
-import { PINNED_CATALOG_KEYS } from "@/lib/product-catalog-layout";
 
 type EditorTab =
   | "basic"
@@ -27,7 +26,7 @@ const tabs: Array<{
   hint: string;
 }> = [
   { id: "basic", number: "01", label: "Básico", hint: "Nome e resumo" },
-  { id: "visual", number: "02", label: "Visual", hint: "Imagem e cores" },
+  { id: "visual", number: "02", label: "Visual", hint: "Imagem protegida" },
   { id: "content", number: "03", label: "Conteúdo", hint: "Detalhes e vídeo" },
   {
     id: "variants",
@@ -38,8 +37,8 @@ const tabs: Array<{
   {
     id: "publication",
     number: "05",
-    label: "Publicação",
-    hint: "Revisar e salvar",
+    label: "Revisão",
+    hint: "Conferir e salvar",
   },
 ];
 
@@ -61,16 +60,6 @@ function fingerprint(item: CatalogAdminItem | null) {
     catalogOrder: item.catalogOrder,
     revision: item.revision,
   });
-}
-
-function slugify(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Za-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 72)
-    .toLowerCase();
 }
 
 async function readApi<T>(response: Response) {
@@ -257,22 +246,11 @@ function VariantEditor({
           <span className="admin-kicker">Planos comerciais</span>
           <h2>Variações e preços</h2>
           <p>
-            Cada linha vira uma opção dentro do card. Produtos sem preço podem
-            ficar “sob consulta”.
+            Edite somente os planos que já existem. A quantidade de opções é
+            protegida para evitar que um clique apague uma oferta do card.
           </p>
         </div>
-        <button
-          type="button"
-          className="admin-secondary-button"
-          onClick={() =>
-            onChange([
-              ...variants,
-              { name: `Nova opção ${variants.length + 1}` },
-            ])
-          }
-        >
-          + Nova variação
-        </button>
+        <span className="admin-help-pill">Estrutura protegida</span>
       </div>
 
       {variants.length ? (
@@ -329,26 +307,13 @@ function VariantEditor({
                   placeholder="Ex.: Mais vendido"
                 />
               </label>
-              <button
-                type="button"
-                className="admin-danger-link"
-                onClick={() =>
-                  onChange(
-                    variants.filter(
-                      (_, variantIndex) => variantIndex !== index,
-                    ),
-                  )
-                }
-              >
-                Remover esta opção
-              </button>
             </fieldset>
           ))}
         </div>
       ) : (
         <div className="admin-empty-state admin-empty-state--compact">
           <strong>Este produto está sem variações.</strong>
-          <p>Ele aparecerá como “Preço sob consulta” no site.</p>
+          <p>Peça assistência para criar a estrutura comercial correta.</p>
         </div>
       )}
     </div>
@@ -389,12 +354,10 @@ export function AdminDashboard({
   const [changeNote, setChangeNote] = useState("");
   const [revisions, setRevisions] = useState<CatalogRevision[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [reviewConfirmed, setReviewConfirmed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const dirty = Boolean(draft && fingerprint(draft) !== savedFingerprint);
-  const pinnedProduct = Boolean(
-    draft && PINNED_CATALOG_KEYS.includes(draft.sourceKey),
-  );
   const publishedCount = items.filter(
     (item) => item.publicationState === "published",
   ).length;
@@ -453,6 +416,7 @@ export function AdminDashboard({
     setTab("basic");
     setChangeNote("");
     setHistoryOpen(false);
+    setReviewConfirmed(false);
     setNotice("");
   };
 
@@ -460,6 +424,7 @@ export function AdminDashboard({
     key: K,
     value: Product[K],
   ) => {
+    setReviewConfirmed(false);
     setDraft((current) =>
       current
         ? { ...current, product: { ...current.product, [key]: value } }
@@ -469,6 +434,14 @@ export function AdminDashboard({
 
   const save = async () => {
     if (!draft || demoMode || busy) return;
+    if (!reviewConfirmed) {
+      setTab("publication");
+      announce(
+        "Confira a prévia e marque a confirmação antes de salvar.",
+        "info",
+      );
+      return;
+    }
     setBusy("save");
     setNotice("");
     const mutation: CatalogMutation = {
@@ -495,78 +468,12 @@ export function AdminDashboard({
       setDraft(cloneItem(payload.item));
       setSavedFingerprint(fingerprint(payload.item));
       setChangeNote("");
+      setReviewConfirmed(false);
       announce("Alterações salvas com segurança.", "ok");
       router.refresh();
     } catch (reason) {
       announce(
         reason instanceof Error ? reason.message : "Não foi possível salvar.",
-        "error",
-      );
-    } finally {
-      setBusy("");
-    }
-  };
-
-  const createFrom = async (source?: CatalogAdminItem) => {
-    if (demoMode || busy) return;
-    if (dirty && !window.confirm("Descartar alterações ainda não salvas?")) {
-      return;
-    }
-
-    const suffix = Date.now().toString(36).slice(-5);
-    const baseProduct: Product = source
-      ? {
-          ...structuredClone(source.product),
-          catalogKey: undefined,
-          slug: `${slugify(source.product.slug)}-copia-${suffix}`,
-          title: `${source.product.title} — cópia`,
-        }
-      : {
-          slug: `novo-produto-${suffix}`,
-          title: "Novo produto",
-          category: "Geral",
-          tagline: "Escreva uma frase curta sobre este produto",
-          description: "",
-          image: "/products/card-art/game-setup-pro-6dnx.webp",
-          status: "custom",
-          variants: [],
-          videoOrientation: "landscape",
-          theme: defaultTheme,
-        };
-    const mutation: CatalogMutation = {
-      product: baseProduct,
-      publicationState: "draft",
-      catalogOrder:
-        items.reduce((highest, item) => Math.max(highest, item.catalogOrder), 0) +
-        1,
-      changeNote: source
-        ? `Cópia criada a partir de ${source.product.title}`
-        : "Produto criado pelo painel",
-    };
-
-    setBusy("create");
-    try {
-      const payload = await readApi<{ item: CatalogAdminItem }>(
-        await fetch("/api/admin/products", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(mutation),
-        }),
-      );
-      setItems((current) => [...current, payload.item]);
-      setCatalogState("ready");
-      selectItem(payload.item);
-      announce(
-        source
-          ? "Cópia criada como rascunho."
-          : "Novo produto criado como rascunho.",
-        "ok",
-      );
-    } catch (reason) {
-      announce(
-        reason instanceof Error
-          ? reason.message
-          : "Não foi possível criar o produto.",
         "error",
       );
     } finally {
@@ -587,6 +494,7 @@ export function AdminDashboard({
       setSelectedId(first?.id ?? null);
       setDraft(first ? cloneItem(first) : null);
       setSavedFingerprint(fingerprint(first));
+      setReviewConfirmed(false);
       announce(
         `${payload.items.length} produtos importados. O painel está pronto.`,
         "ok",
@@ -607,15 +515,19 @@ export function AdminDashboard({
     if (!draft || demoMode || busy) return;
     setBusy("upload");
     try {
-      const form = new FormData();
-      form.set("file", file);
-      form.set("sourceKey", draft.sourceKey);
       const payload = await readApi<{ url: string }>(
-        await fetch("/api/admin/assets", { method: "POST", body: form }),
+        await fetch("/api/admin/assets", {
+          method: "POST",
+          headers: {
+            "content-type": file.type,
+            "x-product-source-key": draft.sourceKey,
+          },
+          body: file,
+        }),
       );
       updateProduct("image", payload.url);
       announce(
-        "Imagem enviada. Clique em “Salvar alterações” para publicar a troca.",
+        "Imagem enviada. Revise a prévia e clique em “Salvar campos seguros” para concluir.",
         "ok",
       );
     } catch (reason) {
@@ -646,50 +558,6 @@ export function AdminDashboard({
         reason instanceof Error
           ? reason.message
           : "Não foi possível abrir o histórico.",
-        "error",
-      );
-    } finally {
-      setBusy("");
-    }
-  };
-
-  const restore = async (revision: CatalogRevision) => {
-    if (!draft || demoMode || busy) return;
-    if (
-      !window.confirm(
-        `Restaurar a revisão ${revision.revision}? A versão atual continuará guardada no histórico.`,
-      )
-    ) {
-      return;
-    }
-
-    setBusy("restore");
-    try {
-      const payload = await readApi<{ item: CatalogAdminItem }>(
-        await fetch(
-          `/api/admin/products/${encodeURIComponent(draft.id)}/revisions`,
-          {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-              revisionId: revision.id,
-              expectedRevision: draft.revision,
-            }),
-          },
-        ),
-      );
-      setItems((current) =>
-        current.map((item) => (item.id === payload.item.id ? payload.item : item)),
-      );
-      setDraft(cloneItem(payload.item));
-      setSavedFingerprint(fingerprint(payload.item));
-      setHistoryOpen(false);
-      announce(`Revisão ${revision.revision} restaurada.`, "ok");
-    } catch (reason) {
-      announce(
-        reason instanceof Error
-          ? reason.message
-          : "Não foi possível restaurar a revisão.",
         "error",
       );
     } finally {
@@ -839,14 +707,7 @@ export function AdminDashboard({
             <span className="admin-kicker">Catálogo</span>
             <h2>Produtos</h2>
           </div>
-          <button
-            type="button"
-            aria-label="Criar novo produto"
-            onClick={() => createFrom()}
-            disabled={demoMode || Boolean(busy)}
-          >
-            +
-          </button>
+          <span className="admin-safe-mode-badge">Modo seguro</span>
         </div>
         <label className="admin-search">
           <span aria-hidden>⌕</span>
@@ -904,18 +765,6 @@ export function AdminDashboard({
             </p>
           ) : null}
         </nav>
-        <button
-          type="button"
-          className="admin-sidebar__create"
-          onClick={() => createFrom()}
-          disabled={demoMode || Boolean(busy)}
-        >
-          <span>+</span>
-          <p>
-            <strong>Novo produto</strong>
-            <small>Começa como rascunho</small>
-          </p>
-        </button>
       </aside>
 
       {draft ? (
@@ -949,14 +798,6 @@ export function AdminDashboard({
                 <button
                   type="button"
                   className="admin-secondary-button"
-                  onClick={() => createFrom(draft)}
-                  disabled={demoMode || Boolean(busy)}
-                >
-                  Duplicar
-                </button>
-                <button
-                  type="button"
-                  className="admin-secondary-button"
                   onClick={openHistory}
                   disabled={demoMode || Boolean(busy)}
                 >
@@ -965,10 +806,10 @@ export function AdminDashboard({
                 <button
                   type="button"
                   className="admin-primary-button"
-                  onClick={save}
+                  onClick={() => setTab("publication")}
                   disabled={!dirty || demoMode || Boolean(busy)}
                 >
-                  {busy === "save" ? "Salvando…" : "Salvar alterações"}
+                  Revisar alterações
                 </button>
               </div>
             </header>
@@ -1086,27 +927,6 @@ export function AdminDashboard({
                         {draft.product.description.length}/4000 caracteres
                       </small>
                     </label>
-                    <label className="admin-field admin-field--wide">
-                      <span>Identificador de links (avançado)</span>
-                      <div className="admin-route-field">
-                        <code>ID</code>
-                        <input
-                          value={draft.product.slug}
-                          maxLength={96}
-                          onChange={(event) =>
-                            updateProduct(
-                              "slug",
-                              event.target.value.replace(/\s+/g, "-"),
-                            )
-                          }
-                        />
-                      </div>
-                      <small>
-                        Usado nos links internos, checkout e suporte. Aceita
-                        letras, números e hífens; a chave editorial permanece
-                        intacta.
-                      </small>
-                    </label>
                   </div>
                 </section>
               ) : null}
@@ -1116,7 +936,7 @@ export function AdminDashboard({
                   <div className="admin-section-heading">
                     <div>
                       <span className="admin-kicker">Direção de arte</span>
-                      <h2>Imagem e cores</h2>
+                      <h2>Imagem do produto</h2>
                       <p>
                         A prévia ao lado mostra exatamente a intenção visual do
                         card antes de salvar.
@@ -1158,92 +978,29 @@ export function AdminDashboard({
                         {busy === "upload" ? "Enviando…" : "Substituir imagem"}
                       </button>
                       <label className="admin-field">
-                        <span>Caminho atual</span>
+                        <span>Endereço da imagem</span>
                         <input
                           value={draft.product.image}
-                          onChange={(event) =>
-                            updateProduct("image", event.target.value)
-                          }
+                          readOnly
+                          aria-readonly="true"
                         />
+                        <small>
+                          Gerenciado automaticamente. Use “Substituir imagem”.
+                        </small>
                       </label>
                     </div>
                   </div>
-                  <div className="admin-color-grid">
-                    <label className="admin-color-field">
-                      <input
-                        type="color"
-                        value={
-                          draft.product.theme?.accentColor ??
-                          defaultTheme.accentColor
-                        }
-                        onChange={(event) =>
-                          updateProduct("theme", {
-                            ...(draft.product.theme ?? defaultTheme),
-                            accentColor: event.target.value,
-                          })
-                        }
-                      />
-                      <span>
-                        <strong>Cor de destaque</strong>
-                        <small>Botões, contorno e pequenos detalhes</small>
-                      </span>
-                      <code>
-                        {draft.product.theme?.accentColor ??
-                          defaultTheme.accentColor}
-                      </code>
-                    </label>
-                    <label className="admin-color-field">
-                      <input
-                        type="color"
-                        value={
-                          draft.product.theme?.surfaceColor ??
-                          defaultTheme.surfaceColor
-                        }
-                        onChange={(event) =>
-                          updateProduct("theme", {
-                            ...(draft.product.theme ?? defaultTheme),
-                            surfaceColor: event.target.value,
-                          })
-                        }
-                      />
-                      <span>
-                        <strong>Fundo do card</strong>
-                        <small>Superfície atrás das informações</small>
-                      </span>
-                      <code>
-                        {draft.product.theme?.surfaceColor ??
-                          defaultTheme.surfaceColor}
-                      </code>
-                    </label>
-                    <label className="admin-color-field">
-                      <input
-                        type="color"
-                        value={
-                          draft.product.theme?.textColor ?? defaultTheme.textColor
-                        }
-                        onChange={(event) =>
-                          updateProduct("theme", {
-                            ...(draft.product.theme ?? defaultTheme),
-                            textColor: event.target.value,
-                          })
-                        }
-                      />
-                      <span>
-                        <strong>Cor do texto</strong>
-                        <small>Título e informações principais</small>
-                      </span>
-                      <code>
-                        {draft.product.theme?.textColor ?? defaultTheme.textColor}
-                      </code>
-                    </label>
+                  <div className="admin-safety-check">
+                    <span aria-hidden>✓</span>
+                    <div>
+                      <strong>Paleta oficial protegida</strong>
+                      <p>
+                        Cores de fundo, texto e destaque não podem ser alteradas
+                        aqui. Assim, nenhum clique acidental compromete contraste
+                        ou identidade visual.
+                      </p>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    className="admin-text-button"
-                    onClick={() => updateProduct("theme", defaultTheme)}
-                  >
-                    Restaurar paleta padrão 6DNX
-                  </button>
                 </section>
               ) : null}
 
@@ -1342,99 +1099,54 @@ export function AdminDashboard({
                 <section className="admin-form-section">
                   <div className="admin-section-heading">
                     <div>
-                      <span className="admin-kicker">Controle editorial</span>
-                      <h2>Revisar e publicar</h2>
+                      <span className="admin-kicker">Última conferência</span>
+                      <h2>Revisar antes de salvar</h2>
                       <p>
-                        Escolha onde o produto deve aparecer. Arquivar é
-                        reversível e não apaga o histórico.
+                        O painel salva apenas conteúdo cotidiano. Rota, posição,
+                        publicação, paleta e quantidade de planos permanecem
+                        exatamente como estavam.
                       </p>
                     </div>
+                    <span className="admin-help-pill">Sem ações estruturais</span>
                   </div>
-                  <div className="admin-publication-options">
-                    {[
-                      {
-                        value: "draft",
-                        title: "Rascunho",
-                        text: "Fica salvo no painel, invisível no site.",
-                      },
-                      {
-                        value: "published",
-                        title: "Publicado",
-                        text: "Aparece no catálogo público após salvar.",
-                      },
-                      {
-                        value: "archived",
-                        title: "Arquivado",
-                        text: "Sai do site, mas continua recuperável.",
-                      },
-                    ].map((option) => (
-                      <label
-                        key={option.value}
-                        className={
-                          draft.publicationState === option.value
-                            ? "is-active"
-                            : ""
-                        }
-                      >
-                        <input
-                          type="radio"
-                          name="publication"
-                          value={option.value}
-                          checked={draft.publicationState === option.value}
-                          disabled={pinnedProduct && option.value !== "published"}
-                          onChange={() =>
-                            setDraft((current) =>
-                              current
-                                ? {
-                                    ...current,
-                                    publicationState:
-                                      option.value as CatalogAdminItem["publicationState"],
-                                  }
-                                : current,
-                            )
-                          }
-                        />
-                        <span aria-hidden />
-                        <p>
-                          <strong>{option.title}</strong>
-                          <small>{option.text}</small>
-                        </p>
-                      </label>
-                    ))}
-                  </div>
-                  {pinnedProduct ? (
-                    <div className="admin-pinned-note">
-                      <span aria-hidden>◆</span>
+                  <div className="admin-protection-grid">
+                    <article>
+                      <span aria-hidden>01</span>
                       <p>
-                        <strong>Produto fixo da navegação</strong>
-                        Este card sustenta a página inicial ou a primeira página
-                        à direita. Ele precisa permanecer publicado para o
-                        carrossel manter a ordem aprovada.
+                        <strong>
+                          Continua {draft.publicationState === "published"
+                            ? "publicado"
+                            : draft.publicationState === "archived"
+                              ? "arquivado"
+                              : "como rascunho"}
+                        </strong>
+                        <small>Salvar não coloca nem retira o card do site.</small>
                       </p>
-                    </div>
-                  ) : null}
+                    </article>
+                    <article>
+                      <span aria-hidden>02</span>
+                      <p>
+                        <strong>Rota e posição intactas</strong>
+                        <small>Links e ordem do carrossel não podem mudar.</small>
+                      </p>
+                    </article>
+                    <article>
+                      <span aria-hidden>03</span>
+                      <p>
+                        <strong>Planos preservados</strong>
+                        <small>É possível editar os dados, não apagar opções.</small>
+                      </p>
+                    </article>
+                    <article>
+                      <span aria-hidden>04</span>
+                      <p>
+                        <strong>Versão anterior guardada</strong>
+                        <small>O histórico registra cada gravação automaticamente.</small>
+                      </p>
+                    </article>
+                  </div>
                   <div className="admin-form-grid">
-                    <label className="admin-field">
-                      <span>Ordem no catálogo</span>
-                      <input
-                        type="number"
-                        min="0"
-                        max="9999"
-                        value={draft.catalogOrder}
-                        onChange={(event) =>
-                          setDraft((current) =>
-                            current
-                              ? {
-                                  ...current,
-                                  catalogOrder: Number(event.target.value),
-                                }
-                              : current,
-                          )
-                        }
-                      />
-                      <small>Números menores aparecem primeiro.</small>
-                    </label>
-                    <label className="admin-field">
+                    <label className="admin-field admin-field--wide">
                       <span>Nota desta alteração</span>
                       <input
                         maxLength={240}
@@ -1450,25 +1162,40 @@ export function AdminDashboard({
                     <div>
                       <strong>Proteção contra erros ativada</strong>
                       <p>
-                        A revisão {draft.revision} será preservada antes de
-                        qualquer mudança. Se outra pessoa salvar primeiro, o
-                        painel interrompe sua gravação e avisa.
+                        A revisão {draft.revision} será guardada. Se outra pessoa
+                        salvar primeiro ou alguém tentar alterar a estrutura, o
+                        servidor interrompe a gravação.
                       </p>
                     </div>
                   </div>
+                  <label className="admin-review-confirm">
+                    <input
+                      type="checkbox"
+                      checked={reviewConfirmed}
+                      onChange={(event) =>
+                        setReviewConfirmed(event.target.checked)
+                      }
+                    />
+                    <span aria-hidden />
+                    <p>
+                      <strong>Conferi a prévia e os preços deste produto.</strong>
+                      <small>
+                        Esta confirmação libera somente o salvamento dos campos
+                        seguros exibidos pelo painel.
+                      </small>
+                    </p>
+                  </label>
                   <button
                     type="button"
                     className="admin-primary-button admin-primary-button--wide"
                     onClick={save}
-                    disabled={!dirty || demoMode || Boolean(busy)}
+                    disabled={
+                      !dirty || !reviewConfirmed || demoMode || Boolean(busy)
+                    }
                   >
                     {busy === "save"
                       ? "Salvando com segurança…"
-                      : draft.publicationState === "published"
-                        ? "Salvar e manter publicado"
-                        : draft.publicationState === "archived"
-                          ? "Salvar e arquivar"
-                          : "Salvar como rascunho"}
+                      : "Salvar campos seguros"}
                   </button>
                 </section>
               ) : null}
@@ -1540,7 +1267,10 @@ export function AdminDashboard({
               <span>Atual</span>
               <p>
                 <strong>Revisão {draft.revision}</strong>
-                <small>Esta é a versão que está sendo editada.</small>
+                <small>
+                  Histórico somente para consulta. Restaurações exigem
+                  assistência técnica e não ficam expostas no painel cotidiano.
+                </small>
               </p>
             </div>
             <div className="admin-history__list">
@@ -1559,13 +1289,6 @@ export function AdminDashboard({
                       }).format(new Date(revision.createdAt))}
                     </small>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => restore(revision)}
-                    disabled={Boolean(busy)}
-                  >
-                    Restaurar
-                  </button>
                 </article>
               ))}
               {!revisions.length ? (

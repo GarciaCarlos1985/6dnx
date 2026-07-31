@@ -13,7 +13,7 @@ O painel administrativo e sua ativação segura estão documentados em
 
 ## Estado atual
 
-- Hero em vídeo e uma narrativa GSAP independente na vitrine: o casal Killa
+- Hero estático cinematográfico e uma narrativa GSAP independente na vitrine: o casal Killa
   enquadra os cards pela esquerda e o anjo de asas claras com gesto de silêncio
   enquadra pela direita, sempre abaixo do conteúdo interativo e com suporte a
   `prefers-reduced-motion`.
@@ -23,7 +23,8 @@ O painel administrativo e sua ativação segura estão documentados em
   demais DayZ ficam à esquerda, enquanto Tarkov, Rust e PUBG abrem a sequência
   da direita.
 - No desktop, informação abre à esquerda, o card selecionado permanece visível
-  no centro e o vídeo ou prévia visual abre à direita. No mobile, o conteúdo
+  no centro e a prévia visual 6DNX abre à direita. Os vídeos estão temporariamente
+  desativados; no mobile, o conteúdo
   usa uma única sheet acessível.
 - Checkout isolado de teste por variação, com Pix/cartão cenográficos, valor
   fixo de R$ 1,00 e notificação server-side marcada como TESTE no TICKET.
@@ -32,9 +33,9 @@ O painel administrativo e sua ativação segura estão documentados em
   Google AI Blog e OpenAI News via RSS.
 - Persistência Supabase e sincronização diária preparadas, mas não aplicadas remotamente.
 - Painel CMS em `/admin`, protegido por Supabase Auth + papel administrativo +
-  RLS, com prévia, rascunhos, publicação, upload, histórico e fallback estático.
-  A migração do catálogo e a primeira conta continuam pendentes de validação
-  humana.
+  RLS, com prévia, upload, histórico somente para consulta e edição cotidiana
+  em modo seguro. Rota, ordem, publicação, paleta e estrutura de variações não
+  ficam expostas ao proprietário e também são bloqueadas pela API.
 
 Ainda faltam decisões comerciais que precisam de validação do proprietário:
 
@@ -142,7 +143,8 @@ então reexecuções não duplicam notícias e preservam os controles editoriais
 ## Segurança
 
 - `GET /api/redirect` apenas redireciona; não dispara webhook.
-- `POST /api/redirect` valida origem e produto antes da notificação.
+- `GET /api/redirect?slug=...` valida o produto e abre o atendimento Discord
+  sem criar ticket ou mensagem por efeito colateral.
 - O checkout de teste valida produto/variação no servidor, limita sessões e
   nunca recebe dados financeiros.
 - O webhook tem timeout e uma falha não prende o visitante.

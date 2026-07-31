@@ -5,7 +5,11 @@ import {
   noStoreJson,
   rejectCrossOriginMutation,
 } from "@/lib/admin/api";
-import { updateAdminProduct } from "@/lib/catalog/repository";
+import {
+  getAdminProduct,
+  updateAdminProduct,
+} from "@/lib/catalog/repository";
+import { protectedCatalogUpdateErrors } from "@/lib/catalog/admin-safety";
 import { isAllowedProductImage, parseCatalogMutation } from "@/lib/catalog/validation";
 import { getPublicSupabaseConfig } from "@/lib/supabase/config";
 import { BoundedJsonError, readBoundedJson } from "@/lib/http/read-bounded-json";
@@ -60,6 +64,27 @@ export async function PUT(
   ) {
     return noStoreJson(
       { error: "Use uma imagem do site ou enviada pelo próprio painel." },
+      400,
+    );
+  }
+
+  const current = await getAdminProduct(auth.supabase, id);
+  if (current.error) return databaseErrorResponse(current.error);
+  if (!current.item) {
+    return noStoreJson({ error: "Produto não encontrado." }, 404);
+  }
+
+  const protectedErrors = protectedCatalogUpdateErrors(
+    current.item,
+    parsed.value,
+  );
+  if (protectedErrors.length) {
+    return noStoreJson(
+      {
+        error:
+          "Esta ação não faz parte do modo seguro do painel.",
+        errors: protectedErrors,
+      },
       400,
     );
   }

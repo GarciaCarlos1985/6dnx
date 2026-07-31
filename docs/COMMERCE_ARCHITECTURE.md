@@ -3,6 +3,19 @@
 This document defines the intended professional purchase flow. The current
 checkout remains a laboratory and must not be presented as a real charge.
 
+## Current StorM boundary — 2026-07-31
+
+The three server-only environment names are present locally and in Vercel, but
+no application route consumes them and `/api/webhooks/storm-wallet` does not
+exist yet. The credentials are therefore configuration material, not an active
+payment integration.
+
+The Wallet provider callback must never point directly to a Discord webhook.
+The future callback is the 6DNX backend route, which verifies the HMAC signature
+over the raw request body, persists an idempotent event and only then sends a
+sanitized staff notification to Discord. Do not configure that future URL
+until the route is deployed and tested against an official sandbox contract.
+
 ## Customer journey
 
 1. The customer opens a product card and compares its description, video,

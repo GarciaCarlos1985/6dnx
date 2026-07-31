@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { shouldProtectSiteReview } from "@/lib/security/review-mode";
 import { refreshSupabaseSession } from "@/lib/supabase/proxy";
 
 const MIN_REVIEW_PASSWORD_LENGTH = 16;
@@ -126,7 +127,10 @@ async function nextResponse(request: NextRequest) {
 
 export async function proxy(request: NextRequest) {
   const configuredReviewMode = process.env.SITE_REVIEW_ENABLED;
-  const reviewEnabled = configuredReviewMode === "true";
+  const reviewEnabled = shouldProtectSiteReview(
+    configuredReviewMode,
+    process.env.VERCEL === "1" || Boolean(process.env.VERCEL_ENV),
+  );
 
   if (!reviewEnabled || isServerToServerRoute(request.nextUrl.pathname)) {
     return applySecurityHeaders(await nextResponse(request), request);

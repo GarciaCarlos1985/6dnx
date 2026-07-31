@@ -400,9 +400,21 @@ export function isAllowedProductImage(
 
   try {
     const parsed = new URL(image);
-    if (parsed.protocol !== "https:") return false;
     if (!supabaseUrl) return false;
-    return parsed.hostname === new URL(supabaseUrl).hostname;
+    const expectedOrigin = new URL(supabaseUrl).origin;
+    const productAssetsPath =
+      "/storage/v1/object/public/product-assets/";
+
+    return (
+      parsed.protocol === "https:" &&
+      parsed.origin === expectedOrigin &&
+      parsed.username === "" &&
+      parsed.password === "" &&
+      parsed.search === "" &&
+      parsed.hash === "" &&
+      parsed.pathname.startsWith(productAssetsPath) &&
+      parsed.pathname.length > productAssetsPath.length
+    );
   } catch {
     return false;
   }

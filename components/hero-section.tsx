@@ -32,19 +32,15 @@ type ParticleStyle = CSSProperties & {
   "--particle-drift": string;
 };
 
-type HeroSectionProps = {
-  showBrandOverlay?: boolean;
-  showCinematicEffects?: boolean;
-  showVideoOverlay?: boolean;
-};
-
-export function HeroSection({
-  showBrandOverlay = true,
-  showCinematicEffects = true,
-  showVideoOverlay = true,
-}: HeroSectionProps) {
+export function HeroSection() {
   const sceneRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const leftActorRef = useRef<HTMLDivElement>(null);
+  const rightActorRef = useRef<HTMLDivElement>(null);
+  const leftActorReactiveRef = useRef<HTMLDivElement>(null);
+  const rightActorReactiveRef = useRef<HTMLDivElement>(null);
+  const leftActorBeamRef = useRef<HTMLSpanElement>(null);
+  const rightActorBeamRef = useRef<HTMLSpanElement>(null);
   const auraRef = useRef<HTMLDivElement>(null);
   const bloodEyeRef = useRef<HTMLDivElement>(null);
   const bloodEyeCoreRef = useRef<HTMLDivElement>(null);
@@ -58,36 +54,6 @@ export function HeroSection({
   const cueArrowRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    );
-    const syncPlayback = () => {
-      if (reducedMotion.matches) {
-        video.pause();
-        video.currentTime = 0;
-        return;
-      }
-
-      void video.play().catch(() => {
-        // The muted autoplay attributes satisfy current browser policies in
-        // normal conditions. If a browser still blocks playback, its first
-        // decoded frame remains a valid static hero background.
-      });
-    };
-
-    syncPlayback();
-    reducedMotion.addEventListener("change", syncPlayback);
-    return () => {
-      reducedMotion.removeEventListener("change", syncPlayback);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!showCinematicEffects) return;
-
     const mm = gsap.matchMedia();
     const eyeElement = bloodEyeRef.current;
     const eyeVisibility = { hover: 0, scroll: 0 };
@@ -122,12 +88,27 @@ export function HeroSection({
         });
         gsap.set(logoScrollRef.current, { transformOrigin: "50% 50%" });
 
-        // Characters now live in one page-wide component. This hero owns only
-        // its copy and ocular payoff, so it consumes one natural viewport.
+        // The hero owns one natural viewport. Its actors are local to this
+        // section; the independent product-scene companions remain untouched.
         let endIntro: (() => void) | undefined;
         if (window.scrollY < 40) {
           const intro = gsap
             .timeline({ defaults: { ease: "power3.out" } })
+            .from(
+              backdropRef.current,
+              { scale: 1.055, opacity: 0.72, duration: 1.45 },
+              0,
+            )
+            .from(
+              [leftActorRef.current, rightActorRef.current],
+              {
+                y: 38,
+                opacity: 0,
+                duration: 1.08,
+                stagger: 0.12,
+              },
+              0.08,
+            )
             .from(titleRef.current, { y: 34, opacity: 0, duration: 0.9 }, 0.15)
             .from(cueRef.current, { opacity: 0, duration: 0.65 }, 0.7);
 
@@ -175,9 +156,36 @@ export function HeroSection({
 
         // Beat 1 — camera pushes in while the first pose remains readable.
         tl.to(
-          titleRef.current,
-          { y: -10, ease: "none", duration: 0.28 },
+          backdropRef.current,
+          { scale: 1.085, yPercent: 1.6, ease: "none", duration: 0.46 },
           "push",
+        )
+          .to(
+            leftActorRef.current,
+            {
+              xPercent: -5,
+              yPercent: 4,
+              scale: 1.06,
+              ease: "none",
+              duration: 0.46,
+            },
+            "push",
+          )
+          .to(
+            rightActorRef.current,
+            {
+              xPercent: 5,
+              yPercent: 4,
+              scale: 1.055,
+              ease: "none",
+              duration: 0.46,
+            },
+            "push",
+          )
+          .to(
+            titleRef.current,
+            { y: -10, ease: "none", duration: 0.28 },
+            "push",
           )
           .to(
             logoScrollRef.current,
@@ -237,6 +245,16 @@ export function HeroSection({
             duration: 0.22,
           },
           "payoff-=0.12",
+        ).to(
+          [leftActorRef.current, rightActorRef.current],
+          {
+            opacity: 0,
+            yPercent: 8,
+            filter: "blur(8px)",
+            ease: "power2.in",
+            duration: 0.22,
+          },
+          "payoff-=0.22",
         );
 
         // Beat 4 — the ocular sigil gains presence under the existing
@@ -549,48 +567,246 @@ export function HeroSection({
       sceneRef,
     );
 
+    mm.add(
+      {
+        motion: "(prefers-reduced-motion: no-preference)",
+        finePointer: "(pointer: fine)",
+      },
+      (ctx) => {
+        const { motion, finePointer } = ctx.conditions as {
+          motion: boolean;
+          finePointer: boolean;
+        };
+        const scene = sceneRef.current;
+        const leftActor = leftActorRef.current;
+        const rightActor = rightActorRef.current;
+        const leftReactive = leftActorReactiveRef.current;
+        const rightReactive = rightActorReactiveRef.current;
+        const leftBeam = leftActorBeamRef.current;
+        const rightBeam = rightActorBeamRef.current;
+
+        if (
+          !motion ||
+          !finePointer ||
+          !scene ||
+          !leftActor ||
+          !rightActor ||
+          !leftReactive ||
+          !rightReactive ||
+          !leftBeam ||
+          !rightBeam
+        ) {
+          return;
+        }
+
+        gsap.set([leftReactive, rightReactive], {
+          transformPerspective: 900,
+          transformOrigin: "50% 68%",
+          transformStyle: "preserve-3d",
+          force3D: true,
+        });
+
+        const createController = (
+          actor: HTMLDivElement,
+          reactive: HTMLDivElement,
+          beam: HTMLSpanElement,
+          beamOrigin: { x: number; y: number },
+          movement: { x: number; y: number },
+        ) => ({
+          actor,
+          reactive,
+          beam,
+          beamOrigin,
+          movement,
+          x: gsap.quickTo(reactive, "x", {
+            duration: 0.48,
+            ease: "power3.out",
+          }),
+          y: gsap.quickTo(reactive, "y", {
+            duration: 0.48,
+            ease: "power3.out",
+          }),
+          rotationX: gsap.quickTo(reactive, "rotationX", {
+            duration: 0.62,
+            ease: "power3.out",
+          }),
+          rotationY: gsap.quickTo(reactive, "rotationY", {
+            duration: 0.62,
+            ease: "power3.out",
+          }),
+        });
+
+        const controllers = [
+          createController(
+            leftActor,
+            leftReactive,
+            leftBeam,
+            { x: 0.36, y: 0.3 },
+            { x: 18, y: 12 },
+          ),
+          createController(
+            rightActor,
+            rightReactive,
+            rightBeam,
+            { x: 0.54, y: 0.45 },
+            { x: 16, y: 11 },
+          ),
+        ];
+
+        const clamp = gsap.utils.clamp(-1, 1);
+        let pointerX = -10_000;
+        let pointerY = -10_000;
+        let pointerFrame = 0;
+
+        const updateController = (
+          controller: (typeof controllers)[number],
+        ) => {
+          const rect = controller.actor.getBoundingClientRect();
+          const sceneRect = scene.getBoundingClientRect();
+          const actorOpacity = Number.parseFloat(
+            window.getComputedStyle(controller.actor).opacity,
+          );
+          const sceneVisible =
+            sceneRect.bottom > 0 && sceneRect.top < window.innerHeight;
+          const centerX = rect.left + rect.width * 0.5;
+          const centerY = rect.top + rect.height * 0.48;
+          const normalX = clamp(
+            (pointerX - centerX) / Math.max(rect.width * 0.78, 1),
+          );
+          const normalY = clamp(
+            (pointerY - centerY) / Math.max(rect.height * 0.7, 1),
+          );
+          const ellipticalDistance = Math.hypot(normalX, normalY * 0.9);
+          const proximity = Math.max(0, 1 - ellipticalDistance);
+          const rawIntensity = proximity * proximity * (3 - 2 * proximity);
+          const intensity = sceneVisible ? rawIntensity * actorOpacity : 0;
+
+          controller.x(normalX * controller.movement.x * intensity);
+          controller.y(normalY * controller.movement.y * intensity);
+          controller.rotationX(normalY * -2.4 * intensity);
+          controller.rotationY(normalX * 3.2 * intensity);
+
+          const localX = Math.min(
+            100,
+            Math.max(0, ((pointerX - rect.left) / rect.width) * 100),
+          );
+          const localY = Math.min(
+            100,
+            Math.max(0, ((pointerY - rect.top) / rect.height) * 100),
+          );
+          controller.reactive.style.setProperty(
+            "--pointer-intensity",
+            intensity.toFixed(3),
+          );
+          controller.reactive.style.setProperty(
+            "--pointer-local-x",
+            `${localX.toFixed(2)}%`,
+          );
+          controller.reactive.style.setProperty(
+            "--pointer-local-y",
+            `${localY.toFixed(2)}%`,
+          );
+
+          const originX = rect.left + rect.width * controller.beamOrigin.x;
+          const originY = rect.top + rect.height * controller.beamOrigin.y;
+          const deltaX = pointerX - originX;
+          const deltaY = pointerY - originY;
+          controller.beam.style.setProperty(
+            "--beam-x",
+            `${originX - sceneRect.left}px`,
+          );
+          controller.beam.style.setProperty(
+            "--beam-y",
+            `${originY - sceneRect.top}px`,
+          );
+          controller.beam.style.setProperty(
+            "--beam-length",
+            `${Math.hypot(deltaX, deltaY) + 54}px`,
+          );
+          controller.beam.style.setProperty(
+            "--beam-angle",
+            `${Math.atan2(deltaY, deltaX)}rad`,
+          );
+          controller.beam.style.setProperty(
+            "--beam-opacity",
+            Math.min(0.88, intensity * 1.08).toFixed(3),
+          );
+        };
+
+        const renderPointerEffect = () => {
+          pointerFrame = 0;
+          controllers.forEach(updateController);
+        };
+        const schedulePointerEffect = () => {
+          if (!pointerFrame) {
+            pointerFrame = window.requestAnimationFrame(renderPointerEffect);
+          }
+        };
+        const onPointerMove = (event: PointerEvent) => {
+          pointerX = event.clientX;
+          pointerY = event.clientY;
+          schedulePointerEffect();
+        };
+        const resetPointerEffect = () => {
+          pointerX = -10_000;
+          pointerY = -10_000;
+          schedulePointerEffect();
+        };
+        const onPointerOut = (event: PointerEvent) => {
+          if (event.relatedTarget === null) resetPointerEffect();
+        };
+
+        window.addEventListener("pointermove", onPointerMove, {
+          passive: true,
+        });
+        window.addEventListener("scroll", schedulePointerEffect, {
+          passive: true,
+        });
+        window.addEventListener("pointerout", onPointerOut, {
+          passive: true,
+        });
+        window.addEventListener("blur", resetPointerEffect);
+
+        return () => {
+          window.removeEventListener("pointermove", onPointerMove);
+          window.removeEventListener("scroll", schedulePointerEffect);
+          window.removeEventListener("pointerout", onPointerOut);
+          window.removeEventListener("blur", resetPointerEffect);
+          if (pointerFrame) window.cancelAnimationFrame(pointerFrame);
+        };
+      },
+      sceneRef,
+    );
+
     return () => {
       mm.revert();
       eyeElement?.style.removeProperty("opacity");
     };
-  }, [showCinematicEffects]);
+  }, []);
 
   return (
     <section
       ref={sceneRef}
-      className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-transparent"
+      className="hero-apocalypse relative flex h-screen w-full items-center justify-center overflow-hidden bg-transparent"
       aria-label="6DNX"
     >
       <div
-        className="hero-video-stage pointer-events-none absolute inset-0"
-        data-video-overlay={showVideoOverlay ? "visible" : "hidden"}
+        ref={backdropRef}
+        className="hero-apocalypse-stage pointer-events-none absolute inset-0"
         aria-hidden
       >
-        <video
-          ref={videoRef}
-          className="hero-video-stage__media"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          disablePictureInPicture
-          disableRemotePlayback
-          tabIndex={-1}
-        >
-          <source src="/novo-hero-final.mp4" type="video/mp4" />
-        </video>
+        <Image
+          src="/hero-apocalypse.jpg"
+          alt=""
+          fill
+          preload
+          sizes="100vw"
+          className="hero-apocalypse-stage__image"
+        />
+        <span className="hero-apocalypse-stage__grade" />
       </div>
 
-      {showVideoOverlay ? (
-        <div
-          className="hero-video-overlay pointer-events-none absolute inset-0"
-          aria-hidden
-        />
-      ) : null}
-
-      {showCinematicEffects ? (
-        <>
+      <>
           <div
             ref={auraRef}
             className="pointer-events-none absolute left-1/2 top-1/2 h-[130vh] w-[130vh] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-45 will-change-transform"
@@ -708,6 +924,67 @@ export function HeroSection({
             </div>
           </div>
 
+          <span
+            ref={leftActorBeamRef}
+            className="cinematic-pointer-beam cinematic-pointer-beam--operator hero-apocalypse-pointer-beam"
+          >
+            <span className="cinematic-pointer-beam__origin" />
+          </span>
+          <span
+            ref={rightActorBeamRef}
+            className="cinematic-pointer-beam cinematic-pointer-beam--angel hero-apocalypse-pointer-beam"
+          >
+            <span className="cinematic-pointer-beam__origin" />
+          </span>
+
+          <div
+            ref={leftActorRef}
+            data-hero-character="couple"
+            className="hero-apocalypse-actor hero-apocalypse-actor--left"
+            aria-hidden
+          >
+            <div
+              ref={leftActorReactiveRef}
+              className="hero-apocalypse-actor__reactive"
+            >
+              <span className="hero-apocalypse-actor__aura" />
+              <Image
+                src="/killa-casal-hero.png"
+                alt=""
+                fill
+                loading="eager"
+                sizes="(max-width: 899px) 88vw, 56vw"
+                className="hero-apocalypse-actor__image"
+              />
+              <span className="cinematic-pointer-light hero-apocalypse-pointer-light" />
+              <span className="hero-apocalypse-actor__smoke" />
+            </div>
+          </div>
+
+          <div
+            ref={rightActorRef}
+            data-hero-character="angel"
+            className="hero-apocalypse-actor hero-apocalypse-actor--right"
+            aria-hidden
+          >
+            <div
+              ref={rightActorReactiveRef}
+              className="hero-apocalypse-actor__reactive"
+            >
+              <span className="hero-apocalypse-actor__aura" />
+              <Image
+                src="/anjo-frame-03-ivory-v2.webp"
+                alt=""
+                fill
+                loading="eager"
+                sizes="(max-width: 899px) 88vw, 58vw"
+                className="hero-apocalypse-actor__image"
+              />
+              <span className="cinematic-pointer-light hero-apocalypse-pointer-light" />
+              <span className="hero-apocalypse-actor__smoke" />
+            </div>
+          </div>
+
           <div
             ref={transformationFlashRef}
             className="pointer-events-none absolute inset-0 z-[9] opacity-0 will-change-transform"
@@ -729,47 +1006,45 @@ export function HeroSection({
           />
 
         </>
-      ) : null}
+
+      <div className="hero-apocalypse-seam pointer-events-none" aria-hidden>
+        <span className="hero-apocalypse-seam__smoke hero-apocalypse-seam__smoke--left" />
+        <span className="hero-apocalypse-seam__smoke hero-apocalypse-seam__smoke--center" />
+        <span className="hero-apocalypse-seam__smoke hero-apocalypse-seam__smoke--right" />
+      </div>
 
       <div
         data-hero-copy-position
-        className="pointer-events-none absolute inset-x-0 bottom-[clamp(7.75rem,16vh,9rem)] z-[var(--z-hero-copy)] px-6"
+        className="hero-apocalypse-copy pointer-events-none absolute inset-x-0 z-[var(--z-hero-copy)] px-6"
       >
         <div
           ref={titleRef}
           className="mx-auto max-w-[46rem] text-center select-none will-change-transform"
         >
-          <h1
-            className={showBrandOverlay ? "mb-1" : "sr-only"}
-            data-hero-brand-overlay={showBrandOverlay ? "visible" : "hidden"}
-          >
+          <h1 className="mb-1" data-hero-brand-overlay="visible">
             <span
               ref={logoScrollRef}
               data-hero-logo-shell
-              className="hero-brand-logo-shell inline-block w-[clamp(21rem,46vw,40rem)] max-w-[92vw] align-middle"
+              className="hero-brand-logo-shell inline-block w-[clamp(22rem,48vw,43rem)] max-w-[94vw] align-middle"
             >
-              {showBrandOverlay ? (
-                <Image
-                  ref={logoRef}
-                  data-hero-logo-motion
-                  src="/brand/6dorme-nois-xita-hero-v2.webp"
-                  alt="6Dorme Nois Xita"
-                  width={1536}
-                  height={1024}
-                  preload
-                  sizes="(max-width: 640px) 92vw, (max-width: 1280px) 46vw, 640px"
-                  className="hero-brand-logo block h-auto w-full"
-                />
-              ) : (
-                "6Dorme Nois Xita"
-              )}
+              <Image
+                ref={logoRef}
+                data-hero-logo-motion
+                src="/logo-asas-optimized.webp"
+                alt="6Dorme Nois Xita"
+                width={1536}
+                height={1024}
+                loading="eager"
+                sizes="(max-width: 640px) 94vw, (max-width: 1280px) 48vw, 688px"
+                className="hero-brand-logo block h-auto w-full"
+              />
             </span>
           </h1>
-          <p className="hero-copy-headline mb-3 text-balance text-[clamp(0.95rem,2.2vw,1.6rem)] font-extrabold uppercase tracking-[0.05em]">
+          <p className="hero-copy-headline mb-0 text-balance text-[clamp(0.95rem,2.2vw,1.6rem)] font-extrabold uppercase tracking-[0.05em]">
             Soluções <span className="italic text-primary">Incríveis</span>,{" "}
             <span className="italic text-primary">Seguras</span> e Profissionais
           </p>
-          <p className="hero-copy-support mx-auto max-w-xl text-[0.65rem] uppercase leading-relaxed tracking-[0.22em] md:text-xs">
+          <p className="hero-copy-support mx-auto max-w-xl text-[0.65rem] uppercase leading-[1.45] tracking-[0.22em] md:text-xs">
             Descubra soluções criadas para elevar sua experiência em diferentes
             jogos.
           </p>

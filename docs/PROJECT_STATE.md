@@ -12,9 +12,12 @@ isolated test checkout, and an automated games-and-AI news area.
 
 - Visual language: near-black, blood crimson, stone/metal textures, restrained
   particles, strong red contour light.
-- The active video hero stays free of separately mounted character cutouts.
-  Starting at the product section, the Killa couple frames the left side and
-  the pale-wing shushing angel frames the right side.
+- The active hero uses the static `hero-apocalypse.jpg` backdrop, a dedicated
+  Killa couple on the left, a dedicated ivory-wing angel on the right and the
+  transparent `logo-asas` artwork in the center. These hero-only actors dissolve
+  before the product scene appears.
+- Starting at the product section, its existing Killa couple and pale-wing
+  shushing angel keep their own choreography unchanged.
 - The product character scene owns one reversible scroll journey from the
   section entrance to the document end; it never restarts inside the catalog.
 - The character layer is fixed, pointer-transparent, and unclipped. It stays
@@ -22,8 +25,9 @@ isolated test checkout, and an automated games-and-AI news area.
 - The hero receives the broad circular dark-crimson Sharingan beneath the
   existing scrim and scan overlay. It responds to page scroll and fine-pointer
   logo hover through independent nested rotors.
-- Desktop product interaction is always information left / card center / video
-  right. Mobile uses one centered sheet.
+- Desktop product interaction is always information left / card center / 6DNX
+  media preview right. Mobile uses one centered sheet. Video embeds are
+  temporarily disabled even when a product retains a stored YouTube ID.
 - Historical product claims remain traceable to `discord-imagens/` and
   `docs/Produtos_Organizados.md`. The 31-entry editorial map remains the
   historical source index; the executable catalog may split a confirmed source
@@ -48,19 +52,41 @@ isolated test checkout, and an automated games-and-AI news area.
 - Implemented the `/admin` catalog CMS as a separate, data-driven control
   surface. It includes a branded Supabase email/password login, server-side
   `app_metadata.role=admin` authorization, guided five-step editing, live card
-  preview, search/filters, duplication, draft/published/archived states,
-  bounded thumbnail upload, per-card accent/text/surface colors, optimistic
-  revision checks and one-click history restoration. `/admin/demo` provides a
-  development-only visual walkthrough without weakening production auth.
+  preview, search/filters, bounded thumbnail upload, optimistic revision checks
+  and automatic history. `/admin/demo` provides a development-only visual
+  walkthrough without weakening production auth.
+- Rebuilt the owner experience as a fail-safe daily editor. Creation,
+  duplication, archive/publication changes, route edits, catalog ordering,
+  arbitrary colors, variation add/remove and one-click restoration are absent
+  from the normal panel. The update API independently rejects changes to those
+  structural fields, and history is read-only. Saving requires a final preview
+  and price confirmation; existing publication and carousel composition remain
+  unchanged.
+- Simplified first-admin activation for the Supabase Dashboard workflow. The
+  provisioning command now promotes an existing confirmed Auth user by e-mail,
+  preserves its password and provider metadata, and remains idempotent when the
+  account is already an admin. Password-strength rules stay on account creation;
+  the login form no longer rejects an otherwise valid existing password based
+  on its length.
+- Added `GUIA_ADMIN_MAYCON.md`, a plain-language operating manual focused only
+  on the 6DNX catalog panel: login, the five editing stages, safe image upload,
+  publication states, history recovery, protected fields and a pre-save
+  checklist for a non-technical owner.
+- Fixed public rendering of thumbnails uploaded by the admin panel. The Next.js
+  image optimizer now derives the configured Supabase host at build time and
+  allows only the public `product-assets` bucket path; the product mutation
+  validator enforces the same origin and path contract. The FiveM upload was
+  verified through the optimizer and in desktop/mobile catalog views.
 - Added the unapplied
   `20260731090000_create_product_catalog_admin.sql` migration for catalog rows,
   immutable editorial keys, automatic revision snapshots, RLS and the 5 MB
   `product-assets` bucket. Product deletion is intentionally unavailable;
   archive and restore own the reversible workflow.
 - Connected the public catalog, test checkout and safe Discord redirect to the
-  published Supabase catalog. `lib/products.ts` remains the fail-safe source
-  whenever configuration/schema/data is unavailable or the remote catalog
-  cannot satisfy the required carousel composition.
+  published Supabase catalog. `lib/products.ts` is used only before Supabase is
+  configured and during the controlled initial import; after configuration,
+  remote errors or invalid/empty data fail closed instead of resurrecting the
+  static catalog.
 - Hardened the initial import against silent data loss: all 40 current products
   now pass the same validator used by future panel saves before any batch is
   sent to Supabase. The six cards that anchor `D` and the first page to the
@@ -79,28 +105,36 @@ isolated test checkout, and an automated games-and-AI news area.
   It defines the canonical reading order, task-specific context routes,
   read-only Git inspection, impact reporting, secret boundaries, validation,
   and handoff requirements before an agent may modify the project.
-- Added a reversible hero-video experiment using
-  `public/novo-hero-final.mp4` (H.264, 1920x1080, 9.7 seconds, 3.37 MB). The footage is a
-  decorative muted inline loop with reduced-motion playback protection and a
-  restrained lower veil that dissolves into the same page-wide background used
-  by the product section. Because the footage already carries the brand, the
-  separate transparent logo overlay is currently disabled through
-  `showBrandOverlay={false}`; its component, asset, accessible heading, scroll
-  transform, and pointer implementation remain preserved for one-property
-  reversal.
-- Added an explicit video-first composition with
-  `showCinematicEffects={false}` and `showVideoOverlay`. The active hero renders
-  the MP4 without CSS grading, zoom, aura, smoke, ocular artwork, scanlines,
-  transformation flashes, or GSAP copy fading. A separate low-opacity gradient
-  veil now sits above the unmodified footage and below the copy/CTA, improving
-  legibility without flattening the background. The supporting copy uses solid
-  colors and glyph-local shadows and sits immediately above an accessible
-  `#produtos` CTA styled as a mechanical spacebar.
-- Replaced the hard hero/products boundary with a two-sided cinematic dissolve:
-  the final video pixels fade into one shared near-black crimson tone while the
-  product section projects a broad blurred smoke bank upward across the same
-  boundary. The bridge is static, pointer-transparent, and remains below all
-  copy, cards, controls, and dialogs.
+- Replaced the active video experiment with a reversible static cinematic hero.
+  `hero-apocalypse.jpg` fills one natural viewport;
+  `killa-casal-hero.png` and `anjo-frame-03-ivory-v2.webp` are independently
+  bottom-anchored, scaled nearly to the top and hidden at the feet by the lower
+  smoke bank. The former MP4 and prior logo assets remain in `public/` for a
+  future manual rollback but are not mounted or downloaded by the page.
+- Restored hero-only fine-pointer reactions without changing the product scene:
+  each actor now moves through a nested request-animation-frame-bounded parallax
+  layer, receives a localized highlight, and emits a slightly extended beam
+  from its chest toward the cursor. The blood-red contour is thinner, while the
+  copy and CTA sit on a higher content layer with tighter spacing and stronger
+  contrast. All hero pointer effects remain off for reduced motion and coarse
+  pointers.
+- Replaced every desktop and mobile product video embed with the existing
+  branded `ProductMediaPreview`. It displays the product thumbnail, miniature
+  angel and explicit "Demonstração em preparação" copy instead of contacting
+  YouTube or leaving a broken player. Existing `youtubeId` and orientation data
+  stay stored but are not rendered, keeping later reactivation reversible.
+- Activated `logo-asas-optimized.webp` as the hero brand. Its transparent WebP
+  copy preserves the original PNG while reducing the transfer source from
+  2.71 MB to 435 KB. A crimson underglow improves separation, the existing
+  fine-pointer tilt remains on the inner artwork, and scroll expansion remains
+  on the outer shell so both effects compose cleanly.
+- Restored the broad circular Sharingan beneath the logo and the existing
+  scan/ocular effects. The hero background, actors, logo and eye share one
+  reversible scroll timeline; hero actors crossfade away before the untouched
+  product-section characters enter.
+- Replaced the hard hero/products boundary with a broad, pointer-transparent
+  smoke dissolve. Overlapping radial and vertical gradients hide the actor feet
+  and meet the existing section-two background without a one-pixel divider.
 - Added one page-wide, pointer-transparent atmosphere with 22 deterministic
   soot and ember particles distributed from the hero through the bottom of the
   storefront. They animate only transform and opacity, stay below the
@@ -161,7 +195,8 @@ isolated test checkout, and an automated games-and-AI news area.
   official hero angel as a consistent animated miniature. The single Thermal
   card now centers itself on its overflow page.
 - Made the complete card clickable. On desktop it moves to the center before
-  opening information on the left and video on the right; closing restores the
+  opening information on the left and the 6DNX media preview on the right;
+  closing restores the
   original card order and scroll position. Mobile uses one scrollable sheet.
 - While desktop popups are open, the selected center card shares their visual
   layer above the backdrop/blur; sibling cards remain hidden behind the modal.
@@ -193,17 +228,17 @@ isolated test checkout, and an automated games-and-AI news area.
   limiting, and TEST-marked Discord TICKET delivery.
 - Expanded Radar 6DNX to Steam News API, Google AI Blog RSS, and OpenAI News
   RSS. RSS reads are streamed with a 1 MB ceiling and a strict host allowlist.
-- Made the daily cron resilient: successful collection revalidates the site
-  even when Supabase persistence is unavailable, while returning
-  `storage: "source-only"` instead of falsely claiming durable storage.
+- Made the daily cron honest: collection is not reported as successful when
+  Supabase persistence fails. The endpoint returns a failing status so Vercel
+  Cron can expose the incident instead of showing a false green run.
 - Verified one complete DayZ/spow Pix laboratory order in the production
   preview. The UI confirmed one TEST-marked message delivered to Discord.
 - Verified the protected cron locally: 25 items (five each from OpenAI, Google
   AI, DayZ/Steam, ARC Raiders/Steam, and Counter-Strike 2/Steam). Collection
   passed; persistence returned 404 because the pending migration is absent.
 - Overrode Next's vulnerable transitive PostCSS/Sharp versions with currently
-  patched releases and rebuilt successfully. Production dependency audit is
-  clean; remaining audit findings are confined to ESLint development tooling.
+  patched releases and rebuilt successfully. `npm audit --omit=dev` is clean,
+  and all 378 installed packages have verified registry signatures.
 - Reorganized `.env.local` into Vercel runtime, future commerce, and local-only
   blocks without exposing values. The misplaced GitHub PAT was removed from
   `CRON_SECRET`, replaced with an independent random secret, and verified
@@ -257,7 +292,7 @@ isolated test checkout, and an automated games-and-AI news area.
   `docs/Produtos_Organizados.md`. All 40 runtime slugs are unique and every card
   has at least one variation. The catalog renders three cards per page, always
   starts at `D`, preserves the angel/art/hover composition for every item, and
-  keeps the information-left/card-center/video-right interaction intact.
+  keeps the information-left/card-center/media-preview-right interaction intact.
 - Reorganized the catalog around a deterministic bidirectional landing point.
   The active `D` page now opens with DayZ Private, Counter-Strike 2, and Arena
   Breakout. Every other DayZ family is paginated to the left, with any partial
@@ -277,18 +312,39 @@ isolated test checkout, and an automated games-and-AI news area.
   `DISCORD_INVITE_URL`; Discord webhook credentials remain server-only and are
   never rendered as browser links. The configured invite must be generated
   from the Discord `Welcome` channel for visitors to land there.
+- Removed the inherited **Download Manager** and **Instalar Drivers** links from
+  every product detail surface. The public CTA now starts an honest manual
+  order in Discord after the user selects a variation; it does not claim that
+  StorM charged the customer and does not expose the R$ 1 laboratory on the
+  storefront.
+- Made the configured Supabase catalog fail closed: database/network/validation
+  failures now render a catalog-unavailable support state instead of reviving
+  archived products from `lib/products.ts`. The static source remains available
+  only before Supabase is configured and for the controlled initial import.
+- Hardened admin mutations and image upload. Mutations require the exact page
+  origin. Uploads are streamed with a 5 MB bound, verify JPG/PNG/WEBP/AVIF magic
+  bytes, and store only a detected matching MIME. The news cron now fails its
+  run if persistence fails instead of reporting a false green result.
+- Added focused security regression tests, a pinned GitHub Actions quality
+  workflow, Dependabot and CODEOWNERS. `docs/GUIA_ADMIN_MAYCON.md` now explains
+  manual versus automatic sales, closing public signup, MFA boundaries and
+  safe everyday operation in nontechnical language.
+- Made the payment laboratory impossible to enable in Vercel Production even
+  if `PAYMENT_TEST_MODE=true` is entered by mistake. Preview still requires
+  that explicit value; local development remains the only default-on context.
+- Rechecked `.env.local` by variable name only after the owner cleanup: no
+  bootstrap/admin login or password variable remains, no duplicate variable
+  name exists, and no secret value was printed.
 
 ## Pending human or business input
 
-- Decide whether the hero-video experiment replaces the established
-  frame-driven hero. Before production use, approve the footage and produce a
-  mobile-specific delivery if field testing shows slow startup; the current
-  3.37 MB desktop MP4 is substantially lighter than the previous 6.65 MB
-  candidate but is not adaptive streaming.
-- Add an approved YouTube ID only when official material exists; products
-  without video use the designed media preview instead of a broken player.
-- `Custom Steam Profile` uses the approved vertical YouTube video
-  `BqPwa1SXowE`; its popup preserves the video's portrait proportion.
+- Approve the new static hero composition after desktop and mobile visual
+  review. The retained MP4 is rollback material only and is not loaded by the
+  active storefront.
+- Decide later which official product videos may return. Until that approval,
+  every popup uses the designed media preview and no YouTube player is mounted.
+- The stored `Custom Steam Profile` video ID remains data-only; its former
+  portrait embed is intentionally inactive.
 - Confirm or replace each displayed reference price before enabling real
   commerce.
 - Configure `SITE_REVIEW_ENABLED`, `SITE_REVIEW_USER`, and a 16+ character
@@ -301,10 +357,10 @@ isolated test checkout, and an automated games-and-AI news area.
 - Revoke the old classic GitHub PAT in GitHub settings. It is no longer present
   in `CRON_SECRET`; no replacement GitHub token is needed unless Git
   authentication later requests one.
-- The local branch is now `main`; merge `78c3fa7` preserves both local and
-  remote histories without a force-push, and the latest sales/environment work
-  is committed locally. `carloshg-dev` is now an accepted collaborator and a
-  dry-run push confirms write permission to `GarciaCarlos1985/6dnx`.
+- The local branch is `main`; merge `78c3fa7` preserves both local and remote
+  histories without a force-push. `carloshg-dev` is an accepted collaborator,
+  but the current hardening work remains intentionally uncommitted for human
+  review.
 - Confirm StorM Wallet accepts the catalog and provides sandbox documentation
   before enabling real payments. The current laboratory must never be
   presented as a real charge.
@@ -312,16 +368,29 @@ isolated test checkout, and an automated games-and-AI news area.
   Supabase orders, idempotency, and server-side charge creation before using
   the StorM live credentials in application code or activating the provider
   webhook.
+- The three StorM environment names are already populated locally and in
+  Vercel Production, but no runtime route consumes them. A 2026-07-31 owner
+  capture showed the provider callback incorrectly targeting a Discord webhook;
+  that destination must be removed. Configure the future 6DNX callback only
+  after the route exists and passes official sandbox/signature tests.
 - Follow `COMMERCE_ARCHITECTURE.md`: Supabase is the order source of truth,
   signed provider webhooks confirm payment, and Discord is
   notification/support, never proof of payment.
+- Supabase **Allow new users to sign up** was disabled by the owner on
+  2026-07-31. Manual linking and anonymous sign-in were also shown disabled;
+  existing confirmed administrator accounts remain able to sign in.
+- Enable MFA on the Supabase dashboard account immediately with a backup TOTP
+  factor. Application-level MFA for `/admin` remains staged work: enrollment,
+  challenge, recovery and `aal2` enforcement must be tested with a spare admin
+  before becoming mandatory.
 - The requested `i-have-adhd` plugin was not exposed by the safe plugin manager;
   project continuity is currently provided by `AGENTS.md` and this file.
 
 ## Safety status
 
-- Commit and push to `main` were authorized, and GitHub write permission has
-  been verified without mutating the remote.
+- No commit, push, migration or deployment was executed in the current
+  hardening pass. Obtain fresh explicit human approval after reviewing the
+  working tree and the remaining remote actions.
 - Every successful `main` push must be followed through the Vercel deployment
   until the production domain returns the new commit successfully.
 - `.env.local` is ignored by Git and must remain secret.
