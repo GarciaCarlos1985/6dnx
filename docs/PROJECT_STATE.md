@@ -1,6 +1,6 @@
 # 6DNX project state
 
-Last updated: 2026-07-29
+Last updated: 2026-07-31
 
 ## Current objective
 
@@ -12,9 +12,11 @@ isolated test checkout, and an automated games-and-AI news area.
 
 - Visual language: near-black, blood crimson, stone/metal textures, restrained
   particles, strong red contour light.
-- Hero order: operator left, central 6DNX copy, angel right.
-- Five poses per character are distributed once across the complete page
-  scroll; the hero never restarts or consumes the whole sequence.
+- The active video hero stays free of separately mounted character cutouts.
+  Starting at the product section, the Killa couple frames the left side and
+  the pale-wing shushing angel frames the right side.
+- The product character scene owns one reversible scroll journey from the
+  section entrance to the document end; it never restarts inside the catalog.
 - The character layer is fixed, pointer-transparent, and unclipped. It stays
   above section backgrounds and below all readable or interactive content.
 - The hero receives the broad circular dark-crimson Sharingan beneath the
@@ -23,8 +25,9 @@ isolated test checkout, and an automated games-and-AI news area.
 - Desktop product interaction is always information left / card center / video
   right. Mobile uses one centered sheet.
 - Historical product claims remain traceable to `discord-imagens/` and
-  `docs/Produtos_Organizados.md`. The seven executable laboratory services are
-  independent reference drafts and are not automatic renames of those records.
+  `docs/Produtos_Organizados.md`. The 31-entry editorial map remains the
+  historical source index; the executable catalog may split a confirmed source
+  entry into distinct commercial families without merging their prices.
 - Supabase API credentials are normalized; the `news_articles` migration is
   still pending human approval.
 - The daily schedule is Vercel Cron (`0 12 * * *`), not GitHub Actions.
@@ -42,6 +45,76 @@ isolated test checkout, and an automated games-and-AI news area.
 
 ## Completed in the current laboratory pass
 
+- Implemented the `/admin` catalog CMS as a separate, data-driven control
+  surface. It includes a branded Supabase email/password login, server-side
+  `app_metadata.role=admin` authorization, guided five-step editing, live card
+  preview, search/filters, duplication, draft/published/archived states,
+  bounded thumbnail upload, per-card accent/text/surface colors, optimistic
+  revision checks and one-click history restoration. `/admin/demo` provides a
+  development-only visual walkthrough without weakening production auth.
+- Added the unapplied
+  `20260731090000_create_product_catalog_admin.sql` migration for catalog rows,
+  immutable editorial keys, automatic revision snapshots, RLS and the 5 MB
+  `product-assets` bucket. Product deletion is intentionally unavailable;
+  archive and restore own the reversible workflow.
+- Connected the public catalog, test checkout and safe Discord redirect to the
+  published Supabase catalog. `lib/products.ts` remains the fail-safe source
+  whenever configuration/schema/data is unavailable or the remote catalog
+  cannot satisfy the required carousel composition.
+- Hardened the initial import against silent data loss: all 40 current products
+  now pass the same validator used by future panel saves before any batch is
+  sent to Supabase. The six cards that anchor `D` and the first page to the
+  right must remain published in the interface and in the database constraint.
+- Added `scripts/create-admin.mjs` and `docs/ADMIN.md`. No account was created,
+  no migration was applied and no secret was written to source; those remain
+  explicit human-controlled activation steps.
+- Revalidated the admin pass with ESLint, strict TypeScript and a production
+  Next build. Desktop QA at 1440x900 and mobile QA at 390x844 passed without
+  document-level horizontal overflow; the production build returns 404 for
+  `/admin/demo`, 401 for an anonymous admin session, and the public catalog
+  still opens on DayZ Private / Counter-Strike 2 / Arena Breakout. The runtime
+  dependency audit is clean; nine high findings remain confined to the ESLint
+  development toolchain and require incompatible dependency changes.
+- Added `docs/CODEX.md` as the mandatory startup protocol for every new chat.
+  It defines the canonical reading order, task-specific context routes,
+  read-only Git inspection, impact reporting, secret boundaries, validation,
+  and handoff requirements before an agent may modify the project.
+- Added a reversible hero-video experiment using
+  `public/novo-hero-final.mp4` (H.264, 1920x1080, 9.7 seconds, 3.37 MB). The footage is a
+  decorative muted inline loop with reduced-motion playback protection and a
+  restrained lower veil that dissolves into the same page-wide background used
+  by the product section. Because the footage already carries the brand, the
+  separate transparent logo overlay is currently disabled through
+  `showBrandOverlay={false}`; its component, asset, accessible heading, scroll
+  transform, and pointer implementation remain preserved for one-property
+  reversal.
+- Added an explicit video-first composition with
+  `showCinematicEffects={false}` and `showVideoOverlay`. The active hero renders
+  the MP4 without CSS grading, zoom, aura, smoke, ocular artwork, scanlines,
+  transformation flashes, or GSAP copy fading. A separate low-opacity gradient
+  veil now sits above the unmodified footage and below the copy/CTA, improving
+  legibility without flattening the background. The supporting copy uses solid
+  colors and glyph-local shadows and sits immediately above an accessible
+  `#produtos` CTA styled as a mechanical spacebar.
+- Replaced the hard hero/products boundary with a two-sided cinematic dissolve:
+  the final video pixels fade into one shared near-black crimson tone while the
+  product section projects a broad blurred smoke bank upward across the same
+  boundary. The bridge is static, pointer-transparent, and remains below all
+  copy, cards, controls, and dialogs.
+- Added one page-wide, pointer-transparent atmosphere with 22 deterministic
+  soot and ember particles distributed from the hero through the bottom of the
+  storefront. They animate only transform and opacity, stay below the
+  `z-content` layer used by headings/cards/controls/dialogs, and disappear
+  entirely for `prefers-reduced-motion`.
+- Preserved the explicit `beams-only` mode and mounted the full
+  `CinematicCompanions` product scene after the video hero. It uses the
+  optimized transparent `casal-killa.webp` on the left and
+  `anjo-hero-shh-v4.webp` on the right. Both receive the established
+  scroll-scrubbed scale/translation, behind-art transition pulses, aura, waist
+  smoke, pointer parallax, chest-origin beams and side-specific embers or pale
+  feathers. The scene stays hidden before `#produtos`, reverses on upward
+  scroll, remains below cards/dialogs, and falls back to static,
+  section-bounded framing on mobile or reduced motion.
 - Added the crimson ocular payoff beneath the hero overlays and increased the
   marked subtitle contrast without changing the visual hierarchy.
 - Moved every radial character transition pulse behind its artwork, isolated
@@ -92,9 +165,14 @@ isolated test checkout, and an automated games-and-AI news area.
   original card order and scroll position. Mobile uses one scrollable sheet.
 - While desktop popups are open, the selected center card shares their visual
   layer above the backdrop/blur; sibling cards remain hidden behind the modal.
+  The visible center card is an `aria-hidden`, non-focusable visual twin inside
+  the body-level modal portal. This preserves the original grid position while
+  keeping the dialog outside the inert page, so its information panel remains
+  scrollable and the background stays correctly locked.
 - Replaced the product pager's raw numeric overflow with symmetric, equal-size
-  clickable arrows around the `6 D N X` core. Each overflow page receives one
-  arrow on each side, and either arrow opens its assigned product cards.
+  clickable arrows around the `6 D N X` core. Pages beyond `D` and `N` are
+  reached sequentially through the arrow pair, while a compact non-numeric
+  progress rail communicates position without changing the brand mark.
 - Rebuilt the page stacking scale so the cinematic characters remain visible
   and unclipped in open space while passing behind hero copy, product cards,
   news content, controls, overlays, and dialogs. The news block also has a
@@ -171,9 +249,42 @@ isolated test checkout, and an automated games-and-AI news area.
   positions in `MAPA_EDITORIAL_31_ENTRADAS.md`. Their cadastral state is
   `PENDENTE_DE_VALIDACAO_DO_PROPRIETARIO`; this records missing documented
   approval and does not assert `false` or a commercial block.
+- Expanded the executable storefront to 40 distinct cards. The former DayZ
+  umbrella card was separated into Spow, Moonwalk, Private, GG, Rage, Shadow
+  and Elisyum; only duration or license remains inside each card as a price
+  variation. The eight imported entries that had lost their documented plans
+  now carry the exact reference values present in
+  `docs/Produtos_Organizados.md`. All 40 runtime slugs are unique and every card
+  has at least one variation. The catalog renders three cards per page, always
+  starts at `D`, preserves the angel/art/hover composition for every item, and
+  keeps the information-left/card-center/video-right interaction intact.
+- Reorganized the catalog around a deterministic bidirectional landing point.
+  The active `D` page now opens with DayZ Private, Counter-Strike 2, and Arena
+  Breakout. Every other DayZ family is paginated to the left, with any partial
+  group kept at the far-left edge; the first page to the right contains Escape
+  From Tarkov, Rust, and PUBG, followed by every remaining product in canonical
+  source order. The layout validates required slugs, duplicate identifiers, and
+  total product preservation before rendering.
+- Added a finite `Adjacent Page Peek` cascade on wide fine-pointer viewports.
+  Each side now exposes up to three real cards from the neighboring page as
+  progressively smaller, darker depth layers. This produces an
+  infinite-corridor illusion without changing the finite catalog: clicking a
+  cascade advances exactly one page, with no autoplay or wraparound loop. The
+  previews are absent at catalog boundaries, hidden during product dialogs,
+  and disabled below 70rem to preserve the existing mobile/tablet layout.
+- Unified every storefront community, purchase-support, and help action behind
+  the server-side `/api/redirect` route. The route reads and validates only
+  `DISCORD_INVITE_URL`; Discord webhook credentials remain server-only and are
+  never rendered as browser links. The configured invite must be generated
+  from the Discord `Welcome` channel for visitors to land there.
 
 ## Pending human or business input
 
+- Decide whether the hero-video experiment replaces the established
+  frame-driven hero. Before production use, approve the footage and produce a
+  mobile-specific delivery if field testing shows slow startup; the current
+  3.37 MB desktop MP4 is substantially lighter than the previous 6.65 MB
+  candidate but is not adaptive streaming.
 - Add an approved YouTube ID only when official material exists; products
   without video use the designed media preview instead of a broken player.
 - `Custom Steam Profile` uses the approved vertical YouTube video

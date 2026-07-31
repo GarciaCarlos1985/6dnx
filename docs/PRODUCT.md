@@ -49,6 +49,8 @@ SaaS roxo-branco genérico; cream/sand editorial; grids de cards com ícones red
 4. Cards só onde há interação de produto (vitrine).
 5. Menos atrito: um clique do produto ao Discord.
 6. Conteúdo sem ruído: notícias oficiais, hierarquia editorial e nenhuma disputa visual com a vitrine.
+7. Operação sem código: o painel administrativo edita dados validados, mostra
+   uma prévia e preserva histórico; nunca reescreve arquivos da aplicação.
 
 ## Accessibility & Inclusion
 

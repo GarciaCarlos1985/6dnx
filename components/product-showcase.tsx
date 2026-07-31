@@ -17,16 +17,15 @@ import {
   formatBRL,
   priceFrom,
   productStatusLabel,
-  products,
   type Product,
   type Variant,
 } from "@/lib/products";
 import { burstConfetti } from "@/lib/confetti";
+import { buildProductCatalogLayout } from "@/lib/product-catalog-layout";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const PER_PAGE = 3;
-const DEFAULT_PRODUCT_PAGE = 0;
 const MARGIN = 12;
 const GAP = 20;
 const INFO_W = 360;
@@ -43,7 +42,7 @@ type Box = { top: number; left: number; width: number; height: number };
 type Placement = {
   info: Box;
   video: Box;
-  card: DOMRect;
+  card: Box;
 };
 
 const clamp = (v: number, min: number, max: number) =>
@@ -99,7 +98,16 @@ function place(card: DOMRect, portraitVideo = false): Placement {
     ),
   };
 
-  return { info, video, card };
+  return {
+    info,
+    video,
+    card: {
+      top: card.top,
+      left: card.left,
+      width: card.width,
+      height: card.height,
+    },
+  };
 }
 
 function useProductCheckout(product: Product) {
@@ -182,7 +190,7 @@ function Cords({ p }: { p: Placement }) {
   const infoAnchorY = clamp(cy, p.info.top, p.info.top + p.info.height);
   const infoPath = `M ${infoStartX} ${cy} C ${(infoStartX + infoAnchorX) / 2} ${cy}, ${(infoStartX + infoAnchorX) / 2} ${infoAnchorY}, ${infoAnchorX} ${infoAnchorY}`;
 
-  const vidStartX = p.card.right;
+  const vidStartX = p.card.left + p.card.width;
   const vidAnchorX = p.video.left;
   const vidAnchorY = clamp(cy, p.video.top, p.video.top + p.video.height);
   const vidPath = `M ${vidStartX} ${cy} C ${(vidStartX + vidAnchorX) / 2} ${cy}, ${(vidStartX + vidAnchorX) / 2} ${vidAnchorY}, ${vidAnchorX} ${vidAnchorY}`;
@@ -483,23 +491,19 @@ function Popups({
                 <span className="text-primary text-xs">↗</span>
               </a>
               <a
-                href="https://chat.whatsapp.com/E8M62tClaZT42vTUZNuu0L"
+                href={supportUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-between rounded-md border border-green-500/20 bg-[#075e54]/20 px-4 py-3 transition-colors hover:border-green-500/50 hover:bg-[#075e54]/40"
+                className="flex items-center justify-between rounded-md border border-primary/30 bg-primary/10 px-4 py-3 transition-colors hover:border-primary/70 hover:bg-primary/20"
               >
-                <span className="text-[0.65rem] font-black uppercase tracking-widest text-green-400">
-                  Comunidade WhatsApp
+                <span className="text-[0.65rem] font-black uppercase tracking-widest text-primary">
+                  Discord · Canal Welcome
                 </span>
-                <span className="text-green-500 text-xs">↗</span>
+                <span className="text-primary text-xs">↗</span>
               </a>
             </div>
           </div>
 
-          <p className="mb-4 border border-amber-300/20 bg-amber-300/[0.06] px-3 py-2 text-[0.64rem] leading-relaxed text-amber-100/75">
-            Valores de referência para montagem da vitrine. Confirme escopo e
-            preço final antes de qualquer venda real.
-          </p>
           <p className="mb-2 text-[0.65rem] uppercase tracking-[0.2em] text-muted">
             Variações · escolha uma opção
           </p>
@@ -540,7 +544,7 @@ function Popups({
                 Comprar via StorM Wallet
               </a>
               <a
-                href={process.env.NEXT_PUBLIC_DISCORD_WELCOME_URL || "https://discord.gg/9sdvEWxdR"}
+                href={supportUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="flex min-h-[3.25rem] items-center justify-center border-t border-primary/50 bg-transparent px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-primary transition-colors hover:bg-primary/10 sm:border-l sm:border-t-0"
@@ -587,26 +591,45 @@ function Card({
   obscured,
   centered,
   onOpen,
+  modalClone = false,
 }: {
   product: Product;
   open: boolean;
   obscured: boolean;
   centered: boolean;
-  onOpen: (el: HTMLElement, trigger: HTMLButtonElement) => void;
+  onOpen?: (el: HTMLElement, trigger: HTMLButtonElement) => void;
+  modalClone?: boolean;
 }) {
   const from = priceFrom(product);
+  const productTheme = product.theme ?? {
+    accentColor: "#e3062c",
+    textColor: "#f7f3f4",
+    surfaceColor: "#0b0708",
+  };
 
   return (
     <article
-      data-product-card={product.slug}
-      className={`product-card group relative flex min-h-[31rem] flex-col overflow-hidden rounded-[1.35rem] border bg-surface text-left transition-[border-color,box-shadow,transform,opacity] duration-500 ${
-        centered ? "lg:col-start-2" : ""
+      data-product-card={modalClone ? undefined : product.slug}
+      aria-hidden={modalClone ? true : undefined}
+      style={
+        {
+          "--product-card-accent": productTheme.accentColor,
+          "--product-card-text": productTheme.textColor,
+          "--product-card-surface": productTheme.surfaceColor,
+        } as React.CSSProperties
+      }
+      className={`product-card group relative flex flex-col overflow-hidden rounded-[1.35rem] border bg-surface text-left transition-[border-color,box-shadow,transform,opacity] duration-500 ${
+        modalClone ? "h-full min-h-0" : "min-h-[31rem]"
+      } ${centered && !modalClone ? "lg:col-start-2" : ""} ${
+        open && modalClone
+          ? "border-primary shadow-[0_0_54px_var(--primary-glow)]"
+          : open
+            ? "z-[70] scale-[1.025] border-primary shadow-[0_0_54px_var(--primary-glow)] lg:col-start-2"
+            : obscured
+              ? "pointer-events-none opacity-0"
+              : "reveal-up border-white/10 hover:-translate-y-1 hover:border-primary/60 hover:shadow-[0_0_38px_var(--primary-glow)]"
       } ${
-        open
-          ? "z-[70] scale-[1.025] border-primary shadow-[0_0_54px_var(--primary-glow)] lg:col-start-2"
-          : obscured
-            ? "pointer-events-none opacity-0"
-          : "reveal-up border-white/10 hover:-translate-y-1 hover:border-primary/60 hover:shadow-[0_0_38px_var(--primary-glow)]"
+        modalClone ? "select-none" : ""
       }`}
     >
       <div className="product-card__visual relative aspect-[16/9] overflow-hidden border-b border-white/10 bg-black">
@@ -642,14 +665,14 @@ function Card({
           </span>
         </div>
 
-        <p className="absolute bottom-4 left-4 z-[4] max-w-[62%] border-l-2 border-primary bg-black/55 px-2.5 py-1 text-[0.56rem] font-black uppercase tracking-[0.2em] text-ink backdrop-blur-sm">
+        <p className="product-card__category absolute bottom-4 left-4 z-[4] max-w-[62%] border-l-2 border-primary bg-black/55 px-2.5 py-1 text-[0.56rem] font-black uppercase tracking-[0.2em] text-ink backdrop-blur-sm">
           {product.category}
         </p>
       </div>
 
       <div className="product-card__body flex flex-1 flex-col p-6">
-        <p className="mb-2 flex items-center gap-2 text-[0.58rem] font-bold uppercase tracking-[0.28em] text-primary/80">
-          <span className="inline-block h-px w-7 bg-primary/70" aria-hidden />
+        <p className="product-card__eyebrow mb-2 flex items-center gap-2 text-[0.58rem] font-bold uppercase tracking-[0.28em] text-primary/80">
+          <span className="product-card__eyebrow-line inline-block h-px w-7 bg-primary/70" aria-hidden />
           6DNX // catálogo seguro
         </p>
         <h3 className="mb-1 text-2xl leading-tight text-ink">{product.title}</h3>
@@ -665,7 +688,7 @@ function Card({
             </li>
           ))}
           {product.variants.length > 5 ? (
-            <li className="px-2 py-0.5 text-[0.7rem] text-primary">
+            <li className="product-card__more px-2 py-0.5 text-[0.7rem] text-primary">
               +{product.variants.length - 5}
             </li>
           ) : null}
@@ -686,41 +709,127 @@ function Card({
 
         <span
           aria-hidden
-          className="inline-flex min-h-11 items-center justify-center border border-primary bg-primary px-4 text-sm font-bold uppercase tracking-[0.14em] text-ink transition-colors group-hover:bg-transparent group-hover:text-primary"
+          className="product-card__cta inline-flex min-h-11 items-center justify-center border border-primary bg-primary px-4 text-sm font-bold uppercase tracking-[0.14em] text-ink transition-colors group-hover:bg-transparent group-hover:text-primary"
         >
           Ver detalhes
         </span>
       </div>
 
-      <button
-        type="button"
-        onClick={(event) =>
-          onOpen(
-            event.currentTarget.parentElement as HTMLElement,
-            event.currentTarget,
-          )
-        }
-        aria-label={`Centralizar e abrir detalhes de ${product.title}`}
-        aria-expanded={open}
-        className="absolute inset-0 z-[5] cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-primary"
-      />
+      {!modalClone && onOpen ? (
+        <button
+          type="button"
+          onClick={(event) =>
+            onOpen(
+              event.currentTarget.parentElement as HTMLElement,
+              event.currentTarget,
+            )
+          }
+          aria-label={`Centralizar e abrir detalhes de ${product.title}`}
+          aria-expanded={open}
+          className="absolute inset-0 z-[5] cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-primary"
+        />
+      ) : null}
     </article>
   );
 }
 
-const TARGET_SLUGS = [
-  "dayz-6DNX-software",
-  "arena-breakout",
-  "escape-from-tarkov-6DNX-software",
-  "cs-2",
-  "fivem-6DNX-software",
-  "pubg-6DNX-software",
-  "custom-steam-profile",
-  "zoom-ia",
-  "Spow-KWID"
-];
+function SelectedProductCard({
+  product,
+  placement,
+}: {
+  product: Product;
+  placement: Placement;
+}) {
+  return (
+    <div
+      data-selected-product-card={product.slug}
+      aria-hidden
+      className="fixed z-[70]"
+      style={placement.card}
+    >
+      <Card
+        product={product}
+        open
+        obscured={false}
+        centered={false}
+        modalClone
+      />
+    </div>
+  );
+}
 
-export function ProductShowcase() {
+function AdjacentPagePeek({
+  side,
+  products: previewProducts,
+  onNavigate,
+}: {
+  side: "previous" | "next";
+  products: Product[];
+  onNavigate: () => void;
+}) {
+  const previous = side === "previous";
+  const directionLabel = previous ? "anterior" : "seguinte";
+  const nearestProduct = previewProducts[0];
+  const additionalProducts = Math.max(0, previewProducts.length - 1);
+
+  return (
+    <button
+      type="button"
+      onClick={onNavigate}
+      data-catalog-peek={side}
+      aria-label={`Ver página ${directionLabel}, com ${previewProducts.length} ${
+        previewProducts.length === 1 ? "produto" : "produtos"
+      }; prévia: ${nearestProduct.title}${
+        additionalProducts > 0 ? ` e mais ${additionalProducts}` : ""
+      }`}
+      className={`catalog-page-peek catalog-page-peek--${side}`}
+    >
+      {previewProducts.slice(0, 3).map((product, depth) => (
+        <span
+          key={product.slug}
+          className={`catalog-page-peek__card catalog-page-peek__card--depth-${depth}`}
+          aria-hidden
+        >
+          <span className="catalog-page-peek__visual">
+            <Image
+              src={product.image}
+              alt=""
+              fill
+              sizes="288px"
+              className="object-cover"
+            />
+            <span className="catalog-page-peek__visual-shade" />
+          </span>
+          <span className="catalog-page-peek__body">
+            <span className="catalog-page-peek__eyebrow">
+              6DNX //{" "}
+              {previous ? "transmissão anterior" : "próxima transmissão"}
+            </span>
+            <strong>{product.title}</strong>
+            <small>{product.category}</small>
+          </span>
+        </span>
+      ))}
+      <span className="catalog-page-peek__cue" aria-hidden>
+        <span>{previous ? "‹" : "›"}</span>
+        <small>mais</small>
+      </span>
+    </button>
+  );
+}
+
+export function ProductShowcase({
+  catalogProducts,
+}: {
+  catalogProducts: Product[];
+}) {
+  const productCatalog = useMemo(
+    () => buildProductCatalogLayout(catalogProducts, PER_PAGE),
+    [catalogProducts],
+  );
+  const defaultProductPage = productCatalog.defaultPage;
+  const firstRightProductPage = productCatalog.firstRightPage;
+  const [page, setPage] = useState(defaultProductPage);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [placement, setPlacement] = useState<Placement | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
@@ -734,28 +843,43 @@ export function ProductShowcase() {
     getWidePopupServerSnapshot,
   );
 
-  const visible = useMemo(
-    () => TARGET_SLUGS.map((slug) => products.find((p) => p.slug === slug)).filter((p): p is Product => Boolean(p)),
-    [],
-  );
+  const pages = productCatalog.pages.length;
+  const visible =
+    productCatalog.pages[page] ??
+    productCatalog.pages[defaultProductPage];
+  const previousPage = page > 0 ? productCatalog.pages[page - 1] : null;
+  const nextPage =
+    page < pages - 1 ? productCatalog.pages[page + 1] : null;
+  const previousPreviewProducts = previousPage
+    ? [...previousPage].reverse()
+    : [];
+  const nextPreviewProducts = nextPage ?? [];
 
-  const openProduct = products.find((p) => p.slug === openSlug) ?? null;
+  const openProduct =
+    catalogProducts.find((product) => product.slug === openSlug) ?? null;
   const portraitVideo = openProduct?.videoOrientation === "portrait";
   const orderedVisible = useMemo(() => {
     if (!wide || !openSlug) return visible;
-    const selectedIndex = visible.findIndex((product) => product.slug === openSlug);
-    if (selectedIndex < 0) return visible;
-
-    const col = selectedIndex % 3;
-    if (col === 1) return visible;
+    const selectedIndex = visible.findIndex(
+      (product) => product.slug === openSlug,
+    );
+    if (selectedIndex < 0 || selectedIndex === 1 || visible.length < 2) {
+      return visible;
+    }
 
     const ordered = [...visible];
-    const centerIndex = selectedIndex - col + 1;
-    const temp = ordered[selectedIndex];
-    ordered[selectedIndex] = ordered[centerIndex];
-    ordered[centerIndex] = temp;
+    const [selected] = ordered.splice(selectedIndex, 1);
+    ordered.splice(Math.min(1, ordered.length), 0, selected);
     return ordered;
   }, [openSlug, visible, wide]);
+
+  useEffect(() => {
+    const resetRestoredPage = (event: PageTransitionEvent) => {
+      if (event.persisted) setPage(defaultProductPage);
+    };
+    window.addEventListener("pageshow", resetRestoredPage);
+    return () => window.removeEventListener("pageshow", resetRestoredPage);
+  }, [defaultProductPage]);
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
@@ -986,11 +1110,22 @@ export function ProductShowcase() {
     setOpenSlug(slug);
   };
 
+  const changePage = (nextPage: number) => {
+    if (openSlug) {
+      originScrollRef.current = null;
+      close();
+    }
+    setPage(clamp(nextPage, 0, pages - 1));
+  };
+
   return (
     <section
       ref={sectionRef}
       id="produtos"
-      className="site-flow-section relative bg-transparent px-4 py-20 md:px-8 md:py-28"
+      data-catalog-page={page}
+      data-catalog-pages={pages}
+      data-catalog-default-page={defaultProductPage}
+      className="product-showcase-section site-flow-section relative bg-transparent px-4 py-20 md:px-8 md:py-28"
       aria-labelledby="produtos-heading"
     >
       <div className="reveal-up relative z-[var(--z-content)] mx-auto mb-12 max-w-6xl text-center">
@@ -1001,31 +1136,206 @@ export function ProductShowcase() {
           Soluções 6DNX
         </h2>
         <p className="mx-auto max-w-2xl text-white/72">
-          Serviços legítimos, artes originais e valores de referência para
-          validar toda a experiência antes de uma cobrança real.
+          Cada produto possui seu próprio card, arte 6DNX, informações e
+          variações de preço.
         </p>
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-7xl items-center justify-center gap-2 lg:gap-8">
-        <div
-          className={`relative w-full max-w-5xl grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 ${
-            wide && openSlug ? "z-[80]" : "z-[var(--z-content)]"
-          }`}
-        >
-          {orderedVisible.map((product) => (
-            <Card
-              key={product.slug}
-              product={product}
-              open={openSlug === product.slug}
-              obscured={wide && openSlug !== null && openSlug !== product.slug}
-              centered={orderedVisible.length === 1}
-              onOpen={(el, trigger) => openCard(product.slug, el, trigger)}
-            />
-          ))}
+      <div className="product-catalog-stage relative mx-auto w-full max-w-[90rem] overflow-x-clip">
+        {!openSlug && previousPreviewProducts.length > 0 ? (
+          <AdjacentPagePeek
+            key={`previous-${page}`}
+            side="previous"
+            products={previousPreviewProducts}
+            onNavigate={() => changePage(page - 1)}
+          />
+        ) : null}
+
+        {!openSlug && nextPreviewProducts.length > 0 ? (
+          <AdjacentPagePeek
+            key={`next-${page}`}
+            side="next"
+            products={nextPreviewProducts}
+            onNavigate={() => changePage(page + 1)}
+          />
+        ) : null}
+
+        <div className="pointer-events-none relative z-[var(--z-content)] mx-auto flex w-full max-w-7xl items-center justify-center gap-2 lg:gap-8">
+          <button
+            type="button"
+            onClick={() => changePage(page - 1)}
+            disabled={page === 0 || Boolean(openSlug)}
+            aria-label="Exibir cards anteriores"
+            data-catalog-previous
+            className={`pointer-events-auto relative hidden h-24 w-16 shrink-0 items-center justify-center text-7xl font-light text-primary/70 transition-[color,opacity,transform] hover:scale-105 hover:text-primary disabled:pointer-events-none disabled:opacity-15 md:flex ${
+              wide && openSlug ? "invisible" : ""
+            }`}
+          >
+            ‹
+          </button>
+
+          <div className="pointer-events-auto relative grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {orderedVisible.map((product) => (
+              <Card
+                key={product.slug}
+                product={product}
+                open={openSlug === product.slug}
+                obscured={
+                  wide && openSlug !== null && openSlug !== product.slug
+                }
+                centered={orderedVisible.length === 1}
+                onOpen={(el, trigger) => openCard(product.slug, el, trigger)}
+              />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => changePage(page + 1)}
+            disabled={page === pages - 1 || Boolean(openSlug)}
+            aria-label="Exibir próximos cards"
+            data-catalog-next
+            className={`pointer-events-auto relative hidden h-24 w-16 shrink-0 items-center justify-center text-7xl font-light text-primary/70 transition-[color,opacity,transform] hover:scale-105 hover:text-primary disabled:pointer-events-none disabled:opacity-15 md:flex ${
+              wide && openSlug ? "invisible" : ""
+            }`}
+          >
+            ›
+          </button>
         </div>
       </div>
 
-      {/* Pager removed for 9-card fixed layout */}
+      <nav
+        ref={pagerRef}
+        className="relative z-[var(--z-content)] mx-auto mt-14 flex max-w-5xl flex-col items-center gap-4"
+        aria-label="Navegar pelos cards de produtos"
+      >
+        <div className="flex items-center justify-center gap-1.5 sm:gap-3">
+          <button
+            type="button"
+            onClick={() => changePage(page - 1)}
+            disabled={page === 0 || Boolean(openSlug)}
+            aria-label="Página anterior de produtos"
+            className="inline-flex size-11 items-center justify-center text-3xl leading-none text-primary/70 transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-20"
+          >
+            ‹
+          </button>
+
+          <button
+            type="button"
+            onClick={() => changePage(page - 1)}
+            disabled={page === 0 || Boolean(openSlug)}
+            aria-label="Produtos anteriores"
+            className="relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none text-muted transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-35"
+          >
+            <span className="relative z-[1]">6</span>
+            <span
+              aria-hidden
+              data-pager-shadow="6"
+              className="product-pager__shadow"
+            >
+              6
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => changePage(defaultProductPage)}
+            disabled={Boolean(openSlug)}
+            aria-label="Abrir a página inicial D"
+            aria-current={page === defaultProductPage ? "page" : undefined}
+            className={`relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
+              page === defaultProductPage
+                ? "text-primary drop-shadow-[0_0_18px_var(--primary-glow)]"
+                : "text-muted/55 hover:text-muted"
+            }`}
+          >
+            <span className="relative z-[1]">D</span>
+            <span
+              aria-hidden
+              data-pager-shadow="D"
+              className="product-pager__shadow"
+            >
+              D
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => changePage(firstRightProductPage)}
+            disabled={
+              firstRightProductPage >= pages || Boolean(openSlug)
+            }
+            aria-label="Abrir a página N"
+            aria-current={
+              page === firstRightProductPage ? "page" : undefined
+            }
+            className={`relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
+              page === firstRightProductPage
+                ? "text-primary drop-shadow-[0_0_18px_var(--primary-glow)]"
+                : "text-muted/55 hover:text-muted"
+            } disabled:pointer-events-none disabled:opacity-35`}
+          >
+            <span className="relative z-[1]">N</span>
+            <span
+              aria-hidden
+              data-pager-shadow="N"
+              className="product-pager__shadow"
+            >
+              N
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => changePage(page + 1)}
+            disabled={page === pages - 1 || Boolean(openSlug)}
+            aria-label="Próximos produtos"
+            className="relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none text-muted transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-35"
+          >
+            <span className="relative z-[1]">X</span>
+            <span
+              aria-hidden
+              data-pager-shadow="X"
+              className="product-pager__shadow"
+            >
+              X
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => changePage(page + 1)}
+            disabled={page === pages - 1 || Boolean(openSlug)}
+            aria-label="Próxima página de produtos"
+            className="inline-flex size-11 items-center justify-center text-3xl leading-none text-primary/70 transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-20"
+          >
+            ›
+          </button>
+        </div>
+
+        <div
+          aria-hidden
+          className="flex max-w-full items-center justify-center gap-1"
+        >
+          {Array.from({ length: pages }, (_, index) => (
+            <span
+              key={index}
+              className={`h-px transition-[width,background-color,box-shadow] ${
+                page === index
+                  ? "w-5 bg-primary shadow-[0_0_10px_var(--primary-glow)]"
+                  : "w-2 bg-white/15"
+              }`}
+            />
+          ))}
+        </div>
+
+        <p className="sr-only" aria-live="polite">
+          Exibindo o grupo {page + 1} de {pages}, com{" "}
+          {visible.length === 1
+            ? "1 produto"
+            : `${visible.length} produtos`}.
+        </p>
+      </nav>
 
       {typeof document !== "undefined" && openProduct
         ? createPortal(
@@ -1037,11 +1347,17 @@ export function ProductShowcase() {
               />
               {wide ? (
                 placement ? (
-                  <Popups
-                    product={openProduct}
-                    placement={placement}
-                    onClose={close}
-                  />
+                  <>
+                    <SelectedProductCard
+                      product={openProduct}
+                      placement={placement}
+                    />
+                    <Popups
+                      product={openProduct}
+                      placement={placement}
+                      onClose={close}
+                    />
+                  </>
                 ) : null
               ) : (
                 <MobileSheet product={openProduct} onClose={close} />
@@ -1117,10 +1433,6 @@ function MobileSheet({
         <div className="px-4 py-3">
           <p className="mb-4 text-sm leading-relaxed text-muted">
             {product.description}
-          </p>
-          <p className="mb-4 border border-amber-300/20 bg-amber-300/[0.06] px-3 py-2 text-[0.64rem] leading-relaxed text-amber-100/75">
-            Valores de referência. Confirme escopo e preço final antes de uma
-            venda real.
           </p>
           <ul className="space-y-1.5">
             {product.variants.map((v) => (

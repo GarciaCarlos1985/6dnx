@@ -1,7 +1,8 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { formatBRL, products } from "@/lib/products";
+import { getPublishedCatalog } from "@/lib/catalog/repository";
+import { formatBRL } from "@/lib/products";
 
 const SESSION_TTL_MS = 20 * 60 * 1_000;
 const RATE_WINDOW_MS = 10 * 60 * 1_000;
@@ -88,7 +89,7 @@ function consumeRateLimit(clientKey: string, now = Date.now()) {
   bucket.count += 1;
 }
 
-export function createTestCheckout(
+export async function createTestCheckout(
   productSlug: string,
   variantName: string,
   clientKey: string,
@@ -96,6 +97,7 @@ export function createTestCheckout(
   pruneExpired();
   consumeRateLimit(clientKey);
 
+  const products = await getPublishedCatalog();
   const product = products.find((item) => item.slug === productSlug);
   const variant = product?.variants.find((item) => item.name === variantName);
   if (!product || !variant) return null;

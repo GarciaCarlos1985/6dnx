@@ -16,8 +16,19 @@ export type ProductFeature = {
   value: string;
 };
 
+export type ProductTheme = {
+  accentColor: string;
+  textColor: string;
+  surfaceColor: string;
+};
+
 export type Product = {
   slug: string;
+  /**
+   * Identificador editorial imutável usado para preservar o posicionamento do
+   * catálogo quando o slug público é alterado pelo administrador.
+   */
+  catalogKey?: string;
   title: string;
   category: string;
   tagline: string;
@@ -32,9 +43,10 @@ export type Product = {
   /** ID do vídeo do YouTube (o trecho depois de `v=`), quando disponível. */
   youtubeId?: string;
   videoOrientation?: "landscape" | "portrait";
+  theme?: ProductTheme;
 };
 
-export const products: Product[] = [
+const sourceProducts: Product[] = [
   {
     "slug": "dayz-6DNX-software",
     "title": "DayZ",
@@ -2873,11 +2885,209 @@ export const products: Product[] = [
     systemSupport: [],
     menuKeys: [],
     tutorialSteps: [],
-    image: "/products/card-art/custom-steam-profile-6dnx.webp",
+    image: "/products/card-art/steam-profile-6dnx.webp",
     status: "available",
     variants: [{ name: "Unitário", priceBRL: 50.00 }]
   }
 ];
+
+type CatalogPatch = Partial<
+  Pick<
+    Product,
+    | "title"
+    | "category"
+    | "tagline"
+    | "description"
+    | "variants"
+    | "youtubeId"
+  >
+>;
+
+/**
+ * Correções cadastrais confirmadas no documento histórico recebido.
+ * Os valores continuam sendo referências comerciais, nunca cobrança final.
+ */
+const catalogPatches: Record<string, CatalogPatch> = {
+  freezing: {
+    variants: [
+      { name: "1 Dia", priceBRL: 15.99 },
+      { name: "7 Dias", priceBRL: 25.99 },
+      { name: "30 Dias", priceBRL: 50.99 },
+    ],
+    youtubeId: undefined,
+  },
+  "recoil-ia": {
+    title: "Recoil [IA]",
+    category: "Utilitário de gameplay",
+    tagline: "Recoil [IA] Acesso",
+    variants: [
+      { name: "1 Dia", priceBRL: 15.99 },
+      { name: "7 Dias", priceBRL: 25.99 },
+      { name: "30 Dias", priceBRL: 50.99 },
+    ],
+    youtubeId: undefined,
+  },
+  "Spow-KWID": {
+    title: "Spow [KWID]",
+    category: "Sistema / KWID",
+    tagline: "Spow [KWID] Acesso",
+    variants: [
+      { name: "1 Dia", priceBRL: 21.99 },
+      { name: "7 Dias", priceBRL: 47.99 },
+      { name: "30 Dias", priceBRL: 122.99 },
+    ],
+    youtubeId: undefined,
+  },
+  "Spow-warzone-ranked-KWID": {
+    title: "Spow Warzone + Ranked [KWID]",
+    category: "Warzone",
+    tagline: "Spow Warzone + Ranked [KWID] Acesso",
+    variants: [
+      { name: "1 Dia", priceBRL: 37.99 },
+      { name: "7 Dias", priceBRL: 69.99 },
+      { name: "30 Dias", priceBRL: 216.99 },
+    ],
+    youtubeId: undefined,
+  },
+  "warzone-full-control-aim-6DNX-software": {
+    title: "Warzone [FULL + CONTROL AIM]",
+    category: "Warzone",
+    tagline: "Warzone [FULL + CONTROL AIM] Acesso",
+    variants: [{ name: "30 Dias", priceBRL: 357.99 }],
+    youtubeId: "AX4rM8YSpJs",
+  },
+  "warzone-full-6DNX-software": {
+    title: "Warzone [FULL]",
+    category: "Warzone",
+    tagline: "Warzone [FULL] Acesso",
+    variants: [
+      { name: "1 Dia", priceBRL: 53.99 },
+      { name: "7 Dias", priceBRL: 164.99 },
+      { name: "30 Dias", priceBRL: 317.99 },
+    ],
+    youtubeId: "AX4rM8YSpJs",
+  },
+  "warzone-esp-6DNX-software": {
+    title: "Warzone [ESP]",
+    category: "Warzone",
+    tagline: "Warzone [ESP] Acesso",
+    variants: [
+      { name: "7 Dias", priceBRL: 102.99 },
+      { name: "30 Dias", priceBRL: 204.99 },
+    ],
+    youtubeId: "vVZvtLHwQwk",
+  },
+  "zoom-ia": {
+    title: "Zoom [IA]",
+    category: "Utilitário de gameplay",
+    tagline: "Zoom [IA] Acesso",
+    description: "Super ZOOM mod.",
+    variants: [
+      { name: "1 Dia", priceBRL: 15.99 },
+      { name: "7 Dias", priceBRL: 25.99 },
+      { name: "30 Dias", priceBRL: 50.99 },
+    ],
+    youtubeId: "s8D7QlxiHmE",
+  },
+};
+
+const dayzFamilies = [
+  {
+    slug: "dayz-6DNX-software",
+    title: "DayZ Spow",
+    sourceName: "Spow",
+    singleVariantName: "Acesso",
+    image: "/products/card-art/dayz-6dnx.webp",
+  },
+  {
+    slug: "dayz-moonwalk",
+    title: "DayZ Moonwalk",
+    sourceName: "Moonwalk",
+    singleVariantName: "Lifetime",
+    image: "/products/card-art/aim-training-lab-6dnx.webp",
+  },
+  {
+    slug: "dayz-private",
+    title: "DayZ Private",
+    sourceName: "Private",
+    image: "/products/card-art/performance-audit-6dnx.webp",
+  },
+  {
+    slug: "dayz-gg",
+    title: "DayZ GG",
+    sourceName: "GG",
+    image: "/products/card-art/game-setup-pro-6dnx.webp",
+  },
+  {
+    slug: "dayz-rage",
+    title: "DayZ Rage",
+    sourceName: "Rage",
+    image: "/products/card-art/stream-studio-6dnx.webp",
+  },
+  {
+    slug: "dayz-shadow",
+    title: "DayZ Shadow",
+    sourceName: "Shadow",
+    image: "/products/card-art/creator-identity-pack-6dnx.webp",
+  },
+  {
+    slug: "dayz-elisyum",
+    title: "DayZ Elisyum",
+    sourceName: "Elisyum",
+    image: "/products/card-art/reshades-6dnx.webp",
+  },
+] as const;
+
+function splitDayzFamilies(product: Product): Product[] {
+  return dayzFamilies.map((family) => {
+    const prefix = `${family.sourceName} - `;
+    const variants = product.variants
+      .filter(
+        (variant) =>
+          variant.name === family.sourceName ||
+          variant.name.startsWith(prefix),
+      )
+      .map((variant) => ({
+        ...variant,
+        name:
+          "singleVariantName" in family
+            ? family.singleVariantName
+            : variant.name.slice(prefix.length),
+        note:
+          "singleVariantName" in family &&
+          family.singleVariantName === variant.note
+            ? undefined
+            : variant.note,
+      }));
+
+    return {
+      ...product,
+      slug: family.slug,
+      title: family.title,
+      tagline: `${family.sourceName} · DayZ`,
+      description:
+        product.description ||
+        `Opções de ${family.sourceName} para DayZ com seus respectivos valores de referência.`,
+      image: family.image,
+      variants,
+    };
+  });
+}
+
+const normalizedProducts = sourceProducts.map((product) => ({
+  ...product,
+  ...catalogPatches[product.slug],
+}));
+
+/**
+ * Catálogo executável: cada linha comercial ocupa seu próprio card.
+ * Durações e licenças do mesmo item permanecem como variações internas.
+ */
+export const products: Product[] = normalizedProducts.flatMap((product) =>
+  product.slug === "dayz-6DNX-software"
+    ? splitDayzFamilies(product)
+    : [product],
+);
 
 export function productStatusLabel(status: ProductStatus) {
   return status === "available" ? "Disponível" : "Sob medida";

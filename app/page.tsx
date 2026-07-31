@@ -1,15 +1,24 @@
 import { Suspense } from "react";
-import { CinematicCompanions } from "@/components/cinematic-companions";
 import { HeroSection } from "@/components/hero-section";
+import { CinematicCompanions } from "@/components/cinematic-companions";
 import { NewsRadar, NewsRadarSkeleton } from "@/components/news-radar";
 import { ProductShowcase } from "@/components/product-showcase";
+import { SiteAtmosphere } from "@/components/site-atmosphere";
+import { getPublishedCatalog } from "@/lib/catalog/repository";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const catalogProducts = await getPublishedCatalog();
+
   return (
     <main className="site-flow">
-      <HeroSection />
-      <CinematicCompanions />
-      <ProductShowcase />
+      <SiteAtmosphere />
+      <HeroSection
+        showBrandOverlay={false}
+        showCinematicEffects={false}
+        showVideoOverlay
+      />
+      <CinematicCompanions scene="products" />
+      <ProductShowcase catalogProducts={catalogProducts} />
       <div className="hidden">
         <Suspense fallback={<NewsRadarSkeleton />}>
           <NewsRadar />

@@ -32,8 +32,19 @@ type ParticleStyle = CSSProperties & {
   "--particle-drift": string;
 };
 
-export function HeroSection() {
+type HeroSectionProps = {
+  showBrandOverlay?: boolean;
+  showCinematicEffects?: boolean;
+  showVideoOverlay?: boolean;
+};
+
+export function HeroSection({
+  showBrandOverlay = true,
+  showCinematicEffects = true,
+  showVideoOverlay = true,
+}: HeroSectionProps) {
   const sceneRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const auraRef = useRef<HTMLDivElement>(null);
   const bloodEyeRef = useRef<HTMLDivElement>(null);
   const bloodEyeCoreRef = useRef<HTMLDivElement>(null);
@@ -43,10 +54,40 @@ export function HeroSection() {
   const logoScrollRef = useRef<HTMLSpanElement>(null);
   const logoRef = useRef<HTMLImageElement>(null);
   const revealRef = useRef<HTMLDivElement>(null);
-  const cueRef = useRef<HTMLParagraphElement>(null);
+  const cueRef = useRef<HTMLAnchorElement>(null);
   const cueArrowRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+    const syncPlayback = () => {
+      if (reducedMotion.matches) {
+        video.pause();
+        video.currentTime = 0;
+        return;
+      }
+
+      void video.play().catch(() => {
+        // The muted autoplay attributes satisfy current browser policies in
+        // normal conditions. If a browser still blocks playback, its first
+        // decoded frame remains a valid static hero background.
+      });
+    };
+
+    syncPlayback();
+    reducedMotion.addEventListener("change", syncPlayback);
+    return () => {
+      reducedMotion.removeEventListener("change", syncPlayback);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!showCinematicEffects) return;
+
     const mm = gsap.matchMedia();
     const eyeElement = bloodEyeRef.current;
     const eyeVisibility = { hover: 0, scroll: 0 };
@@ -319,10 +360,14 @@ export function HeroSection() {
           transformOrigin: "50% 50%",
           transformStyle: "preserve-3d",
           force3D: true,
+          scaleX: 1,
+          scaleY: 1,
         });
         gsap.set(eyePointer, {
           transformOrigin: "50% 50%",
           force3D: true,
+          scaleX: 1,
+          scaleY: 1,
         });
 
         const moveX = gsap.quickTo(logo, "x", {
@@ -341,7 +386,11 @@ export function HeroSection() {
           duration: 0.58,
           ease: "power3.out",
         });
-        const breathe = gsap.quickTo(logo, "scale", {
+        const breatheX = gsap.quickTo(logo, "scaleX", {
+          duration: 0.42,
+          ease: "power3.out",
+        });
+        const breatheY = gsap.quickTo(logo, "scaleY", {
           duration: 0.42,
           ease: "power3.out",
         });
@@ -349,7 +398,11 @@ export function HeroSection() {
           duration: 0.52,
           ease: "power3.out",
         });
-        const breatheEye = gsap.quickTo(eyePointer, "scale", {
+        const breatheEyeX = gsap.quickTo(eyePointer, "scaleX", {
+          duration: 0.48,
+          ease: "power3.out",
+        });
+        const breatheEyeY = gsap.quickTo(eyePointer, "scaleY", {
           duration: 0.48,
           ease: "power3.out",
         });
@@ -380,7 +433,8 @@ export function HeroSection() {
           moveY(normalizedY * 8);
           tiltX(normalizedY * -4.5);
           tiltY(normalizedX * 5.5);
-          breathe(1.025);
+          breatheX(1.025);
+          breatheY(1.025);
 
           if (lastPointerX !== null && lastPointerY !== null) {
             eyeRotation += clampEyeStep(
@@ -391,7 +445,8 @@ export function HeroSection() {
           lastPointerX = pointerX;
           lastPointerY = pointerY;
           spinEye(eyeRotation + normalizedX * 7 - normalizedY * 5);
-          breatheEye(1.025);
+          breatheEyeX(1.025);
+          breatheEyeY(1.025);
         };
 
         const revealEye = (event: PointerEvent) => {
@@ -428,10 +483,12 @@ export function HeroSection() {
           moveY(0);
           tiltX(0);
           tiltY(0);
-          breathe(1);
+          breatheX(1);
+          breatheY(1);
           eyeRotation += 18;
           spinEye(eyeRotation);
-          breatheEye(1);
+          breatheEyeX(1);
+          breatheEyeY(1);
           lastPointerX = null;
           lastPointerY = null;
           gsap.to(eyeVisibility, {
@@ -496,7 +553,7 @@ export function HeroSection() {
       mm.revert();
       eyeElement?.style.removeProperty("opacity");
     };
-  }, []);
+  }, [showCinematicEffects]);
 
   return (
     <section
@@ -505,183 +562,218 @@ export function HeroSection() {
       aria-label="6DNX"
     >
       <div
-        ref={auraRef}
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[130vh] w-[130vh] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-45 will-change-transform"
-        style={{
-          background:
-            "radial-gradient(circle, oklch(0.55 0.22 25 / 0.5) 0%, oklch(0.55 0.22 25 / 0.12) 42%, transparent 68%)",
-        }}
+        className="hero-video-stage pointer-events-none absolute inset-0"
+        data-video-overlay={showVideoOverlay ? "visible" : "hidden"}
         aria-hidden
-      />
-
-      <div className="hero-atmosphere" aria-hidden>
-        <span className="hero-smoke hero-smoke--left" />
-        <span className="hero-smoke hero-smoke--center" />
-        <span className="hero-smoke hero-smoke--right" />
-        {HERO_PARTICLES.map((particle, index) => (
-          <span
-            key={`${particle.x}-${particle.y}`}
-            className="hero-particle"
-            style={
-              {
-                left: `${particle.x}%`,
-                top: `${particle.y}%`,
-                width: particle.size,
-                height: particle.size,
-                animationDelay: `-${particle.delay}s`,
-                animationDuration: `${particle.duration}s`,
-                "--particle-drift": `${particle.drift}px`,
-                opacity: index % 4 === 0 ? 0.8 : 0.55,
-              } as ParticleStyle
-            }
-          />
-        ))}
+      >
+        <video
+          ref={videoRef}
+          className="hero-video-stage__media"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          disablePictureInPicture
+          disableRemotePlayback
+          tabIndex={-1}
+        >
+          <source src="/novo-hero-final.mp4" type="video/mp4" />
+        </video>
       </div>
 
+      {showVideoOverlay ? (
+        <div
+          className="hero-video-overlay pointer-events-none absolute inset-0"
+          aria-hidden
+        />
+      ) : null}
+
+      {showCinematicEffects ? (
+        <>
+          <div
+            ref={auraRef}
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[130vh] w-[130vh] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-45 will-change-transform"
+            style={{
+              background:
+                "radial-gradient(circle, oklch(0.55 0.22 25 / 0.5) 0%, oklch(0.55 0.22 25 / 0.12) 42%, transparent 68%)",
+            }}
+            aria-hidden
+          />
+
+          <div className="hero-atmosphere" aria-hidden>
+            <span className="hero-smoke hero-smoke--left" />
+            <span className="hero-smoke hero-smoke--center" />
+            <span className="hero-smoke hero-smoke--right" />
+            {HERO_PARTICLES.map((particle, index) => (
+              <span
+                key={`${particle.x}-${particle.y}`}
+                className="hero-particle"
+                style={
+                  {
+                    left: `${particle.x}%`,
+                    top: `${particle.y}%`,
+                    width: particle.size,
+                    height: particle.size,
+                    animationDelay: `-${particle.delay}s`,
+                    animationDuration: `${particle.duration}s`,
+                    "--particle-drift": `${particle.drift}px`,
+                    opacity: index % 4 === 0 ? 0.8 : 0.55,
+                  } as ParticleStyle
+                }
+              />
+            ))}
+          </div>
+
+          <div
+            ref={bloodEyeRef}
+            data-hero-eye
+            className="hero-blood-eye pointer-events-none absolute left-1/2 top-1/2 z-[7] aspect-square w-[min(88vw,48rem)] -translate-x-1/2 -translate-y-1/2 opacity-0 will-change-[opacity]"
+            aria-hidden
+          >
+            <div
+              ref={bloodEyeCoreRef}
+              className="hero-blood-eye__core h-full w-full will-change-transform"
+            >
+              <div
+                ref={bloodEyePointerRef}
+                className="hero-blood-eye__pointer h-full w-full will-change-transform"
+              >
+                <svg viewBox="0 0 800 800" className="h-full w-full">
+                <defs>
+                  <radialGradient id="blood-iris" cx="50%" cy="48%" r="52%">
+                    <stop offset="0%" stopColor="#060001" />
+                    <stop offset="18%" stopColor="#190003" />
+                    <stop offset="48%" stopColor="#7b0511" />
+                    <stop offset="72%" stopColor="#310006" />
+                    <stop offset="100%" stopColor="#050001" stopOpacity="0" />
+                  </radialGradient>
+                  <radialGradient id="blood-pupil" cx="50%" cy="45%" r="55%">
+                    <stop offset="0%" stopColor="#000" />
+                    <stop offset="66%" stopColor="#090001" />
+                    <stop offset="100%" stopColor="#5d020b" />
+                  </radialGradient>
+                </defs>
+
+                <circle cx="400" cy="400" r="360" fill="url(#blood-iris)" />
+                <circle
+                  cx="400"
+                  cy="400"
+                  r="292"
+                  fill="none"
+                  stroke="#d80b22"
+                  strokeOpacity="0.24"
+                  strokeWidth="13"
+                />
+                <circle
+                  cx="400"
+                  cy="400"
+                  r="208"
+                  fill="none"
+                  stroke="#ff1731"
+                  strokeOpacity="0.28"
+                  strokeWidth="9"
+                />
+                <circle cx="400" cy="400" r="84" fill="url(#blood-pupil)" />
+                <circle
+                  cx="400"
+                  cy="400"
+                  r="44"
+                  fill="#010000"
+                  stroke="#e10b22"
+                  strokeOpacity="0.32"
+                  strokeWidth="5"
+                />
+
+                {[0, 120, 240].map((rotation) => (
+                  <g
+                    key={rotation}
+                    transform={`rotate(${rotation} 400 400) translate(400 176)`}
+                    fill="#070001"
+                  >
+                    <path d="M0-42c27 0 49 22 49 49 0 18-9 34-23 42 15 20 17 44 4 70-2-31-20-50-48-61A49 49 0 0 1 0-42Z" />
+                    <circle cx="0" cy="6" r="31" />
+                  </g>
+                ))}
+
+                <path
+                  d="M102 404c68-110 174-176 298-176s230 66 298 176c-68 110-174 176-298 176S170 514 102 404Z"
+                  fill="none"
+                  stroke="#ff1731"
+                  strokeOpacity="0.16"
+                  strokeWidth="7"
+                />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div
+            ref={transformationFlashRef}
+            className="pointer-events-none absolute inset-0 z-[9] opacity-0 will-change-transform"
+            style={{
+              background:
+                "radial-gradient(ellipse at 20% 62%, oklch(0.68 0.24 25 / 0.7), transparent 35%), radial-gradient(ellipse at 80% 58%, oklch(0.68 0.24 25 / 0.72), transparent 36%)",
+              mixBlendMode: "screen",
+            }}
+            aria-hidden
+          />
+
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 3px)",
+            }}
+            aria-hidden
+          />
+
+        </>
+      ) : null}
+
       <div
-        ref={bloodEyeRef}
-        data-hero-eye
-        className="hero-blood-eye pointer-events-none absolute left-1/2 top-1/2 z-[7] aspect-square w-[min(88vw,48rem)] -translate-x-1/2 -translate-y-1/2 opacity-0 will-change-[opacity]"
-        aria-hidden
+        data-hero-copy-position
+        className="pointer-events-none absolute inset-x-0 bottom-[clamp(7.75rem,16vh,9rem)] z-[var(--z-hero-copy)] px-6"
       >
         <div
-          ref={bloodEyeCoreRef}
-          className="hero-blood-eye__core h-full w-full will-change-transform"
+          ref={titleRef}
+          className="mx-auto max-w-[46rem] text-center select-none will-change-transform"
         >
-          <div
-            ref={bloodEyePointerRef}
-            className="hero-blood-eye__pointer h-full w-full will-change-transform"
+          <h1
+            className={showBrandOverlay ? "mb-1" : "sr-only"}
+            data-hero-brand-overlay={showBrandOverlay ? "visible" : "hidden"}
           >
-            <svg viewBox="0 0 800 800" className="h-full w-full">
-            <defs>
-              <radialGradient id="blood-iris" cx="50%" cy="48%" r="52%">
-                <stop offset="0%" stopColor="#060001" />
-                <stop offset="18%" stopColor="#190003" />
-                <stop offset="48%" stopColor="#7b0511" />
-                <stop offset="72%" stopColor="#310006" />
-                <stop offset="100%" stopColor="#050001" stopOpacity="0" />
-              </radialGradient>
-              <radialGradient id="blood-pupil" cx="50%" cy="45%" r="55%">
-                <stop offset="0%" stopColor="#000" />
-                <stop offset="66%" stopColor="#090001" />
-                <stop offset="100%" stopColor="#5d020b" />
-              </radialGradient>
-            </defs>
-
-            <circle cx="400" cy="400" r="360" fill="url(#blood-iris)" />
-            <circle
-              cx="400"
-              cy="400"
-              r="292"
-              fill="none"
-              stroke="#d80b22"
-              strokeOpacity="0.24"
-              strokeWidth="13"
-            />
-            <circle
-              cx="400"
-              cy="400"
-              r="208"
-              fill="none"
-              stroke="#ff1731"
-              strokeOpacity="0.28"
-              strokeWidth="9"
-            />
-            <circle cx="400" cy="400" r="84" fill="url(#blood-pupil)" />
-            <circle
-              cx="400"
-              cy="400"
-              r="44"
-              fill="#010000"
-              stroke="#e10b22"
-              strokeOpacity="0.32"
-              strokeWidth="5"
-            />
-
-            {[0, 120, 240].map((rotation) => (
-              <g
-                key={rotation}
-                transform={`rotate(${rotation} 400 400) translate(400 176)`}
-                fill="#070001"
-              >
-                <path d="M0-42c27 0 49 22 49 49 0 18-9 34-23 42 15 20 17 44 4 70-2-31-20-50-48-61A49 49 0 0 1 0-42Z" />
-                <circle cx="0" cy="6" r="31" />
-              </g>
-            ))}
-
-            <path
-              d="M102 404c68-110 174-176 298-176s230 66 298 176c-68 110-174 176-298 176S170 514 102 404Z"
-              fill="none"
-              stroke="#ff1731"
-              strokeOpacity="0.16"
-              strokeWidth="7"
-            />
-            </svg>
-          </div>
+            <span
+              ref={logoScrollRef}
+              data-hero-logo-shell
+              className="hero-brand-logo-shell inline-block w-[clamp(21rem,46vw,40rem)] max-w-[92vw] align-middle"
+            >
+              {showBrandOverlay ? (
+                <Image
+                  ref={logoRef}
+                  data-hero-logo-motion
+                  src="/brand/6dorme-nois-xita-hero-v2.webp"
+                  alt="6Dorme Nois Xita"
+                  width={1536}
+                  height={1024}
+                  preload
+                  sizes="(max-width: 640px) 92vw, (max-width: 1280px) 46vw, 640px"
+                  className="hero-brand-logo block h-auto w-full"
+                />
+              ) : (
+                "6Dorme Nois Xita"
+              )}
+            </span>
+          </h1>
+          <p className="hero-copy-headline mb-3 text-balance text-[clamp(0.95rem,2.2vw,1.6rem)] font-extrabold uppercase tracking-[0.05em]">
+            Soluções <span className="italic text-primary">Incríveis</span>,{" "}
+            <span className="italic text-primary">Seguras</span> e Profissionais
+          </p>
+          <p className="hero-copy-support mx-auto max-w-xl text-[0.65rem] uppercase leading-relaxed tracking-[0.22em] md:text-xs">
+            Descubra soluções criadas para elevar sua experiência em diferentes
+            jogos.
+          </p>
         </div>
-      </div>
-
-      <div
-        ref={transformationFlashRef}
-        className="pointer-events-none absolute inset-0 z-[9] opacity-0 will-change-transform"
-        style={{
-          background:
-            "radial-gradient(ellipse at 20% 62%, oklch(0.68 0.24 25 / 0.7), transparent 35%), radial-gradient(ellipse at 80% 58%, oklch(0.68 0.24 25 / 0.72), transparent 36%)",
-          mixBlendMode: "screen",
-        }}
-        aria-hidden
-      />
-
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 3px)",
-        }}
-        aria-hidden
-      />
-
-      {/* Scrim: keeps the copy legible wherever the art lands, at any viewport. */}
-      <div
-        className="pointer-events-none absolute left-1/2 top-1/2 z-[var(--z-hero-scrim)] h-[75vh] w-[min(46rem,92vw)] -translate-x-1/2 -translate-y-1/2"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, oklch(0.08 0 0 / 0.92) 0%, oklch(0.08 0 0 / 0.7) 38%, transparent 72%)",
-        }}
-        aria-hidden
-      />
-
-      <div
-        ref={titleRef}
-        className="relative z-[var(--z-hero-copy)] max-w-[46rem] px-6 text-center select-none will-change-transform"
-      >
-        <h1 className="mb-1">
-          <span
-            ref={logoScrollRef}
-            data-hero-logo-shell
-            className="hero-brand-logo-shell inline-block w-[clamp(21rem,46vw,40rem)] max-w-[92vw] align-middle"
-          >
-            <Image
-              ref={logoRef}
-              data-hero-logo-motion
-              src="/brand/6dorme-nois-xita-hero-v2.webp"
-              alt="6Dorme Nois Xita"
-              width={1536}
-              height={1024}
-              preload
-              sizes="(max-width: 640px) 92vw, (max-width: 1280px) 46vw, 640px"
-              className="hero-brand-logo block h-auto w-full"
-            />
-          </span>
-        </h1>
-        <p className="mb-3 text-balance text-[clamp(0.95rem,2.2vw,1.6rem)] font-extrabold uppercase tracking-[0.05em] text-ink">
-          Soluções <span className="italic text-primary">Incríveis</span>,{" "}
-          <span className="italic text-primary">Seguras</span> e Profissionais
-        </p>
-        <p className="mx-auto max-w-xl text-[0.65rem] uppercase leading-relaxed tracking-[0.22em] text-white/85 drop-shadow-[0_1px_12px_rgba(255,255,255,0.2)] md:text-xs">
-          Descubra soluções criadas para elevar sua experiência em diferentes
-          jogos.
-        </p>
       </div>
 
       <div
@@ -698,13 +790,21 @@ export function HeroSection() {
         </p>
       </div>
 
-      <p
+      <a
         ref={cueRef}
-        className="absolute bottom-8 left-1/2 z-[var(--z-hero-copy)] flex -translate-x-1/2 flex-col items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-white/90 drop-shadow-[0_1px_10px_rgba(255,255,255,0.16)]"
+        href="#produtos"
+        className="hero-buy-key-shell absolute bottom-7 left-1/2 z-[var(--z-hero-copy)] w-[clamp(14rem,28vw,19rem)] -translate-x-1/2"
+        aria-label="Comprar agora — ver soluções 6DNX"
       >
-        Role para desvendar
-        <span ref={cueArrowRef} className="text-xl font-bold text-primary/70" aria-hidden>↓</span>
-      </p>
+        <span className="hero-buy-key">
+          <span className="hero-buy-key__label">Comprar agora</span>
+          <span
+            ref={cueArrowRef}
+            className="hero-buy-key__glow"
+            aria-hidden
+          />
+        </span>
+      </a>
     </section>
   );
 }

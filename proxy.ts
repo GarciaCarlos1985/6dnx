@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { refreshSupabaseSession } from "@/lib/supabase/proxy";
 
 const MIN_REVIEW_PASSWORD_LENGTH = 16;
 const ROBOTS_POLICY =
@@ -111,12 +112,24 @@ function restrictedResponse(
   return applySecurityHeaders(response, request, true);
 }
 
-export function proxy(request: NextRequest) {
+function usesAdminSession(pathname: string) {
+  return pathname === "/admin" ||
+    pathname.startsWith("/admin/") ||
+    pathname.startsWith("/api/admin/");
+}
+
+async function nextResponse(request: NextRequest) {
+  return usesAdminSession(request.nextUrl.pathname)
+    ? refreshSupabaseSession(request)
+    : NextResponse.next();
+}
+
+export async function proxy(request: NextRequest) {
   const configuredReviewMode = process.env.SITE_REVIEW_ENABLED;
   const reviewEnabled = configuredReviewMode === "true";
 
   if (!reviewEnabled || isServerToServerRoute(request.nextUrl.pathname)) {
-    return applySecurityHeaders(NextResponse.next(), request);
+    return applySecurityHeaders(await nextResponse(request), request);
   }
 
   const expectedUsername = process.env.SITE_REVIEW_USER?.trim() || "6dnx";
@@ -146,5 +159,5 @@ export function proxy(request: NextRequest) {
     );
   }
 
-  return applySecurityHeaders(NextResponse.next(), request, true);
+  return applySecurityHeaders(await nextResponse(request), request, true);
 }

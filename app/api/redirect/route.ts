@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { products } from "@/lib/products";
+import { getPublishedCatalog } from "@/lib/catalog/repository";
 
 const FALLBACK_INVITE = "https://discord.gg/6dnx";
 
@@ -23,8 +23,9 @@ function discordInvite() {
  * GET prevents link previewers, crawlers and browser prefetch from announcing
  * customers that never clicked the purchase action.
  */
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const slug = request.nextUrl.searchParams.get("slug");
+  const products = await getPublishedCatalog();
   const productExists = products.some((item) => item.slug === slug);
 
   return NextResponse.redirect(

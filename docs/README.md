@@ -6,18 +6,21 @@ guardam arquitetura, regras, decisões, auditorias e fontes históricas.
 
 ## Ordem recomendada de leitura
 
-1. [`governance/REGRAS_DO_PROJETO.md`](governance/REGRAS_DO_PROJETO.md)
-2. [`PRODUCT.md`](PRODUCT.md)
-3. [`DESIGN.md`](DESIGN.md)
-4. [`PROJECT_STATE.md`](PROJECT_STATE.md)
-5. [`COMMERCE_ARCHITECTURE.md`](COMMERCE_ARCHITECTURE.md)
-6. [`MAPA_EDITORIAL_31_ENTRADAS.md`](MAPA_EDITORIAL_31_ENTRADAS.md)
-7. [`ESTADO_BANCO_SUPABASE_6DNX.md`](ESTADO_BANCO_SUPABASE_6DNX.md)
+1. [`CODEX.md`](CODEX.md)
+2. [`governance/REGRAS_DO_PROJETO.md`](governance/REGRAS_DO_PROJETO.md)
+3. [`PRODUCT.md`](PRODUCT.md)
+4. [`DESIGN.md`](DESIGN.md)
+5. [`PROJECT_STATE.md`](PROJECT_STATE.md)
+6. [`COMMERCE_ARCHITECTURE.md`](COMMERCE_ARCHITECTURE.md)
+7. [`ADMIN.md`](ADMIN.md)
+8. [`MAPA_EDITORIAL_31_ENTRADAS.md`](MAPA_EDITORIAL_31_ENTRADAS.md)
+9. [`ESTADO_BANCO_SUPABASE_6DNX.md`](ESTADO_BANCO_SUPABASE_6DNX.md)
 
 ## Governança
 
 | Documento | Finalidade |
 | --- | --- |
+| [`CODEX.md`](CODEX.md) | protocolo obrigatório para carregar contexto, verificar o Git e iniciar um novo chat sem perder o estado do projeto |
 | [`governance/REGRAS_DO_PROJETO.md`](governance/REGRAS_DO_PROJETO.md) | regras humanas consolidadas de produto, engenharia, segurança e validação |
 
 `AGENTS.md` e `CLAUDE.md` permanecem na raiz porque são arquivos especiais
@@ -30,6 +33,7 @@ continua sendo a regra operacional autoritativa para agentes.
 | --- | --- |
 | [`PROJECT_STATE.md`](PROJECT_STATE.md) | memória operacional, decisões confirmadas, trabalho concluído e pendências |
 | [`COMMERCE_ARCHITECTURE.md`](COMMERCE_ARCHITECTURE.md) | fluxo profissional de compra, estados e invariantes financeiros |
+| [`ADMIN.md`](ADMIN.md) | operação do CMS, autenticação, RLS, primeira conta e checklist de ativação |
 
 ## Produto e design
 

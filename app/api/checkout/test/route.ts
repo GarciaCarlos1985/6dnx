@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     forwardedFor?.split(",")[0]?.trim().slice(0, 96) || "local";
 
   try {
-    const session = createTestCheckout(
+    const session = await createTestCheckout(
       payload.productSlug,
       payload.variantName,
       clientKey,

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- Offline CommonJS catalog generator. */
 const fs = require('fs');
 
 const parsedProducts = JSON.parse(fs.readFileSync('parsed_products.json', 'utf8'));

@@ -8,13 +8,20 @@ O fluxo comercial de produção e suas regras de segurança estão definidos em
 [`docs/COMMERCE_ARCHITECTURE.md`](docs/COMMERCE_ARCHITECTURE.md).
 O mapa de variáveis e escopos da Vercel está em
 [`docs/VERCEL_ENVIRONMENT.md`](docs/VERCEL_ENVIRONMENT.md).
+O painel administrativo e sua ativação segura estão documentados em
+[`docs/ADMIN.md`](docs/ADMIN.md).
 
 ## Estado atual
 
-- Hero com narrativa de scroll em GSAP, cinco poses de cada personagem
-  distribuídas uma vez até o rodapé, atmosfera gerada em CSS e suporte a
+- Hero em vídeo e uma narrativa GSAP independente na vitrine: o casal Killa
+  enquadra os cards pela esquerda e o anjo de asas claras com gesto de silêncio
+  enquadra pela direita, sempre abaixo do conteúdo interativo e com suporte a
   `prefers-reduced-motion`.
-- Sete serviços de referência, exibidos em páginas de três cards.
+- Quarenta cards de produto, exibidos em páginas de três, com cada linha
+  comercial separada e duração/licença mantida como variação de preço. A página
+  inicial `D` apresenta DayZ Private, Counter-Strike 2 e Arena Breakout; os
+  demais DayZ ficam à esquerda, enquanto Tarkov, Rust e PUBG abrem a sequência
+  da direita.
 - No desktop, informação abre à esquerda, o card selecionado permanece visível
   no centro e o vídeo ou prévia visual abre à direita. No mobile, o conteúdo
   usa uma única sheet acessível.
@@ -24,6 +31,10 @@ O mapa de variáveis e escopos da Vercel está em
 - Notícias oficiais de DayZ, ARC Raiders e Counter-Strike 2 via Steam Web API,
   Google AI Blog e OpenAI News via RSS.
 - Persistência Supabase e sincronização diária preparadas, mas não aplicadas remotamente.
+- Painel CMS em `/admin`, protegido por Supabase Auth + papel administrativo +
+  RLS, com prévia, rascunhos, publicação, upload, histórico e fallback estático.
+  A migração do catálogo e a primeira conta continuam pendentes de validação
+  humana.
 
 Ainda faltam decisões comerciais que precisam de validação do proprietário:
 
@@ -37,6 +48,8 @@ Ainda faltam decisões comerciais que precisam de validação do proprietário:
 
 ```text
 app/
+  admin/              login e central editorial protegida
+  api/admin/          CRUD validado, histórico, bootstrap e upload
   api/redirect/       navegação segura de suporte para o Discord
   api/checkout/test/  sessões efêmeras do laboratório de pagamento
   api/cron/news/      coleta protegida por CRON_SECRET
@@ -47,6 +60,8 @@ components/
   product-showcase.tsx
   news-radar.tsx
 lib/
+  admin/              autorização e proteções das APIs administrativas
+  catalog/            contrato, validação, persistência e fallback
   products.ts
   news/
     types.ts           contrato do domínio
@@ -55,7 +70,7 @@ lib/
     sources.ts         agregador das fontes oficiais
     repository.ts      Supabase -> fontes oficiais -> fallback local
     seed.ts            último recurso para indisponibilidade externa
-supabase/migrations/   tabela, índices, RLS e RPC idempotente
+supabase/migrations/   notícias e catálogo administrativo com RLS/histórico
 ```
 
 A home continua estática e os feeds são revalidados diariamente. O conteúdo editorial
