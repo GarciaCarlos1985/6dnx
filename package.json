@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start --port 3127",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --experimental-strip-types tests/*.test.mts",
     "check": "npm run lint && npm run typecheck && npm test && npm run build",
     "admin:create": "node scripts/create-admin.mjs"
