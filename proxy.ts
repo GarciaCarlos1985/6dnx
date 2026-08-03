@@ -2,18 +2,26 @@ import { timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { shouldProtectSiteReview } from "@/lib/security/review-mode";
+import { isSocialPreviewImagePath } from "@/lib/security/social-preview";
 import { refreshSupabaseSession } from "@/lib/supabase/proxy";
 
 const MIN_REVIEW_PASSWORD_LENGTH = 16;
-const ROBOTS_POLICY =
-  "noindex, nofollow, noarchive, nosnippet, noimageindex";
+const ROBOTS_POLICY = "noindex, nofollow, noarchive, nosnippet";
 
 function applySecurityHeaders(
   response: NextResponse,
   request: NextRequest,
   privateReview = false,
 ) {
-  response.headers.set("X-Robots-Tag", ROBOTS_POLICY);
+  const socialPreviewImage = isSocialPreviewImagePath(
+    request.nextUrl.pathname,
+  );
+
+  if (socialPreviewImage) {
+    response.headers.delete("X-Robots-Tag");
+  } else {
+    response.headers.set("X-Robots-Tag", ROBOTS_POLICY);
+  }
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -22,7 +30,10 @@ function applySecurityHeaders(
     "camera=(), geolocation=(), microphone=()",
   );
   response.headers.set("Content-Security-Policy", "frame-ancestors 'none'");
-  response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
+  response.headers.set(
+    "Cross-Origin-Resource-Policy",
+    socialPreviewImage ? "cross-origin" : "same-origin",
+  );
 
   if (request.nextUrl.protocol === "https:") {
     response.headers.set("Strict-Transport-Security", "max-age=31536000");
