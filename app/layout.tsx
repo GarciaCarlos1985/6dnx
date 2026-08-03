@@ -17,11 +17,16 @@ const manrope = Manrope({
 
 function metadataBase() {
   const fallback = new URL("http://localhost:3127");
+  const officialSite = new URL("https://www.6dnx.com.br");
   const configured = process.env.NEXT_PUBLIC_SITE_URL;
   if (!configured) return fallback;
 
   try {
     const url = new URL(configured);
+    if (["6dnx.vercel.app", "6dnx.com.br"].includes(url.hostname)) {
+      return officialSite;
+    }
+
     return url.protocol === "https:" ||
       ["localhost", "127.0.0.1"].includes(url.hostname)
       ? url
