@@ -20,7 +20,7 @@ Configure em **Project Settings > Environment Variables**.
 | Variável | Production | Preview | Uso atual |
 | --- | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | URL canônica HTTPS aprovada para o deployment; domínio atual servido em `https://www.6dnx.com.br` | URL HTTPS do Preview | Metadados e URLs absolutas. Nunca use localhost na Production. |
-| `DEVELOPER_CREDIT_URL` | link público HTTPS, quando fornecido | pode repetir | Destino clicável de “Developer Bicho” no rodapé. Use perfil ou convite público; nunca webhook. |
+| `DEVELOPER_CREDIT_URL` | link público HTTPS, quando fornecido | pode repetir | Destino clicável de “Developer Bicho” no rodapé. Quando ausente, o site reutiliza `DISCORD_INVITE_URL`; nunca use webhook. |
 | `CRON_SECRET` | obrigatório | segredo diferente | Protege `/api/cron/news`; use um segredo aleatório sem privilégios externos. |
 | `SITE_REVIEW_ENABLED` | `true` enquanto privado | `true` enquanto privado | Ativa a senha de revisão. Na Vercel, ausente também bloqueia por segurança; somente `false` explícito abre. |
 | `SITE_REVIEW_USER` | usuário privado | usuário diferente, se desejado | Usuário do desafio HTTP Basic; somente servidor. |

@@ -18,9 +18,9 @@ export default async function HomePage() {
   );
   const checkoutAvailable = checkoutReadiness().ready;
   const paymentTestAvailable = shouldEnablePaymentTestMode(process.env);
-  const developerCreditUrl = resolvePublicHttpsLink(
-    process.env.DEVELOPER_CREDIT_URL,
-  );
+  const developerCreditUrl =
+    resolvePublicHttpsLink(process.env.DEVELOPER_CREDIT_URL) ??
+    resolvePublicHttpsLink(process.env.DISCORD_INVITE_URL);
 
   return (
     <main className="site-flow">
