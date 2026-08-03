@@ -39,6 +39,24 @@ export const metadata: Metadata = {
   },
   description:
     "Softwares utilitários premium para PC, checkout assistido e notícias oficiais de games e inteligência artificial.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "/",
+    siteName: "6DNX",
+    title: "6DNX — Softwares Incríveis, Seguros e Profissionais",
+    description:
+      "Conheça o catálogo premium 6DNX, com soluções para diferentes jogos e atendimento direto pelo Discord.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "6DNX — Softwares Incríveis, Seguros e Profissionais",
+    description:
+      "Conheça o catálogo premium 6DNX, com soluções para diferentes jogos e atendimento direto pelo Discord.",
+  },
   robots: {
     index: false,
     follow: false,

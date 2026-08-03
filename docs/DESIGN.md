@@ -1,10 +1,9 @@
 # Design System — 6DNX
 
-> **Contexto de publicação — 2026-08-03:** estas regras descrevem o design
-> aprovado no worktree local. Production ainda serve a composição anterior com
-> três cards e sem o rodapé novo. Não interpretar a presença deste documento
-> como prova de que a vitrine de doze cards foi commitada, mesclada ou
-> publicada.
+> **Contexto de publicação — 2026-08-03:** Production já serve a vitrine de
+> doze cards, o rodapé e o checkout desligado com atendimento pelo Discord. A
+> nova imagem social Open Graph foi validada e aprovada visualmente pelo
+> proprietário para publicação.
 
 ## Mood
 
@@ -34,6 +33,17 @@ Committed: crimson carries identity (~30–40% of accent moments). Surface is pu
 - Display: **Archivo Black** (imposing, condensed, not Inter/Space Grotesk)
 - Body / UI: **Manrope** (geometric humanist, readable on dark)
 - Headings: uppercase tracking tight; body: sentence case, measure ≤ 65ch
+
+## Social sharing
+
+- A prévia principal de WhatsApp, Discord e redes sociais usa arte estática em
+  proporção 1.9:1 para não depender de uma função em tempo de execução.
+- A composição preserva os arquivos oficiais: casal tático à esquerda, logo
+  alado no centro e anjo à direita, sobre cenário pós-apocalíptico em preto,
+  bordô e carmesim.
+- O logo nunca deve ser reescrito por texto gerado. Open Graph e Twitter usam a
+  mesma imagem e descrições curtas, com URL canônica derivada de
+  `NEXT_PUBLIC_SITE_URL`.
 
 ## Motion
 
