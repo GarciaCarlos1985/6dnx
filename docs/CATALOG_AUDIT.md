@@ -1,5 +1,12 @@
 # Auditoria do catálogo 6DNX
 
+> **Documento histórico de evidências.** Sincronizado em 2026-08-03 somente
+> para contexto: preços e estados abaixo não autorizam venda. O estado
+> operacional do catálogo está em `PROJECT_STATE.md`; Production ainda mostra
+> três cards, enquanto o worktree local prepara doze posições iniciais e o
+> banco medido possui mais registros publicados que precisam ser reconciliados
+> antes da nova vitrine.
+
 Fonte de verdade visual: os 45 arquivos de `discord-imagens/`, revisados em
 2026-07-28. Este documento preserva o que os prints comprovam sem transformar
 preço, estoque ou texto possivelmente desatualizado em dado comercial ativo.

@@ -1,5 +1,10 @@
 # Mapa editorial das 31 entradas originais
 
+> **Fonte editorial histórica.** Sincronizado em 2026-08-03: este mapa não
+> representa sozinho o número atual de registros no Supabase, a ordem dos doze
+> cards iniciais do worktree ou autorização de pagamento. Consulte
+> `PROJECT_STATE.md` antes de usar qualquer entrada em código ou oferta real.
+
 Atualizado em 29 de julho de 2026.
 
 ## Finalidade

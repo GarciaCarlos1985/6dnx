@@ -38,6 +38,11 @@ export type Product = {
   menuKeys?: ProductFeature[];
   tutorialSteps?: string[];
   image: string;
+  /**
+   * Arte vertical exclusiva do checkout. `null` significa usar a thumbnail do
+   * card como fallback sem recortá-la.
+   */
+  checkoutBanner?: string | null;
   status: ProductStatus;
   variants: Variant[];
   /** ID do vídeo do YouTube (o trecho depois de `v=`), quando disponível. */
@@ -3079,15 +3084,112 @@ const normalizedProducts = sourceProducts.map((product) => ({
   ...catalogPatches[product.slug],
 }));
 
+export const RUST_SOURCE_CATALOG_KEY = "rust-6DNX-software";
+export const RUST_CLONE_COUNT = 20;
+
+export function rustCloneCatalogKey(index: number) {
+  if (!Number.isInteger(index) || index < 1 || index > RUST_CLONE_COUNT) {
+    throw new RangeError(
+      `A cópia do Rust deve estar entre 1 e ${RUST_CLONE_COUNT}.`,
+    );
+  }
+
+  return `rust-${index}-6dnx-software`;
+}
+
+const rustCloneCatalogKeys = new Set(
+  Array.from(
+    { length: RUST_CLONE_COUNT },
+    (_, index) => rustCloneCatalogKey(index + 1),
+  ),
+);
+
+export function isRustCloneCatalogKey(value: string) {
+  return rustCloneCatalogKeys.has(value);
+}
+
 /**
- * Catálogo executável: cada linha comercial ocupa seu próprio card.
- * Durações e licenças do mesmo item permanecem como variações internas.
+ * Gera cópias editoriais completas do Rust sem compartilhar arrays ou objetos
+ * mutáveis com o card de origem. Apenas o título e os identificadores internos
+ * mudam; conteúdo, arte, variações, preços e estado comercial permanecem
+ * exatamente iguais aos da origem recebida.
  */
-export const products: Product[] = normalizedProducts.flatMap((product) =>
+export function buildRustCloneProducts(source: Product): Product[] {
+  return Array.from({ length: RUST_CLONE_COUNT }, (_, offset) => {
+    const index = offset + 1;
+    const catalogKey = rustCloneCatalogKey(index);
+
+    return {
+      ...source,
+      slug: catalogKey,
+      catalogKey,
+      title: `Rust${index}`,
+      ...(source.features
+        ? { features: source.features.map((feature) => ({ ...feature })) }
+        : {}),
+      ...(source.systemSupport
+        ? { systemSupport: source.systemSupport.map((item) => ({ ...item })) }
+        : {}),
+      ...(source.menuKeys
+        ? { menuKeys: source.menuKeys.map((item) => ({ ...item })) }
+        : {}),
+      ...(source.tutorialSteps
+        ? { tutorialSteps: [...source.tutorialSteps] }
+        : {}),
+      variants: source.variants.map((variant) => ({ ...variant })),
+      ...(source.theme ? { theme: { ...source.theme } } : {}),
+    };
+  });
+}
+
+/**
+ * Seleciona, em ordem numérica, somente as próximas cópias ausentes. O padrão
+ * deliberadamente conservador é criar um card por solicitação.
+ */
+export function selectMissingRustCloneProducts(
+  source: Product,
+  existingKeys: ReadonlySet<string>,
+  requestedCount = 1,
+): Product[] {
+  if (
+    !Number.isInteger(requestedCount) ||
+    requestedCount < 1 ||
+    requestedCount > RUST_CLONE_COUNT
+  ) {
+    throw new RangeError(
+      `A quantidade deve estar entre 1 e ${RUST_CLONE_COUNT}.`,
+    );
+  }
+
+  return buildRustCloneProducts(source)
+    .filter(
+      (product) => !existingKeys.has(product.catalogKey ?? product.slug),
+    )
+    .slice(0, requestedCount);
+}
+
+const baseProducts = normalizedProducts.flatMap((product) =>
   product.slug === "dayz-6DNX-software"
     ? splitDayzFamilies(product)
     : [product],
 );
+const rustSourceProduct = baseProducts.find(
+  (product) =>
+    (product.catalogKey ?? product.slug) === RUST_SOURCE_CATALOG_KEY,
+);
+
+if (!rustSourceProduct) {
+  throw new Error("O card estrutural Rust não foi encontrado no catálogo.");
+}
+
+/**
+ * Catálogo executável: cada linha comercial ocupa seu próprio card.
+ * Durações e licenças do mesmo item permanecem como variações internas.
+ */
+export const products: Product[] = [
+  ...baseProducts,
+  ...buildRustCloneProducts(rustSourceProduct),
+];
 
 export function productStatusLabel(status: ProductStatus) {
   return status === "available" ? "Disponível" : "Sob medida";

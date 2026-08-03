@@ -1,5 +1,11 @@
 # Regras consolidadas do projeto 6DNX
 
+> **Sincronizado em 2026-08-03:** existe uma integração StorM server-only já
+> exercitada com um PIX real controlado. Ela continua desligada para novos
+> clientes porque o pedido do teste aguarda a correção/replay da RPC. As regras
+> abaixo devem ser lidas junto de `PROJECT_STATE.md`; snapshots antigos de
+> laboratório não anulam o estado mais recente.
+
 Atualizado em 29 de julho de 2026.
 
 Este documento apresenta as regras em formato humano. `AGENTS.md`, mantido na
@@ -117,10 +123,13 @@ O planejamento interno obedece:
 
 ## Pagamentos
 
-- O checkout atual é laboratório e não movimenta dinheiro.
-- Valor de teste, QR e cartão são cenográficos.
-- StorM Wallet permanece inativa até existir contrato verificável da API,
-  sandbox, criação server-side e webhook assinado.
+- O laboratório cenográfico continua isolado e nunca prova pagamento.
+- A integração StorM real é server-only, usa preço canônico do banco e continua
+  bloqueada em Production por flags explícitas.
+- Um único PIX real autorizado de R$ 1,00 comprovou criação, liquidação no
+  provedor, webhook e HMAC; o pedido ainda não está `paid` porque a RPC falhou.
+- Não marcar pedido manualmente como pago. Aplicar somente migration versionada
+  autorizada e usar replay do payload original assinado.
 - Valor cobrado sempre vem do backend.
 - Nunca confiar em valor, estado `paid` ou redirecionamento enviados pelo
   navegador.

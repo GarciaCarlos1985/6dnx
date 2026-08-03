@@ -4,7 +4,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidateTag } from "next/cache";
 import { getPublicSupabaseConfig } from "@/lib/supabase/config";
 import { buildProductCatalogLayout } from "@/lib/product-catalog-layout";
-import { products as staticProducts, type Product } from "@/lib/products";
+import {
+  isRustCloneCatalogKey,
+  products as staticProducts,
+  RUST_CLONE_COUNT,
+  RUST_SOURCE_CATALOG_KEY,
+  selectMissingRustCloneProducts,
+  type Product,
+} from "@/lib/products";
 import type {
   CatalogAdminItem,
   CatalogBootstrapState,
@@ -28,6 +35,7 @@ type CatalogRow = {
   menu_keys: unknown;
   tutorial_steps: unknown;
   image: string;
+  checkout_banner?: string | null;
   status: string;
   variants: unknown;
   youtube_id: string | null;
@@ -63,6 +71,9 @@ function rowProductCandidate(row: CatalogRow) {
     menuKeys: row.menu_keys,
     tutorialSteps: row.tutorial_steps,
     image: row.image,
+    ...(row.checkout_banner !== undefined
+      ? { checkoutBanner: row.checkout_banner }
+      : {}),
     status: row.status,
     variants: row.variants,
     youtubeId: row.youtube_id ?? undefined,
@@ -109,6 +120,9 @@ export function catalogMutationColumns(
     menu_keys: product.menuKeys ?? [],
     tutorial_steps: product.tutorialSteps ?? [],
     image: product.image,
+    ...(Object.hasOwn(product, "checkoutBanner")
+      ? { checkout_banner: product.checkoutBanner ?? null }
+      : {}),
     status: product.status,
     variants: product.variants,
     youtube_id: product.youtubeId ?? null,
@@ -211,6 +225,37 @@ export async function listAdminCatalog(
     return item ? [item] : [];
   });
   return { state: items.length ? "ready" : "empty", items };
+}
+
+/**
+ * Persists one complete published-catalog order through the database RPC.
+ * The RPC validates membership and applies every position atomically, so a
+ * partial request can never leave the storefront with a half-saved order.
+ */
+export async function reorderPublishedCatalog(
+  supabase: SupabaseClient,
+  orderedIds: string[],
+) {
+  const { error } = await supabase.rpc(
+    "reorder_published_product_catalog",
+    { p_ordered_ids: orderedIds },
+  );
+  if (error) return { items: [], error };
+
+  revalidateTag(PRODUCT_CATALOG_CACHE_TAG, { expire: 0 });
+  const refreshed = await listAdminCatalog(supabase);
+  if (refreshed.state !== "ready") {
+    return {
+      items: refreshed.items,
+      error: {
+        code: "CATALOG_UNAVAILABLE",
+        message:
+          refreshed.message ?? "O catálogo não pôde ser recarregado.",
+      },
+    };
+  }
+
+  return { items: refreshed.items, error: null };
 }
 
 export async function getAdminProduct(
@@ -354,4 +399,114 @@ export async function bootstrapAdminCatalog(supabase: SupabaseClient) {
     .sort((a, b) => a.catalogOrder - b.catalogOrder);
   revalidateTag(PRODUCT_CATALOG_CACHE_TAG, { expire: 0 });
   return { items, error: null };
+}
+
+/**
+ * Sincroniza somente as cópias Rust solicitadas. A operação é idempotente:
+ * cards existentes nunca são sobrescritos e apenas os identificadores ausentes
+ * são anexados ao fim do catálogo.
+ */
+export async function ensureRustCatalogClones(
+  supabase: SupabaseClient,
+  requestedCount = 1,
+) {
+  if (
+    !Number.isInteger(requestedCount) ||
+    requestedCount < 1 ||
+    requestedCount > RUST_CLONE_COUNT
+  ) {
+    return {
+      items: [],
+      createdCount: 0,
+      error: {
+        code: "INVALID_RUST_CLONE_COUNT",
+        message: `Escolha entre 1 e ${RUST_CLONE_COUNT} cards por vez.`,
+      },
+    };
+  }
+
+  const current = await listAdminCatalog(supabase);
+  if (current.state !== "ready") {
+    return {
+      items: current.items,
+      createdCount: 0,
+      error: {
+        code: "CATALOG_UNAVAILABLE",
+        message: current.message ?? "O catálogo não está disponível.",
+      },
+    };
+  }
+
+  const source = current.items.find(
+    (item) => item.sourceKey === RUST_SOURCE_CATALOG_KEY,
+  );
+  if (!source) {
+    return {
+      items: current.items,
+      createdCount: 0,
+      error: {
+        code: "RUST_SOURCE_MISSING",
+        message: "O card Rust original não foi encontrado.",
+      },
+    };
+  }
+
+  const existingKeys = new Set(current.items.map((item) => item.sourceKey));
+  const missingProducts = selectMissingRustCloneProducts(
+    source.product,
+    existingKeys,
+    requestedCount,
+  );
+  if (!missingProducts.length) {
+    return { items: current.items, createdCount: 0, error: null };
+  }
+
+  const lastOrder = current.items.reduce(
+    (highest, item) => Math.max(highest, item.catalogOrder),
+    -1,
+  );
+  const rows = missingProducts.map((product, index) =>
+    catalogMutationColumns(
+      {
+        product,
+        publicationState: "published",
+        catalogOrder: lastOrder + index + 1,
+        changeNote: `Cópia completa solicitada do Rust: ${product.title}`,
+      },
+      product.catalogKey ?? product.slug,
+    ),
+  );
+
+  const { error } = await supabase.from("product_catalog").upsert(rows, {
+    onConflict: "source_key",
+    ignoreDuplicates: true,
+  });
+  if (error) {
+    return { items: current.items, createdCount: 0, error };
+  }
+
+  const refreshed = await listAdminCatalog(supabase);
+  if (refreshed.state !== "ready") {
+    return {
+      items: refreshed.items,
+      createdCount: 0,
+      error: {
+        code: "CATALOG_UNAVAILABLE",
+        message: refreshed.message ?? "O catálogo não pôde ser recarregado.",
+      },
+    };
+  }
+
+  const previousCloneCount = current.items.filter((item) =>
+    isRustCloneCatalogKey(item.sourceKey),
+  ).length;
+  const nextCloneCount = refreshed.items.filter((item) =>
+    isRustCloneCatalogKey(item.sourceKey),
+  ).length;
+  revalidateTag(PRODUCT_CATALOG_CACHE_TAG, { expire: 0 });
+  return {
+    items: refreshed.items,
+    createdCount: Math.max(0, nextCloneCount - previousCloneCount),
+    error: null,
+  };
 }

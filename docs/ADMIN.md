@@ -1,5 +1,11 @@
 # Painel administrativo 6DNX
 
+> **Contexto de 2026-08-03:** o painel usa Supabase Auth, papel `admin`, RLS e
+> validação server-side nas rotas. O cadastro público está desligado. Ainda não
+> existe exigência de MFA/AAL2 para o único administrador; isso é hardening de
+> pré-escala e não é a causa do `422` do PIX. A vitrine/painel ampliados deste
+> worktree ainda não foram publicados na Production atual.
+
 Para o manual operacional em linguagem simples, consulte
 [`GUIA_ADMIN_MAYCON.md`](GUIA_ADMIN_MAYCON.md).
 
@@ -23,19 +29,34 @@ mostram uma indisponibilidade segura, sem ressuscitar produtos arquivados.
 ## O que pode ser editado
 
 - título, categoria, frase curta e descrição;
-- thumbnail local ou enviada ao bucket `product-assets`;
+- thumbnail 16:9 local ou enviada ao bucket `product-assets`;
+- banner vertical 4:5 exclusivo do checkout (opcional); quando vazio, o modal
+  usa a thumbnail inteira sem recortá-la;
 - estado comercial;
 - vídeo do YouTube e orientação horizontal/vertical;
 - recursos, compatibilidade, teclas e passos de tutorial;
 - dados das variações existentes: nome, observação, selo e preço;
 - nota da alteração.
 
-O modo cotidiano não oferece criação, duplicação, restauração, publicação,
-arquivamento, alteração de `slug`/`source_key`, reordenação, paleta arbitrária
-ou inclusão/remoção de variações. Esses campos não apenas sumiram da interface:
-a rota de atualização lê o registro atual e recusa qualquer tentativa de mudar
-essa estrutura. Criar uma nova família comercial ou retirar um produto exige
-revisão técnica deliberada fora do fluxo cotidiano.
+O modo cotidiano não oferece criação ou duplicação genérica, alteração manual
+de `slug`/`source_key`, paleta arbitrária ou
+inclusão/remoção de variações. Esses campos não apenas sumiram da interface: a
+rota de atualização lê o registro atual e recusa qualquer tentativa de mudar
+essa estrutura.
+
+Existem somente três ações estruturais estreitas e deliberadas:
+
+- **Criar cópias Rust:** sincronização idempotente solicitada pelo proprietário.
+  Ela começa em **1**, permite escolher explicitamente a quantidade, copia o
+  Rust atual por inteiro, cria somente os próximos números ausentes, informa
+  que serão publicados, não sobrescreve cards existentes e desaparece quando
+  os vinte estão presentes;
+- **Arquivar/Restaurar card:** retira qualquer produto da vitrine sem apagar seus
+  dados e o recoloca no estado anterior quando solicitado. Um card publicado
+  restaurado retorna no fim do catálogo para evitar colisão de posições;
+- **Organizar vitrine:** reordena somente os cards publicados em uma tela
+  separada. O painel mostra as quatro fileiras iniciais, permite arrastar ou
+  usar botões de posição, exige confirmação e envia a lista completa de uma vez.
 
 ## Proteções contra erro
 
@@ -46,9 +67,13 @@ revisão técnica deliberada fora do fluxo cotidiano.
 - cada atualização gera uma revisão automática;
 - histórico é somente leitura no painel cotidiano;
 - gravação usa controle otimista de revisão e bloqueia sobrescrita concorrente;
-- a API preserva rota, ordem, publicação, paleta e quantidade de variações;
-- a API de produtos não aceita criação e a API de revisões não aceita
-  restauração pelo navegador;
+- a API cotidiana preserva rota, ordem, publicação, paleta e quantidade de
+  variações;
+- a API cotidiana de produtos não aceita criação e a API de revisões não aceita
+  restauração de conteúdo pelo navegador;
+- criação do lote Rust, arquivamento e ordenação usam rotas próprias, autenticação
+  administrativa, confirmação explícita, proteção de origem e revisão
+  otimista;
 - upload é lido em stream com teto de 5 MB e confere a assinatura real de JPG,
   PNG, WEBP ou AVIF, em vez de confiar somente no nome/MIME informado;
 - imagens remotas só podem vir do próprio projeto Supabase;
@@ -64,6 +89,8 @@ Arquivo:
 
 ```text
 supabase/migrations/20260731090000_create_product_catalog_admin.sql
+supabase/migrations/20260801143000_add_catalog_ordering.sql
+supabase/migrations/20260801170000_add_checkout_banner.sql
 ```
 
 Ela cria:
@@ -74,6 +101,26 @@ Ela cria:
 - trigger de histórico;
 - RLS;
 - bucket público `product-assets` com escrita administrativa.
+
+A segunda migração remove a antiga trava dos seis cards fixos e cria a RPC
+administrativa que grava uma ordem completa de forma atômica. Nenhuma das três
+migrações é aplicada automaticamente pelo painel.
+
+A terceira adiciona somente o campo opcional `checkout_banner`. Ela não altera
+thumbnails existentes. Antes de aplicá-la, os cards continuam funcionando com
+o fallback 16:9; salvar um banner dedicado no Supabase depende dessa migration.
+
+### Formato das duas artes
+
+- **Thumbnail do card:** 16:9, recomendação 1600 x 900 px;
+- **Banner do checkout:** 4:5, recomendação 1200 x 1500 px;
+- WEBP ou AVIF preferencialmente; JPG e PNG também são validados;
+- até 5 MB por arquivo.
+
+O painel envia cada arte para uma pasta separada no Storage, mostra a prévia e
+só associa a URL ao produto quando o administrador salva a alteração. O botão
+**Usar thumbnail do card** remove apenas a associação do banner vertical; não
+apaga a thumbnail nem o produto.
 
 Não aplique direto em produção. Primeiro use uma branch/homologação do
 Supabase, execute os testes deste documento e obtenha validação humana.
@@ -151,7 +198,7 @@ alterá-lo. A autorização do painel lê somente `app_metadata`.
 Na primeira entrada o banco estará vazio. Clique em **Importar catálogo atual**.
 A operação:
 
-- copia todos os cards executáveis de `lib/products.ts`;
+- copia todos os 60 cards executáveis de `lib/products.ts`;
 - publica cada item no mesmo estado visual atual;
 - preserva os arquivos fonte;
 - só funciona quando a tabela está vazia.
@@ -165,10 +212,12 @@ A operação:
 5. Marque a confirmação final e salve.
 6. Confira o card e o atendimento pelo Discord no site.
 
-O produto mantém automaticamente seu estado atual: publicado continua
-publicado, rascunho continua rascunho e arquivado continua arquivado. Para
-criar, retirar, reposicionar ou restaurar um produto, abra uma tarefa técnica;
-não altere linhas manualmente no banco.
+O salvamento de conteúdo mantém automaticamente seu estado atual: publicado
+continua publicado, rascunho continua rascunho e arquivado continua arquivado.
+Para retirar um card comum, use **Arquivar card**; para devolvê-lo, abra o filtro
+**Arquivo** e use **Restaurar card**. Para mudar posições, use **Organizar
+vitrine** e confira os doze primeiros lugares antes de salvar. Criação genérica
+continua exigindo uma tarefa técnica; nunca altere linhas manualmente no banco.
 
 ## Rotas
 
@@ -180,9 +229,12 @@ não altere linhas manualmente no banco.
 | `/api/admin/session` | validação da sessão e papel |
 | `/api/admin/products` | listagem; criação cotidiana não é aceita |
 | `/api/admin/products/[id]` | atualização segura com revisão e campos estruturais protegidos |
+| `/api/admin/products/[id]/publication` | arquivamento/restauração reversível de qualquer card |
 | `/api/admin/products/[id]/revisions` | histórico somente para consulta |
 | `/api/admin/assets` | upload limitado de thumbnail |
 | `/api/admin/catalog/bootstrap` | importação inicial única |
+| `/api/admin/catalog/rust-clones` | cria de 1 a 20 cópias Rust ausentes; padrão operacional 1 |
+| `/api/admin/catalog/order` | valida e grava a ordem completa dos cards publicados |
 
 ## Checklist antes de produção
 
@@ -195,8 +247,9 @@ não altere linhas manualmente no banco.
 - [ ] Rascunho e arquivado não aparecem no site.
 - [ ] Publicado aparece no card e o pedido manual abre o atendimento correto.
 - [ ] Duas edições simultâneas geram conflito em vez de sobrescrita.
-- [ ] Tentativas de alterar rota, ordem, publicação, paleta ou quantidade de
-  variações recebem erro e não gravam nada.
+- [ ] A rota cotidiana recusa alteração de rota, ordem, publicação, paleta ou
+  quantidade de variações.
+- [ ] A rota dedicada de ordem recusa listas incompletas, repetidas ou obsoletas.
 - [ ] Upload acima de 5 MB ou MIME inválido é recusado.
 - [ ] Desktop e mobile revisados.
 - [ ] `npm run lint`, `npm run typecheck`, `npm test` e `npm run build`
@@ -208,8 +261,9 @@ não altere linhas manualmente no banco.
 - O painel não ativa pagamento real.
 - O painel não cria a primeira conta automaticamente no deploy.
 - O painel não aplica a migração sozinho.
-- O modo cotidiano não cria, duplica, publica, arquiva, reordena nem restaura
-  produtos. Essas ações estruturais exigem revisão técnica separada.
+- O modo cotidiano não cria ou duplica produtos genericamente nem altera
+  estrutura. As únicas exceções isoladas são o lote fechado Rust1–Rust20, o
+  arquivamento/restauração reversível e a organização integral da vitrine.
 - O fallback estático existe somente sem configuração Supabase. Após ativação,
   mantenha o catálogo remoto completo e válido; falhas ficam visíveis como
   indisponibilidade em vez de publicar dados antigos.

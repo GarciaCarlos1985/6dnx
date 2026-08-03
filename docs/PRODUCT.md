@@ -1,5 +1,11 @@
 # Product
 
+> **Contexto de execução — 2026-08-03:** o objetivo de produto permanece
+> válido, mas Production ainda usa a vitrine antiga. A nova vitrine, o rodapé e
+> o checkout estão no worktree local. Um PIX real controlado foi pago; a
+> liberação de atendimento continua proibida até o backend persistir `paid`
+> após a correção/replay documentados em `PROJECT_STATE.md`.
+
 ## Register
 
 brand

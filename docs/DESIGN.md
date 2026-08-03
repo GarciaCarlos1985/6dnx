@@ -1,5 +1,11 @@
 # Design System — 6DNX
 
+> **Contexto de publicação — 2026-08-03:** estas regras descrevem o design
+> aprovado no worktree local. Production ainda serve a composição anterior com
+> três cards e sem o rodapé novo. Não interpretar a presença deste documento
+> como prova de que a vitrine de doze cards foi commitada, mesclada ou
+> publicada.
+
 ## Mood
 
 Midnight tactical club — blackout stage, crimson smoke, operators and stone angels framing a single brand mark.
@@ -58,12 +64,20 @@ Committed: crimson carries identity (~30–40% of accent moments). Surface is pu
 - Admin: the catalog CMS mirrors the storefront palette but reduces spectacle
   in favor of operational clarity. Desktop uses a product rail, five-step
   editor and live preview; tablet/mobile linearize those regions. The everyday
-  owner mode deliberately omits structural controls: route, order, publication,
-  arbitrary palette, creation/duplication and restoration are not clickable.
-  Publication state, unsaved state and errors never depend on color alone.
-- Hero: full-bleed h-screen, characters bottom-anchored L/R, brand center
-- Products: auto-fit grid minmax(280px, 1fr), dark borders, no nested cards
-- Product discovery: on wide fine-pointer viewports, the three active cards are
+  owner mode deliberately omits dangerous structural controls: route, arbitrary
+  palette, generic creation/duplication and content restoration are not
+  clickable. Ordering is isolated in a dedicated full-catalog board with four
+  named shelf groups, explicit confirmation and one atomic save. Publication
+  state, unsaved state and errors never depend on color alone.
+- Hero: one full-bleed safe viewport, characters bottom-anchored L/R and brand
+  centered. Actor, logo, copy and CTA sizing must respond to both viewport width
+  and height; fixed desktop pixel ceilings must not collapse the composition on
+  QHD, 4K, ultrawide or low-height screens.
+- Products: four shelves of three cards, split evenly between two continuous
+  storefront sections. The first twelve canonical catalog positions fill those
+  shelves in reading order. Dark borders and responsive grids preserve one card
+  per column on narrow screens without horizontal document overflow.
+- Product discovery: on wide fine-pointer viewports, each three-card shelf is
   flanked by restrained, clickable `Adjacent Page Peek` cascades. Each side
   fans out the adjacent page's cards in three progressively smaller, darker
   depth layers, creating an infinite-corridor illusion while navigation remains

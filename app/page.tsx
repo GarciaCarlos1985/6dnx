@@ -5,16 +5,34 @@ import { NewsRadar, NewsRadarSkeleton } from "@/components/news-radar";
 import { ProductShowcase } from "@/components/product-showcase";
 import { SiteAtmosphere } from "@/components/site-atmosphere";
 import { getPublishedCatalog } from "@/lib/catalog/repository";
+import { checkoutReadiness } from "@/lib/checkout/config";
+import { withLocalPaymentTestProduct } from "@/lib/checkout/local-payment-test-product";
+import { shouldEnablePaymentTestMode } from "@/lib/security/payment-test-mode";
+import { resolvePublicHttpsLink } from "@/lib/security/public-link";
 
 export default async function HomePage() {
-  const catalogProducts = await getPublishedCatalog();
+  const catalogProducts = withLocalPaymentTestProduct(
+    await getPublishedCatalog(),
+    process.env.NODE_ENV === "development" &&
+      process.env.STORM_WALLET_CHECKOUT_ENABLED === "true",
+  );
+  const checkoutAvailable = checkoutReadiness().ready;
+  const paymentTestAvailable = shouldEnablePaymentTestMode(process.env);
+  const developerCreditUrl = resolvePublicHttpsLink(
+    process.env.DEVELOPER_CREDIT_URL,
+  );
 
   return (
     <main className="site-flow">
       <SiteAtmosphere />
       <HeroSection />
       <CinematicCompanions scene="products" />
-      <ProductShowcase catalogProducts={catalogProducts} />
+      <ProductShowcase
+        catalogProducts={catalogProducts}
+        checkoutAvailable={checkoutAvailable}
+        paymentTestAvailable={paymentTestAvailable}
+        developerCreditUrl={developerCreditUrl}
+      />
       <div className="hidden">
         <Suspense fallback={<NewsRadarSkeleton />}>
           <NewsRadar />

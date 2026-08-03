@@ -1,5 +1,11 @@
 # Guia simples do Painel Administrativo 6DNX
 
+> **Atualização de 2026-08-03:** o painel e a organização ampliada do catálogo
+> estão no worktree local e ainda não correspondem ao site Production de três
+> cards. O banco comercial já existe. O PIX real de R$ 1,00 permanece pendente
+> no banco por uma correção técnica da RPC; não altere manualmente pedido,
+> tentativa ou evento e não reative a oferta de teste.
+
 Este guia foi escrito para o Maycon operar o catálogo sem precisar entender
 programação e sem correr o risco de danificar o site.
 
@@ -77,10 +83,15 @@ Elas já estão preparadas no computador local e na Vercel, somente no lado do
 servidor. Nunca devem ser coladas no painel administrativo, em produto, no
 GitHub, no Discord ou enviadas por mensagem.
 
-O que ainda não existe é o código que fica entre a loja e a Wallet: criar o
-pedido no Supabase, pedir o Pix, devolver QR Code/copia e cola, receber o aviso,
-validar `X-Storm-Signature` no corpo bruto e impedir eventos repetidos. Por
-isso, cadastrar os segredos não ativa a compra por si só.
+O código entre a loja e a Wallet cria pedido, solicita PIX, exibe QR Code/copia
+e cola, consulta o estado e valida `X-Storm-Signature` no corpo bruto. O banco
+comercial e o webhook já existem. No teste real de R$ 1,00, o pagamento chegou
+à última etapa, mas a função do banco falhou antes de registrar `paid`.
+
+Por isso, não altere manualmente o pedido e não ligue as flags sozinho. O
+procedimento correto é aplicar a migration corretiva autorizada, pedir à StorM
+o replay do callback original assinado e só liberar atendimento depois que o
+banco mostrar `paid` e o evento único.
 
 ### Atenção ao campo “Webhook de pagamentos” da StorM
 
@@ -88,24 +99,29 @@ A URL de webhook do Discord colocada nesse campo está no lugar errado. O
 Discord recebe notificações para a equipe; ele não sabe validar nem processar
 um evento financeiro da StorM.
 
-Enquanto a integração 6DNX não estiver implementada e publicada:
+O destino correto já está configurado como
+`https://www.6dnx.com.br/api/webhooks/storm-wallet`. Portanto:
 
-1. remova a URL do Discord do campo de webhook da StorM;
-2. deixe o webhook financeiro sem destino, se o painel permitir;
-3. não gere outra API key e não regenere o secret HMAC sem necessidade;
-4. não coloque ainda a futura URL da 6DNX;
-5. continue usando o atendimento manual e confirme o recebimento diretamente
+1. nunca substitua essa URL por um webhook do Discord;
+2. não gere outra API key nem regenere o secret HMAC sem necessidade;
+3. não altere o callback enquanto houver pedido pendente ou replay aguardado;
+4. após a correção do banco, solicite o replay do evento original no painel ou
+   suporte da StorM;
+5. continue confirmando o estado `paid` no backend antes de atender ou entregar
    no painel da Wallet.
 
-Depois de a rota existir e passar pelos testes de sandbox, o campo deverá
+Depois de a rota publicada passar pelos testes de sandbox/homologação e o novo
+domínio estar verificado, o campo deverá
 apontar para:
 
 ```text
-https://6dnx.vercel.app/api/webhooks/storm-wallet
+https://6dnx.com.br/api/webhooks/storm-wallet
 ```
 
-Essa URL ainda não funciona hoje. Configurá-la antes da implementação apenas
-criaria eventos perdidos e uma falsa impressão de automação.
+Essa URL ainda não deve ser configurada hoje. `6dnx.com.br` foi adquirido, mas
+primeiro precisa ser anexado à Vercel, receber DNS/HTTPS e passar pelo teste
+financeiro controlado. Configurá-la antes disso criaria eventos perdidos e uma
+falsa impressão de automação.
 
 Para terminar a integração, a equipe precisa da documentação expandida da API,
 sem nenhum segredo: endpoint e corpo para criar Pix, formato da resposta, ID e
@@ -213,9 +229,45 @@ Mostra todos os produtos. Os filtros significam:
 - **Rascunhos:** produtos salvos, mas invisíveis no site;
 - **Arquivo:** produtos retirados do site sem serem apagados.
 
-Não existe botão para criar, duplicar, excluir ou retirar produto. Isso é
-intencional: a lista serve para escolher um card existente, não para alterar a
-estrutura da loja por acidente.
+Não existe botão de exclusão permanente nem criação genérica. Para cards comuns,
+o botão **Arquivar card** apenas retira o produto da vitrine e mantém tudo
+guardado. Qualquer card pode ser arquivado; se ele voltar depois, será colocado
+no fim do catálogo para não bagunçar a ordem salva enquanto esteve fora.
+
+### Organizar vitrine
+
+O botão **Organizar vitrine** abre uma área separada da edição de conteúdo. Ela
+mostra claramente:
+
+1. os três cards da primeira fileira da seção 2;
+2. os três cards da segunda fileira da seção 2;
+3. os três cards da primeira fileira da seção 3;
+4. os três cards da segunda fileira da seção 3;
+5. todos os demais cards que aparecem pelas setas.
+
+Arraste um card para a posição desejada ou use os botões `↑` e `↓`. Isso não
+altera texto, imagem, preço ou arquivo. Antes de salvar, o painel exige que você
+marque **Conferi as quatro fileiras e os doze cards iniciais** e ainda mostra uma
+confirmação final. Se desistir, clique em **Cancelar**; nada muda no site.
+
+### Ação temporária Rust1–Rust20
+
+Enquanto algum dos vinte cards estiver ausente e um card da família Rust estiver
+aberto, aparece o controle **Quantidade / Criar**. Ele foi feito somente para o
+lote solicitado:
+
+1. mostra quantos dos vinte já existem;
+2. começa sempre com quantidade **1**;
+3. permite escolher uma quantidade maior somente de forma explícita;
+4. avisa que os novos cards serão publicados e pede confirmação antes de agir;
+5. copia integralmente o Rust atual, mudando apenas nome e identificadores;
+6. cria somente os próximos números ausentes, sem sobrescrever edições já feitas;
+7. desaparece automaticamente quando Rust1 até Rust20 estão completos.
+
+Se quiser testar apenas um, deixe **Quantidade = 1**. Uma quantidade maior só
+deve ser escolhida quando houver intenção de publicar vários cards de uma vez.
+Se duas pessoas abrirem o painel, combinem quem fará isso; a API nunca
+sobrescreve um número já criado.
 
 ### Área do meio
 
@@ -239,9 +291,11 @@ ou fugir da identidade 6DNX por engano.
 Maycon não precisa decorar uma lista de “não clique”. As ações perigosas não
 ficam disponíveis:
 
-- não há botão de criar ou duplicar produto;
-- não há controle para publicar, arquivar ou retirar um card;
-- não há campo para trocar a rota ou a ordem do carrossel;
+- não há botão de criar ou duplicar produto genericamente;
+- Rust1–Rust20 é a única duplicação assistida e começa com quantidade 1;
+- arquivar exige confirmação e nunca apaga dados;
+- não há campo de ordem misturado com a edição do produto; a ordem inteira só
+  pode ser salva em **Organizar vitrine**;
 - não há seletor livre de cores;
 - não há botão para adicionar ou apagar uma variação comercial;
 - o histórico não possui botão de restauração;
@@ -280,6 +334,20 @@ Use sempre o botão **Substituir imagem**:
 O painel envia a imagem para o **Supabase Storage** automaticamente. Maycon não
 precisa abrir o Storage nem copiar endereço manualmente.
 
+### Thumbnail do card e banner do checkout são imagens diferentes
+
+- **Thumbnail do card:** horizontal 16:9, recomendação 1600 x 900 px;
+- **Banner do checkout:** vertical 4:5, recomendação 1200 x 1500 px;
+- use WEBP ou AVIF e mantenha cada arquivo abaixo de 5 MB.
+
+Na etapa **Visual**, o primeiro botão troca a imagem horizontal do card. O bloco
+**Banner vertical do checkout** troca somente a arte que aparece na lateral do
+PIX. Se ainda não houver banner vertical, o checkout mostra a thumbnail inteira
+sem cortá-la. O botão **Usar thumbnail do card** volta a esse modo seguro.
+
+Não tente transformar uma arte 16:9 em 4:5 esticando-a: recorte/recomponha a
+arte em 1200 x 1500 para preservar logo, personagem e textos dentro da margem.
+
 ### O que significa “imagem remota deve vir do Supabase”
 
 Uma imagem remota é uma imagem que está na internet e possui um endereço
@@ -300,14 +368,19 @@ guardada e não pode ser alterado manualmente. Use o botão **Substituir imagem*
 
 Esses estados são apenas informativos no painel cotidiano. Salvar um texto,
 preço ou imagem não altera o estado: publicado continua publicado, rascunho
-continua rascunho e arquivado continua arquivado. Retirar ou recolocar um
-produto exige uma tarefa técnica separada.
+continua rascunho e arquivado continua arquivado. Para retirar um card comum,
+clique em **Arquivar card** e confirme. Para recolocar, abra **Arquivo**, escolha
+o produto e clique em **Restaurar card**.
 
 ## Botões importantes
 
 - **Revisar alterações:** leva à conferência final, sem salvar ainda;
 - **Salvar campos seguros:** grava somente o conteúdo permitido;
 - **Histórico:** mostra versões anteriores em modo de consulta;
+- **Arquivar card:** retira um card comum do site sem apagá-lo;
+- **Restaurar card:** devolve um card arquivado ao estado que possuía antes;
+- **Organizar vitrine:** muda somente a posição dos cards publicados e exige
+  conferência dos doze primeiros;
 - **Ver site:** abre a loja em outra aba para conferência;
 - **Sair:** encerra a sessão administrativa.
 
@@ -347,9 +420,10 @@ delas por acidente.
 
 1. Não continue fazendo outras alterações.
 2. Se ainda não salvou, recarregue a página e descarte a mudança.
-3. Se já salvou, abra **Histórico** apenas para identificar a última versão
-   correta e peça assistência para restaurá-la; o botão perigoso não fica
-   disponível no painel cotidiano.
+3. Se arquivou o card errado, abra **Arquivo**, selecione o mesmo card e clique
+   em **Restaurar card**. Para recuperar textos, preços ou imagens de uma revisão
+   antiga, abra **Histórico** apenas para identificar a versão correta e peça
+   assistência; restauração de conteúdo não fica disponível no painel cotidiano.
 4. Se a conta não entrar, não crie vários usuários; peça para conferir o papel
    `admin` da conta existente.
 5. Se a imagem não aparecer, não mexa no Storage; tente enviar novamente pelo

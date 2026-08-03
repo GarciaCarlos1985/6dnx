@@ -116,7 +116,10 @@ export function HeroSection() {
           // user scrolls mid-intro they fight; snapping it to its end state on
           // the first scroll hands the properties over cleanly.
           endIntro = () => intro.progress(1);
-          window.addEventListener("scroll", endIntro, { once: true, passive: true });
+          window.addEventListener("scroll", endIntro, {
+            once: true,
+            passive: true,
+          });
         }
 
         gsap.to(auraRef.current, {
@@ -197,11 +200,7 @@ export function HeroSection() {
             { scale: 1.3, opacity: 0.78, ease: "none", duration: 0.28 },
             "push",
           )
-          .to(
-            cueRef.current,
-            { opacity: 0, y: 16, duration: 0.1 },
-            "push",
-          )
+          .to(cueRef.current, { opacity: 0, y: 16, duration: 0.1 }, "push")
           .to(
             eyeVisibility,
             {
@@ -236,26 +235,28 @@ export function HeroSection() {
             duration: 0.26,
           },
           "payoff-=0.16",
-        ).to(
-          titleRef.current,
-          {
-            opacity: 0,
-            filter: "blur(10px)",
-            ease: "power2.in",
-            duration: 0.22,
-          },
-          "payoff-=0.12",
-        ).to(
-          [leftActorRef.current, rightActorRef.current],
-          {
-            opacity: 0,
-            yPercent: 8,
-            filter: "blur(8px)",
-            ease: "power2.in",
-            duration: 0.22,
-          },
-          "payoff-=0.22",
-        );
+        )
+          .to(
+            titleRef.current,
+            {
+              opacity: 0,
+              filter: "blur(10px)",
+              ease: "power2.in",
+              duration: 0.22,
+            },
+            "payoff-=0.12",
+          )
+          .to(
+            [leftActorRef.current, rightActorRef.current],
+            {
+              opacity: 0,
+              yPercent: 8,
+              filter: "blur(8px)",
+              ease: "power2.in",
+              duration: 0.22,
+            },
+            "payoff-=0.22",
+          );
 
         // Beat 4 — the ocular sigil gains presence under the existing
         // overlays. Scroll owns this rotor; logo hover owns a nested rotor so
@@ -297,17 +298,17 @@ export function HeroSection() {
             "payoff+=0.02",
           )
           .fromTo(
-          revealRef.current,
-          { opacity: 0, y: 36, filter: "blur(10px)" },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            ease: "power2.out",
-            duration: 0.2,
-          },
-          "payoff",
-        )
+            revealRef.current,
+            { opacity: 0, y: 36, filter: "blur(10px)" },
+            {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              ease: "power2.out",
+              duration: 0.2,
+            },
+            "payoff",
+          )
           .to(
             auraRef.current,
             { opacity: 0.25, scale: 1, ease: "none", duration: 0.22 },
@@ -658,9 +659,7 @@ export function HeroSection() {
         let pointerY = -10_000;
         let pointerFrame = 0;
 
-        const updateController = (
-          controller: (typeof controllers)[number],
-        ) => {
+        const updateController = (controller: (typeof controllers)[number]) => {
           const rect = controller.actor.getBoundingClientRect();
           const sceneRect = scene.getBoundingClientRect();
           const actorOpacity = Number.parseFloat(
@@ -787,7 +786,7 @@ export function HeroSection() {
   return (
     <section
       ref={sceneRef}
-      className="hero-apocalypse relative flex h-screen w-full items-center justify-center overflow-hidden bg-transparent"
+      className="hero-apocalypse relative flex w-full items-center justify-center overflow-hidden bg-transparent"
       aria-label="6DNX"
     >
       <div
@@ -807,55 +806,55 @@ export function HeroSection() {
       </div>
 
       <>
-          <div
-            ref={auraRef}
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[130vh] w-[130vh] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-45 will-change-transform"
-            style={{
-              background:
-                "radial-gradient(circle, oklch(0.55 0.22 25 / 0.5) 0%, oklch(0.55 0.22 25 / 0.12) 42%, transparent 68%)",
-            }}
-            aria-hidden
-          />
+        <div
+          ref={auraRef}
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[130svh] w-[130svh] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-45 will-change-transform"
+          style={{
+            background:
+              "radial-gradient(circle, oklch(0.55 0.22 25 / 0.5) 0%, oklch(0.55 0.22 25 / 0.12) 42%, transparent 68%)",
+          }}
+          aria-hidden
+        />
 
-          <div className="hero-atmosphere" aria-hidden>
-            <span className="hero-smoke hero-smoke--left" />
-            <span className="hero-smoke hero-smoke--center" />
-            <span className="hero-smoke hero-smoke--right" />
-            {HERO_PARTICLES.map((particle, index) => (
-              <span
-                key={`${particle.x}-${particle.y}`}
-                className="hero-particle"
-                style={
-                  {
-                    left: `${particle.x}%`,
-                    top: `${particle.y}%`,
-                    width: particle.size,
-                    height: particle.size,
-                    animationDelay: `-${particle.delay}s`,
-                    animationDuration: `${particle.duration}s`,
-                    "--particle-drift": `${particle.drift}px`,
-                    opacity: index % 4 === 0 ? 0.8 : 0.55,
-                  } as ParticleStyle
-                }
-              />
-            ))}
-          </div>
+        <div className="hero-atmosphere" aria-hidden>
+          <span className="hero-smoke hero-smoke--left" />
+          <span className="hero-smoke hero-smoke--center" />
+          <span className="hero-smoke hero-smoke--right" />
+          {HERO_PARTICLES.map((particle, index) => (
+            <span
+              key={`${particle.x}-${particle.y}`}
+              className="hero-particle"
+              style={
+                {
+                  left: `${particle.x}%`,
+                  top: `${particle.y}%`,
+                  width: particle.size,
+                  height: particle.size,
+                  animationDelay: `-${particle.delay}s`,
+                  animationDuration: `${particle.duration}s`,
+                  "--particle-drift": `${particle.drift}px`,
+                  opacity: index % 4 === 0 ? 0.8 : 0.55,
+                } as ParticleStyle
+              }
+            />
+          ))}
+        </div>
 
+        <div
+          ref={bloodEyeRef}
+          data-hero-eye
+          className="hero-blood-eye pointer-events-none absolute left-1/2 top-1/2 z-[7] aspect-square w-[min(88vw,48rem)] -translate-x-1/2 -translate-y-1/2 opacity-0 will-change-[opacity]"
+          aria-hidden
+        >
           <div
-            ref={bloodEyeRef}
-            data-hero-eye
-            className="hero-blood-eye pointer-events-none absolute left-1/2 top-1/2 z-[7] aspect-square w-[min(88vw,48rem)] -translate-x-1/2 -translate-y-1/2 opacity-0 will-change-[opacity]"
-            aria-hidden
+            ref={bloodEyeCoreRef}
+            className="hero-blood-eye__core h-full w-full will-change-transform"
           >
             <div
-              ref={bloodEyeCoreRef}
-              className="hero-blood-eye__core h-full w-full will-change-transform"
+              ref={bloodEyePointerRef}
+              className="hero-blood-eye__pointer h-full w-full will-change-transform"
             >
-              <div
-                ref={bloodEyePointerRef}
-                className="hero-blood-eye__pointer h-full w-full will-change-transform"
-              >
-                <svg viewBox="0 0 800 800" className="h-full w-full">
+              <svg viewBox="0 0 800 800" className="h-full w-full">
                 <defs>
                   <radialGradient id="blood-iris" cx="50%" cy="48%" r="52%">
                     <stop offset="0%" stopColor="#060001" />
@@ -919,93 +918,92 @@ export function HeroSection() {
                   strokeOpacity="0.16"
                   strokeWidth="7"
                 />
-                </svg>
-              </div>
+              </svg>
             </div>
           </div>
+        </div>
 
-          <span
-            ref={leftActorBeamRef}
-            className="cinematic-pointer-beam cinematic-pointer-beam--operator hero-apocalypse-pointer-beam"
-          >
-            <span className="cinematic-pointer-beam__origin" />
-          </span>
-          <span
-            ref={rightActorBeamRef}
-            className="cinematic-pointer-beam cinematic-pointer-beam--angel hero-apocalypse-pointer-beam"
-          >
-            <span className="cinematic-pointer-beam__origin" />
-          </span>
+        <span
+          ref={leftActorBeamRef}
+          className="cinematic-pointer-beam cinematic-pointer-beam--operator hero-apocalypse-pointer-beam"
+        >
+          <span className="cinematic-pointer-beam__origin" />
+        </span>
+        <span
+          ref={rightActorBeamRef}
+          className="cinematic-pointer-beam cinematic-pointer-beam--angel hero-apocalypse-pointer-beam"
+        >
+          <span className="cinematic-pointer-beam__origin" />
+        </span>
 
+        <div
+          ref={leftActorRef}
+          data-hero-character="couple"
+          className="hero-apocalypse-actor hero-apocalypse-actor--left"
+          aria-hidden
+        >
           <div
-            ref={leftActorRef}
-            data-hero-character="couple"
-            className="hero-apocalypse-actor hero-apocalypse-actor--left"
-            aria-hidden
+            ref={leftActorReactiveRef}
+            className="hero-apocalypse-actor__reactive"
           >
-            <div
-              ref={leftActorReactiveRef}
-              className="hero-apocalypse-actor__reactive"
-            >
-              <span className="hero-apocalypse-actor__aura" />
-              <Image
-                src="/killa-casal-hero.png"
-                alt=""
-                fill
-                loading="eager"
-                sizes="(max-width: 899px) 88vw, 56vw"
-                className="hero-apocalypse-actor__image"
-              />
-              <span className="cinematic-pointer-light hero-apocalypse-pointer-light" />
-              <span className="hero-apocalypse-actor__smoke" />
-            </div>
+            <span className="hero-apocalypse-actor__aura" />
+            <Image
+              src="/killa-casal-hero.png"
+              alt=""
+              fill
+              loading="eager"
+              sizes="(max-width: 899px) 88vw, 56vw"
+              className="hero-apocalypse-actor__image"
+            />
+            <span className="cinematic-pointer-light hero-apocalypse-pointer-light" />
+            <span className="hero-apocalypse-actor__smoke" />
           </div>
+        </div>
 
+        <div
+          ref={rightActorRef}
+          data-hero-character="angel"
+          className="hero-apocalypse-actor hero-apocalypse-actor--right"
+          aria-hidden
+        >
           <div
-            ref={rightActorRef}
-            data-hero-character="angel"
-            className="hero-apocalypse-actor hero-apocalypse-actor--right"
-            aria-hidden
+            ref={rightActorReactiveRef}
+            className="hero-apocalypse-actor__reactive"
           >
-            <div
-              ref={rightActorReactiveRef}
-              className="hero-apocalypse-actor__reactive"
-            >
-              <span className="hero-apocalypse-actor__aura" />
-              <Image
-                src="/anjo-frame-03-ivory-v2.webp"
-                alt=""
-                fill
-                loading="eager"
-                sizes="(max-width: 899px) 88vw, 58vw"
-                className="hero-apocalypse-actor__image"
-              />
-              <span className="cinematic-pointer-light hero-apocalypse-pointer-light" />
-              <span className="hero-apocalypse-actor__smoke" />
-            </div>
+            <span className="hero-apocalypse-actor__aura" />
+            <Image
+              src="/anjo-frame-03-ivory-v2.webp"
+              alt=""
+              fill
+              loading="eager"
+              sizes="(max-width: 899px) 88vw, 58vw"
+              className="hero-apocalypse-actor__image"
+            />
+            <span className="cinematic-pointer-light hero-apocalypse-pointer-light" />
+            <span className="hero-apocalypse-actor__smoke" />
           </div>
+        </div>
 
-          <div
-            ref={transformationFlashRef}
-            className="pointer-events-none absolute inset-0 z-[9] opacity-0 will-change-transform"
-            style={{
-              background:
-                "radial-gradient(ellipse at 20% 62%, oklch(0.68 0.24 25 / 0.7), transparent 35%), radial-gradient(ellipse at 80% 58%, oklch(0.68 0.24 25 / 0.72), transparent 36%)",
-              mixBlendMode: "screen",
-            }}
-            aria-hidden
-          />
+        <div
+          ref={transformationFlashRef}
+          className="pointer-events-none absolute inset-0 z-[9] opacity-0 will-change-transform"
+          style={{
+            background:
+              "radial-gradient(ellipse at 20% 62%, oklch(0.68 0.24 25 / 0.7), transparent 35%), radial-gradient(ellipse at 80% 58%, oklch(0.68 0.24 25 / 0.72), transparent 36%)",
+            mixBlendMode: "screen",
+          }}
+          aria-hidden
+        />
 
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 3px)",
-            }}
-            aria-hidden
-          />
-
-        </>
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 3px)",
+          }}
+          aria-hidden
+        />
+      </>
 
       <div className="hero-apocalypse-seam pointer-events-none" aria-hidden>
         <span className="hero-apocalypse-seam__smoke hero-apocalypse-seam__smoke--left" />
@@ -1019,13 +1017,13 @@ export function HeroSection() {
       >
         <div
           ref={titleRef}
-          className="mx-auto max-w-[46rem] text-center select-none will-change-transform"
+          className="hero-apocalypse-copy__inner mx-auto text-center select-none will-change-transform"
         >
           <h1 className="mb-1" data-hero-brand-overlay="visible">
             <span
               ref={logoScrollRef}
               data-hero-logo-shell
-              className="hero-brand-logo-shell inline-block w-[clamp(22rem,48vw,43rem)] max-w-[94vw] align-middle"
+              className="hero-brand-logo-shell inline-block align-middle"
             >
               <Image
                 ref={logoRef}
@@ -1034,8 +1032,9 @@ export function HeroSection() {
                 alt="6Dorme Nois Xita"
                 width={1536}
                 height={1024}
-                loading="eager"
-                sizes="(max-width: 640px) 94vw, (max-width: 1280px) 48vw, 688px"
+                preload
+                unoptimized
+                sizes="(max-width: 899px) 94vw, 48vw"
                 className="hero-brand-logo block h-auto w-full"
               />
             </span>
@@ -1068,16 +1067,12 @@ export function HeroSection() {
       <a
         ref={cueRef}
         href="#produtos"
-        className="hero-buy-key-shell absolute bottom-7 left-1/2 z-[var(--z-hero-copy)] w-[clamp(14rem,28vw,19rem)] -translate-x-1/2"
+        className="hero-buy-key-shell absolute bottom-7 left-1/2 z-[var(--z-hero-copy)] -translate-x-1/2"
         aria-label="Comprar agora — ver soluções 6DNX"
       >
         <span className="hero-buy-key">
           <span className="hero-buy-key__label">Comprar agora</span>
-          <span
-            ref={cueArrowRef}
-            className="hero-buy-key__glow"
-            aria-hidden
-          />
+          <span ref={cueArrowRef} className="hero-buy-key__glow" aria-hidden />
         </span>
       </a>
     </section>
