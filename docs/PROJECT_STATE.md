@@ -78,6 +78,9 @@ isolated test checkout, and an automated games-and-AI news area.
   flags are the safe state and do not need to be created as literal `false`.
 - The customer-facing purchase action is `Comprar pelo Discord`; the PIX modal,
   CPF field and QR Code cannot open while checkout readiness is false.
+- The footer credit resolves `DEVELOPER_CREDIT_URL` first and safely falls back
+  to the already configured public `DISCORD_INVITE_URL`; invalid/non-HTTPS
+  values remain blocked by the public-link allowlist.
 - No Supabase migration or offer-status mutation is part of the storefront
   deployment. The paid R$ 1.00 order remains pending until StorM replays the
   original signed event.
