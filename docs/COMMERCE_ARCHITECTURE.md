@@ -1,20 +1,40 @@
 # 6DNX commerce architecture
 
-This document defines the intended professional purchase flow. The current
-checkout remains a laboratory and must not be presented as a real charge.
+> **Context synchronized on 2026-08-03.** The professional flow was exercised
+> with one owner-authorized real R$ 1.00 PIX. Creation, provider settlement,
+> callback delivery, raw-body HMAC and the Supabase RPC call worked. The live
+> RPC then failed with PostgreSQL `42702`/HTTP `422` because
+> `ON CONFLICT (order_id)` is ambiguous. Payment creation remains disabled in
+> Production until the versioned fix, original signed replay and final state
+> verification are complete.
 
-## Current StorM boundary — 2026-07-31
+This document defines the professional purchase flow. The R$ 1,00 simulator
+remains an isolated laboratory. A real StorM implementation now exists behind
+database approval and explicit environment kill switches; it must not be
+treated as active until the checklist in `STORM_PIX_CHECKOUT.md` passes.
 
-The three server-only environment names are present locally and in Vercel, but
-no application route consumes them and `/api/webhooks/storm-wallet` does not
-exist yet. The credentials are therefore configuration material, not an active
-payment integration.
+## Current StorM boundary — 2026-08-02
 
-The Wallet provider callback must never point directly to a Discord webhook.
-The future callback is the 6DNX backend route, which verifies the HMAC signature
-over the raw request body, persists an idempotent event and only then sends a
-sanitized staff notification to Discord. Do not configure that future URL
-until the route is deployed and tested against an official sandbox contract.
+`POST /api/checkout`, `POST /api/checkout/status` and
+`POST /api/webhooks/storm-wallet` are implemented and compile. The backend uses
+an exact provider-host allowlist, idempotent external IDs, bounded payloads,
+minimal CPF persistence and transactional webhook processing.
+
+Enquanto as travas estão desligadas, o modal mostra apenas o estado de
+homologação e o contato de suporte: nome e CPF não aparecem como campos até o
+backend estar efetivamente apto a criar cobranças.
+
+This does **not** mean payments are active in Production. The Supabase migration
+is applied, the webhook and hash secrets are scoped to Production, and both
+activation flags remain absent there. The owner-authorized `Rust1 / 1 Dia`
+offer was temporarily approved for 100 cents, generated one real paid provider
+charge and is now `suspended`. The order remains `pending_payment` only because
+the live RPC failed; it must not be manually marked `paid`.
+
+The Wallet callback must never point directly to Discord. After the route is
+deployed and homologated, its destination is the 6DNX backend, which verifies
+the HMAC signature over the raw body, persists an idempotent event and only then
+sends a sanitized staff notification.
 
 ## Customer journey
 
@@ -62,11 +82,11 @@ Ticket states are independent: `open`, `waiting_staff`, `waiting_customer`, and
 
 ## Canonical data
 
-- `products` and `product_variants`: approved catalog, price, status, and video;
-- `customers`: minimum contact data and optional Discord identity;
-- `orders` and `order_items`: immutable commercial snapshot at purchase time;
-- `payment_attempts`: provider ID, method, amount, status, and timestamps;
-- `webhook_events`: unique provider event ID and idempotent processing result;
+- `product_catalog`: editorial catalog, status and reference values;
+- `commerce_offers`: approved server-side price per product variation;
+- `commerce_orders`: immutable commercial snapshot and minimum payer data;
+- `commerce_payment_attempts`: provider ID, amount state and timestamps;
+- `commerce_webhook_events`: unique event digest and idempotent result;
 - `tickets` and `ticket_messages`: support history;
 - `fulfillment_events`: who released manually, delivered, cancelled, or
   refunded.
@@ -90,11 +110,12 @@ Discord is a notification and support surface. It is not the order database.
 
 ## Recommended implementation phases
 
-1. **Laboratory** — current R$ 1,00 simulator and TEST-marked Discord message.
-2. **Provider sandbox** — StorM Wallet sandbox credentials when available,
-   test Pix, signed webhook, and Supabase order tables. Never use a live key in
-   Preview.
-3. **Private preview** — owner validates every state, mobile UX, refunds, and
+1. **Laboratory** — R$ 1,00 simulator and TEST-marked Discord message.
+2. **Foundation** — implemented routes, modal, migration and automated security
+   tests; Production remains disabled and one local-test offer is approved.
+3. **Provider sandbox** — StorM sandbox credentials when available, signed
+   webhook and Supabase tables. Never use a live key in Preview.
+4. **Private preview** — owner validates every state, mobile UX, refunds and
    ticket handling with no real customer.
-4. **Production** — production credentials, real catalog prices, legal pages,
-   monitoring, backups, and a manual kill switch.
+5. **Production** — approved prices, legal pages, monitoring, backups and both
+   manual activation switches.

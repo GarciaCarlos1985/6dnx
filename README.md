@@ -17,11 +17,11 @@ O painel administrativo e sua ativação segura estão documentados em
   enquadra os cards pela esquerda e o anjo de asas claras com gesto de silêncio
   enquadra pela direita, sempre abaixo do conteúdo interativo e com suporte a
   `prefers-reduced-motion`.
-- Quarenta cards de produto, exibidos em páginas de três, com cada linha
-  comercial separada e duração/licença mantida como variação de preço. A página
-  inicial `D` apresenta DayZ Private, Counter-Strike 2 e Arena Breakout; os
-  demais DayZ ficam à esquerda, enquanto Tarkov, Rust e PUBG abrem a sequência
-  da direita.
+- Catálogo executável preparado para sessenta cards: doze ficam expostos de
+  início, em quatro fileiras de três. As duas primeiras fileiras pertencem à
+  seção logo abaixo do hero e as duas seguintes formam a continuação da
+  vitrine. Cada fileira tem setas e `Adjacent Page Peek` próprios; o rodapé
+  preserva as setas gerais e o núcleo visual `6 D N X`.
 - No desktop, informação abre à esquerda, o card selecionado permanece visível
   no centro e a prévia visual 6DNX abre à direita. Os vídeos estão temporariamente
   desativados; no mobile, o conteúdo
@@ -34,8 +34,23 @@ O painel administrativo e sua ativação segura estão documentados em
 - Persistência Supabase e sincronização diária preparadas, mas não aplicadas remotamente.
 - Painel CMS em `/admin`, protegido por Supabase Auth + papel administrativo +
   RLS, com prévia, upload, histórico somente para consulta e edição cotidiana
-  em modo seguro. Rota, ordem, publicação, paleta e estrutura de variações não
-  ficam expostas ao proprietário e também são bloqueadas pela API.
+  em modo seguro. Qualquer card pode ser arquivado sem exclusão, e um modo
+  separado **Organizar vitrine** permite ordenar por arraste ou por botões sem
+  editar o conteúdo. Criação genérica, rota, paleta e estrutura de variações
+  continuam protegidas pela API. A expansão `Rust1`–`Rust20` usa uma
+  ação idempotente com quantidade explícita e padrão seguro de um card por vez;
+  ela desaparece quando o lote está completo.
+- O checkout aceita uma arte vertical própria por produto em **4:5** (1200 x
+  1500 px recomendado), gerenciada pelo painel. Sem ela, a thumbnail horizontal
+  aparece inteira, sem recorte destrutivo.
+- `6dnx.com.br` está conectado à Vercel com DNS/TLS válidos; o apex redireciona
+  para `https://www.6dnx.com.br/`.
+- A migration comercial, o webhook HMAC StorM e a rota de checkout fazem parte
+  do release versionado. Novas cobranças continuam bloqueadas em Production:
+  `STORM_WALLET_CHECKOUT_ENABLED` e
+  `STORM_WALLET_PRODUCTION_APPROVED` ausentes equivalem a `false`. Enquanto a
+  homologação aguarda o replay do provedor, a vitrine encaminha compras ao
+  Discord e não exibe formulário, CPF, QR Code ou botão PIX.
 
 Ainda faltam decisões comerciais que precisam de validação do proprietário:
 

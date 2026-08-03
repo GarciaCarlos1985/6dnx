@@ -67,6 +67,18 @@ export async function PUT(
       400,
     );
   }
+  if (
+    parsed.value.product.checkoutBanner &&
+    !isAllowedProductImage(
+      parsed.value.product.checkoutBanner,
+      getPublicSupabaseConfig()?.url,
+    )
+  ) {
+    return noStoreJson(
+      { error: "Use um banner do site ou enviado pelo próprio painel." },
+      400,
+    );
+  }
 
   const current = await getAdminProduct(auth.supabase, id);
   if (current.error) return databaseErrorResponse(current.error);

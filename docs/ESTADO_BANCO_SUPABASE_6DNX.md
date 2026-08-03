@@ -1,6 +1,29 @@
 # Estado do banco de dados e do Supabase da 6DNX
 
-Auditoria atualizada em 29 de julho de 2026.
+## Atualização operacional — 2026-08-03
+
+O veredito de 29 de julho abaixo é histórico. O Supabase hoje possui catálogo,
+admin e as quatro tabelas comerciais com RLS. A migration comercial foi
+aplicada e um pedido real de R$ 1,00 foi criado.
+
+| Camada | Estado atual confirmado |
+| --- | --- |
+| `product_catalog` | existe; leitura pública limitada a publicados e escrita administrativa protegida |
+| `commerce_offers` | existe; oferta do teste real está `suspended` |
+| `commerce_orders` | existe; pedido do teste está `pending_payment` |
+| `commerce_payment_attempts` | existe; tentativa do provedor foi registrada |
+| `commerce_webhook_events` | existe; zero eventos persistidos após a falha da RPC |
+| `process_storm_payment_event` | acessível somente ao backend, mas a versão Production possui ambiguidade `ON CONFLICT (order_id)` |
+| RLS `anon` | SELECT/INSERT/UPDATE/DELETE financeiros bloqueados em teste real de papel |
+| Pagamento StorM | PIX pago no provedor; falta replay assinado após correção para persistir `paid` |
+
+A correção proposta foi validada dentro de transação com rollback e preservou
+idempotência. Ela ainda não foi aplicada. Não usar o snapshot antigo abaixo
+para concluir que as tabelas comerciais não existem.
+
+## Snapshot histórico — 29 de julho de 2026
+
+Auditoria original realizada em 29 de julho de 2026.
 
 ## Veredito
 

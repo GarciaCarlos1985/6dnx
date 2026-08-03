@@ -1,5 +1,11 @@
 # Protocolo obrigatório de contexto para novos chats
 
+> **Sincronizado em 2026-08-03.** Um novo chat deve tratar
+> [`PROJECT_STATE.md`](PROJECT_STATE.md) e
+> [`REVIEW_HANDOFF.md`](REVIEW_HANDOFF.md) como o checkpoint operacional
+> corrente. Passagens datadas nos demais documentos são histórico e não podem
+> sobrescrever fatos mais recentes.
+
 Este documento define o procedimento mínimo que o Codex — ou qualquer outra
 IA que assuma o projeto 6DNX — deve cumprir **antes de analisar, planejar ou
 alterar o repositório em um novo chat**.
@@ -32,11 +38,31 @@ Todo novo chat deve ler integralmente:
 3. [`README.md`](README.md) — índice completo da documentação;
 4. [`PROJECT_STATE.md`](PROJECT_STATE.md) — onde o trabalho parou, decisões
    confirmadas, entregas realizadas e pendências;
-5. [`PRODUCT.md`](PRODUCT.md) — propósito, público e verdade comercial;
-6. [`DESIGN.md`](DESIGN.md) — linguagem visual, camadas, movimento e
+5. [`REVIEW_HANDOFF.md`](REVIEW_HANDOFF.md) — separação entre Production, PR e
+   worktree, além das ações humanas e técnicas pendentes;
+6. [`PRODUCT.md`](PRODUCT.md) — propósito, público e verdade comercial;
+7. [`DESIGN.md`](DESIGN.md) — linguagem visual, camadas, movimento e
    acessibilidade;
-7. [`governance/REGRAS_DO_PROJETO.md`](governance/REGRAS_DO_PROJETO.md) —
+8. [`governance/REGRAS_DO_PROJETO.md`](governance/REGRAS_DO_PROJETO.md) —
    conjunto consolidado de regras humanas e técnicas.
+
+## Estado mínimo que todo novo chat deve saber
+
+Em 2026-08-03, a retomada correta é:
+
+1. Production usa um snapshot manual com webhook StorM, vitrine antiga e sem a
+   rota pública de criação do checkout.
+2. A PR rascunho #2 contém a fundação server-only do webhook, mas sua migration
+   original ainda possui a ambiguidade SQL encontrada no teste real.
+3. O worktree local contém a vitrine nova, doze cards iniciais, rodapé, painel
+   ampliado e checkout; essas mudanças não estão na PR #2.
+4. O PIX real de R$ 1,00 foi pago e chegou ao backend. HMAC, firewall e chamada
+   ao Supabase passaram; somente a RPC falhou com `422`/PostgreSQL `42702`.
+5. A oferta de teste está suspensa e o pedido continua `pending_payment`.
+6. Faltam três passos para concluir a homologação: migration corretiva, replay
+   original assinado e confirmação `paid`/evento/Discord.
+7. Não aplicar migration, fazer replay, commit, push, merge, deploy ou ativar
+   flags de Production sem autorização humana específica para aquela ação.
 
 Se a tarefa alterar Next.js, o agente também deve ler a documentação relevante
 da versão instalada em `node_modules/next/dist/docs/` antes de escrever código.

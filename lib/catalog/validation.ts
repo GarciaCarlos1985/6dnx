@@ -281,6 +281,25 @@ export function parseProduct(value: unknown): ValidationResult<Product> {
     errors.push("Thumbnail deve ser um caminho do site ou uma URL HTTPS.");
   }
 
+  const hasCheckoutBanner = Object.hasOwn(value, "checkoutBanner");
+  const checkoutBanner = hasCheckoutBanner
+    ? optionalText(
+        value.checkoutBanner,
+        "Banner vertical do checkout",
+        500,
+        errors,
+      ) ?? null
+    : undefined;
+  if (
+    checkoutBanner &&
+    !checkoutBanner.startsWith("/") &&
+    !checkoutBanner.startsWith("https://")
+  ) {
+    errors.push(
+      "Banner do checkout deve ser um caminho do site ou uma URL HTTPS.",
+    );
+  }
+
   const status: ProductStatus =
     value.status === "custom" ? "custom" : "available";
   if (value.status !== "custom" && value.status !== "available") {
@@ -322,6 +341,7 @@ export function parseProduct(value: unknown): ValidationResult<Product> {
     menuKeys: parseFeatureList(value.menuKeys, "Teclas do menu", errors),
     tutorialSteps: parseTutorialSteps(value.tutorialSteps, errors),
     image,
+    ...(hasCheckoutBanner ? { checkoutBanner } : {}),
     status,
     variants: parseVariants(value.variants, errors),
     youtubeId,

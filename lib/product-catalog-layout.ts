@@ -1,44 +1,19 @@
 import type { Product } from "@/lib/products";
 
-const LANDING_PRODUCT_SLUGS = [
-  "dayz-private",
-  "cs-2",
-  "arena-breakout",
-] as const;
-
-const FIRST_RIGHT_PRODUCT_SLUGS = [
-  "escape-from-tarkov-6DNX-software",
-  "rust-6DNX-software",
-  "pubg-6DNX-software",
-] as const;
-
-export const PINNED_CATALOG_KEYS: readonly string[] = [
-  ...LANDING_PRODUCT_SLUGS,
-  ...FIRST_RIGHT_PRODUCT_SLUGS,
-];
+export const CATALOG_CARDS_PER_ROW = 3;
+export const CATALOG_VISIBLE_ROWS = 4;
+export const CATALOG_INITIAL_VISIBLE_COUNT =
+  CATALOG_CARDS_PER_ROW * CATALOG_VISIBLE_ROWS;
 
 export type ProductCatalogLayout = {
-  pages: Product[][];
-  defaultPage: number;
-  firstRightPage: number;
+  /**
+   * Every row owns its own finite sequence of three-card pages. Pages are
+   * distributed round-robin so changing one row never duplicates a product
+   * already visible in another row.
+   */
+  rows: Product[][][];
+  pageCount: number;
 };
-
-function resolveProducts(
-  productsByKey: ReadonlyMap<string, Product>,
-  keys: readonly string[],
-) {
-  return keys.map((key) => {
-    const product = productsByKey.get(key);
-
-    if (!product) {
-      throw new Error(
-        `[product-catalog-layout] Produto obrigatório não encontrado: ${key}`,
-      );
-    }
-
-    return product;
-  });
-}
 
 function chunkProducts(products: readonly Product[], perPage: number) {
   const pages: Product[][] = [];
@@ -51,92 +26,49 @@ function chunkProducts(products: readonly Product[], perPage: number) {
 }
 
 /**
- * Keeps a partial page at the far-left edge so the page immediately before
- * the catalog landing page still presents a complete three-card composition.
+ * Converts the canonical catalog order into independent carousel rows.
+ *
+ * With four visible rows the first twelve products remain visible together:
+ * pages 0..3 become the first page of rows 0..3, pages 4..7 become their
+ * second page, and so on. This keeps every product reachable without an
+ * infinite loop and makes the admin order the single source of truth.
  */
-function chunkProductsFromEnd(products: readonly Product[], perPage: number) {
-  if (products.length === 0) return [];
-
-  const pages: Product[][] = [];
-  const firstPageSize = products.length % perPage || perPage;
-  pages.push(products.slice(0, firstPageSize));
-
-  for (let index = firstPageSize; index < products.length; index += perPage) {
-    pages.push(products.slice(index, index + perPage));
-  }
-
-  return pages;
-}
-
 export function buildProductCatalogLayout(
   catalog: readonly Product[],
-  perPage: number,
+  perPage = CATALOG_CARDS_PER_ROW,
+  visibleRows = CATALOG_VISIBLE_ROWS,
 ): ProductCatalogLayout {
   if (!Number.isInteger(perPage) || perPage < 1) {
     throw new Error(
-      "[product-catalog-layout] O tamanho da página deve ser um inteiro positivo.",
+      "[product-catalog-layout] O tamanho da fileira deve ser um inteiro positivo.",
+    );
+  }
+  if (!Number.isInteger(visibleRows) || visibleRows < 1) {
+    throw new Error(
+      "[product-catalog-layout] A quantidade de fileiras deve ser um inteiro positivo.",
     );
   }
 
-  const productsBySlug = new Map(
-    catalog.map((product) => [product.slug, product] as const),
-  );
-  const productsByKey = new Map(
-    catalog.map(
-      (product) => [product.catalogKey ?? product.slug, product] as const,
-    ),
-  );
-
+  const slugs = catalog.map((product) => product.slug);
+  const keys = catalog.map((product) => product.catalogKey ?? product.slug);
   if (
-    productsBySlug.size !== catalog.length ||
-    productsByKey.size !== catalog.length
+    new Set(slugs).size !== catalog.length ||
+    new Set(keys).size !== catalog.length
   ) {
     throw new Error(
       "[product-catalog-layout] O catálogo contém identificadores duplicados.",
     );
   }
 
-  const landingProducts = resolveProducts(
-    productsByKey,
-    LANDING_PRODUCT_SLUGS,
-  );
-  const firstRightProducts = resolveProducts(
-    productsByKey,
-    FIRST_RIGHT_PRODUCT_SLUGS,
-  );
-  const reservedKeys = new Set<string>([
-    ...LANDING_PRODUCT_SLUGS,
-    ...FIRST_RIGHT_PRODUCT_SLUGS,
-  ]);
+  const pages = chunkProducts(catalog, perPage);
+  const rows = Array.from({ length: visibleRows }, () => [] as Product[][]);
+  pages.forEach((page, pageIndex) => {
+    rows[pageIndex % visibleRows].push(page);
+  });
 
-  const leftDayzProducts = catalog.filter(
-    (product) =>
-      product.category === "DayZ" &&
-      !reservedKeys.has(product.catalogKey ?? product.slug),
-  );
-  const leftDayzSlugs = new Set(
-    leftDayzProducts.map((product) => product.slug),
-  );
-  const remainingProducts = catalog.filter(
-    (product) =>
-      !reservedKeys.has(product.catalogKey ?? product.slug) &&
-      !leftDayzSlugs.has(product.slug),
-  );
-
-  const leftPages = chunkProductsFromEnd(leftDayzProducts, perPage);
-  const defaultPage = leftPages.length;
-  const firstRightPage = defaultPage + 1;
-  const pages = [
-    ...leftPages,
-    landingProducts,
-    firstRightProducts,
-    ...chunkProducts(remainingProducts, perPage),
-  ];
-
-  const arrangedSlugs = pages.flatMap((page) =>
-    page.map((product) => product.slug),
-  );
-
+  const arrangedSlugs = rows
+    .flatMap((row) => row)
+    .flatMap((page) => page.map((product) => product.slug));
   if (
     arrangedSlugs.length !== catalog.length ||
     new Set(arrangedSlugs).size !== catalog.length
@@ -147,8 +79,7 @@ export function buildProductCatalogLayout(
   }
 
   return {
-    pages,
-    defaultPage,
-    firstRightPage,
+    rows,
+    pageCount: Math.max(0, ...rows.map((row) => row.length)),
   };
 }

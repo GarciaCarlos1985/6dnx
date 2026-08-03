@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { CatalogOrderBoard } from "@/components/admin/catalog-order-board";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type {
   CatalogAdminItem,
@@ -10,7 +11,14 @@ import type {
   CatalogMutation,
   CatalogRevision,
 } from "@/lib/catalog/types";
-import type { Product, ProductFeature, Variant } from "@/lib/products";
+import {
+  isRustCloneCatalogKey,
+  RUST_CLONE_COUNT,
+  RUST_SOURCE_CATALOG_KEY,
+  type Product,
+  type ProductFeature,
+  type Variant,
+} from "@/lib/products";
 
 type EditorTab =
   | "basic"
@@ -355,7 +363,10 @@ export function AdminDashboard({
   const [revisions, setRevisions] = useState<CatalogRevision[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [reviewConfirmed, setReviewConfirmed] = useState(false);
+  const [rustCreateCount, setRustCreateCount] = useState(1);
+  const [organizingOrder, setOrganizingOrder] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const checkoutBannerInputRef = useRef<HTMLInputElement>(null);
 
   const dirty = Boolean(draft && fingerprint(draft) !== savedFingerprint);
   const publishedCount = items.filter(
@@ -364,6 +375,19 @@ export function AdminDashboard({
   const draftCount = items.filter(
     (item) => item.publicationState === "draft",
   ).length;
+  const rustCloneCount = items.filter((item) =>
+    isRustCloneCatalogKey(item.sourceKey),
+  ).length;
+  const rustMissingCount = Math.max(0, RUST_CLONE_COUNT - rustCloneCount);
+  const effectiveRustCreateCount = Math.min(
+    Math.max(1, rustCreateCount),
+    Math.max(1, rustMissingCount),
+  );
+  const editingRustFamily = Boolean(
+    draft &&
+      (draft.sourceKey === RUST_SOURCE_CATALOG_KEY ||
+        isRustCloneCatalogKey(draft.sourceKey)),
+  );
 
   const filteredItems = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("pt-BR");
@@ -382,6 +406,17 @@ export function AdminDashboard({
       return matchesState && matchesQuery;
     });
   }, [items, query, stateFilter]);
+  const orderedPublishedItems = useMemo(
+    () =>
+      items
+        .filter((item) => item.publicationState === "published")
+        .sort(
+          (left, right) =>
+            left.catalogOrder - right.catalogOrder ||
+            left.createdAt.localeCompare(right.createdAt),
+        ),
+    [items],
+  );
 
   useEffect(() => {
     const protectUnsavedWork = (event: BeforeUnloadEvent) => {
@@ -481,6 +516,66 @@ export function AdminDashboard({
     }
   };
 
+  const openOrderOrganizer = () => {
+    if (busy || organizingOrder) return;
+    if (
+      dirty &&
+      !window.confirm(
+        "Há alterações não salvas neste produto. Descartar e abrir a organização da vitrine?",
+      )
+    ) {
+      return;
+    }
+    if (draft) {
+      const saved = items.find((item) => item.id === draft.id) ?? null;
+      setDraft(saved ? cloneItem(saved) : null);
+      setSavedFingerprint(fingerprint(saved));
+      setReviewConfirmed(false);
+      setChangeNote("");
+    }
+    setNotice("");
+    setOrganizingOrder(true);
+  };
+
+  const saveCatalogOrder = async (orderedIds: string[]) => {
+    if (demoMode || busy) return;
+    setBusy("catalog-order");
+    setNotice("");
+    try {
+      const payload = await readApi<{ items: CatalogAdminItem[] }>(
+        await fetch("/api/admin/catalog/order", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ orderedIds }),
+        }),
+      );
+      setItems(payload.items);
+      const selected =
+        payload.items.find((item) => item.id === selectedId) ??
+        payload.items[0] ??
+        null;
+      setSelectedId(selected?.id ?? null);
+      setDraft(selected ? cloneItem(selected) : null);
+      setSavedFingerprint(fingerprint(selected));
+      setReviewConfirmed(false);
+      setOrganizingOrder(false);
+      announce(
+        "Nova ordem salva. As quatro fileiras da vitrine já seguem esta sequência.",
+        "ok",
+      );
+      router.refresh();
+    } catch (reason) {
+      announce(
+        reason instanceof Error
+          ? reason.message
+          : "Não foi possível salvar a ordem da vitrine.",
+        "error",
+      );
+    } finally {
+      setBusy("");
+    }
+  };
+
   const bootstrap = async () => {
     if (demoMode || busy) return;
     setBusy("bootstrap");
@@ -511,9 +606,143 @@ export function AdminDashboard({
     }
   };
 
-  const uploadImage = async (file: File) => {
+  const syncRustClones = async () => {
+    if (demoMode || busy || rustCloneCount >= RUST_CLONE_COUNT) return;
+    if (dirty) {
+      announce(
+        "Salve ou descarte a alteração atual antes de criar os novos cards.",
+        "info",
+      );
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Criar e publicar agora ${effectiveRustCreateCount} ${effectiveRustCreateCount === 1 ? "novo card" : "novos cards"} do Rust? Os cards existentes não serão alterados.`,
+      )
+    ) {
+      return;
+    }
+
+    setBusy("rust-clones");
+    setNotice("");
+    try {
+      const payload = await readApi<{
+        items: CatalogAdminItem[];
+        createdCount: number;
+      }>(
+        await fetch("/api/admin/catalog/rust-clones", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ count: effectiveRustCreateCount }),
+        }),
+      );
+      setItems(payload.items);
+      const selected =
+        payload.items.find((item) => item.id === selectedId) ??
+        payload.items[0] ??
+        null;
+      setSelectedId(selected?.id ?? null);
+      setDraft(selected ? cloneItem(selected) : null);
+      setSavedFingerprint(fingerprint(selected));
+      setReviewConfirmed(false);
+      announce(
+        payload.createdCount > 0
+          ? `${payload.createdCount} novos cards do Rust foram criados e publicados.`
+          : "Rust1 a Rust20 já estavam completos. Nenhum card foi duplicado novamente.",
+        "ok",
+      );
+      router.refresh();
+    } catch (reason) {
+      announce(
+        reason instanceof Error
+          ? reason.message
+          : "Não foi possível criar os cards do Rust.",
+        "error",
+      );
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const changePublication = async () => {
     if (!draft || demoMode || busy) return;
-    setBusy("upload");
+    if (dirty) {
+      announce(
+        "Salve ou descarte as alterações deste produto antes de mudar sua visibilidade.",
+        "info",
+      );
+      return;
+    }
+
+    const restoring = draft.publicationState === "archived";
+    if (draft.publicationState === "draft") {
+      announce("Este card já está fora da vitrine porque é um rascunho.", "info");
+      return;
+    }
+
+    const question = restoring
+      ? `Restaurar ${draft.product.title}? Ele voltará ao estado anterior ao arquivamento.`
+      : `Arquivar ${draft.product.title}? O card sairá da vitrine, mas seus dados e histórico continuarão guardados.`;
+    if (!window.confirm(question)) return;
+
+    setBusy("publication");
+    setNotice("");
+    try {
+      const payload = await readApi<{ item: CatalogAdminItem }>(
+        await fetch(
+          `/api/admin/products/${encodeURIComponent(draft.id)}/publication`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              action: restoring ? "restore" : "archive",
+              expectedRevision: draft.revision,
+            }),
+          },
+        ),
+      );
+      setItems((current) =>
+        current.map((item) =>
+          item.id === payload.item.id ? payload.item : item,
+        ),
+      );
+      setDraft(cloneItem(payload.item));
+      setSavedFingerprint(fingerprint(payload.item));
+      setReviewConfirmed(false);
+      setStateFilter(
+        payload.item.publicationState === "archived"
+          ? "archived"
+          : payload.item.publicationState,
+      );
+      announce(
+        payload.item.publicationState === "archived"
+          ? "Card arquivado. Ele saiu da vitrine sem perder dados ou histórico."
+          : payload.item.publicationState === "published"
+            ? "Card restaurado e novamente visível na vitrine."
+            : "Card restaurado como rascunho e continua fora da vitrine.",
+        "ok",
+      );
+      router.refresh();
+    } catch (reason) {
+      announce(
+        reason instanceof Error
+          ? reason.message
+          : "Não foi possível alterar a visibilidade do card.",
+        "error",
+      );
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const uploadImage = async (
+    file: File,
+    slot: "card" | "checkout" = "card",
+  ) => {
+    if (!draft || demoMode || busy) return;
+    const busyKey = slot === "checkout" ? "upload-checkout" : "upload-card";
+    setBusy(busyKey);
     try {
       const payload = await readApi<{ url: string }>(
         await fetch("/api/admin/assets", {
@@ -521,13 +750,18 @@ export function AdminDashboard({
           headers: {
             "content-type": file.type,
             "x-product-source-key": draft.sourceKey,
+            "x-asset-slot": slot === "checkout" ? "checkout-banner" : "card",
           },
           body: file,
         }),
       );
-      updateProduct("image", payload.url);
+      if (slot === "checkout") {
+        updateProduct("checkoutBanner", payload.url);
+      } else {
+        updateProduct("image", payload.url);
+      }
       announce(
-        "Imagem enviada. Revise a prévia e clique em “Salvar campos seguros” para concluir.",
+        `${slot === "checkout" ? "Banner do checkout" : "Thumbnail"} enviado. Revise a prévia e clique em “Salvar campos seguros” para concluir.`,
         "ok",
       );
     } catch (reason) {
@@ -537,7 +771,11 @@ export function AdminDashboard({
       );
     } finally {
       setBusy("");
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      const input =
+        slot === "checkout"
+          ? checkoutBannerInputRef.current
+          : fileInputRef.current;
+      if (input) input.value = "";
     }
   };
 
@@ -734,6 +972,18 @@ export function AdminDashboard({
             </button>
           ))}
         </div>
+        <button
+          type="button"
+          className={`admin-order-entry ${organizingOrder ? "is-active" : ""}`}
+          onClick={openOrderOrganizer}
+          disabled={Boolean(busy) || organizingOrder}
+        >
+          <span aria-hidden>↕</span>
+          <p>
+            <strong>Organizar vitrine</strong>
+            <small>Arrastar e ordenar os cards com confirmação</small>
+          </p>
+        </button>
         <nav className="admin-product-list" aria-label="Lista de produtos">
           {filteredItems.map((item) => (
             <button
@@ -741,6 +991,7 @@ export function AdminDashboard({
               key={item.id}
               className={selectedId === item.id ? "is-active" : ""}
               onClick={() => selectItem(item)}
+              disabled={organizingOrder}
             >
               <span
                 className="admin-product-list__thumb"
@@ -767,7 +1018,17 @@ export function AdminDashboard({
         </nav>
       </aside>
 
-      {draft ? (
+      {organizingOrder ? (
+        <section className="admin-workspace admin-workspace--order">
+          <CatalogOrderBoard
+            items={orderedPublishedItems}
+            busy={busy === "catalog-order"}
+            demoMode={demoMode}
+            onCancel={() => setOrganizingOrder(false)}
+            onSave={saveCatalogOrder}
+          />
+        </section>
+      ) : draft ? (
         <>
           <section className="admin-workspace">
             <header className="admin-editor-header">
@@ -795,6 +1056,64 @@ export function AdminDashboard({
                 </p>
               </div>
               <div className="admin-editor-header__actions">
+                {editingRustFamily && rustMissingCount > 0 ? (
+                  <div className="admin-rust-create-control">
+                    <label>
+                      <span>Quantidade</span>
+                      <select
+                        value={effectiveRustCreateCount}
+                        onChange={(event) =>
+                          setRustCreateCount(Number(event.target.value))
+                        }
+                        disabled={demoMode || dirty || Boolean(busy)}
+                        aria-label="Quantidade de novos cards do Rust"
+                      >
+                        {Array.from(
+                          { length: rustMissingCount },
+                          (_, index) => index + 1,
+                        ).map((count) => (
+                          <option key={count} value={count}>
+                            {count}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      className="admin-secondary-button"
+                      onClick={syncRustClones}
+                      disabled={demoMode || dirty || Boolean(busy)}
+                      title="Cria somente a quantidade escolhida; o padrão é 1"
+                    >
+                      {busy === "rust-clones"
+                        ? "Criando cards…"
+                        : `Criar ${effectiveRustCreateCount} (${rustCloneCount}/${RUST_CLONE_COUNT})`}
+                    </button>
+                  </div>
+                ) : null}
+                {draft.publicationState !== "draft" ? (
+                  <button
+                    type="button"
+                    className={`admin-secondary-button ${
+                      draft.publicationState === "archived"
+                        ? "admin-restore-button"
+                        : "admin-archive-button"
+                    }`}
+                    onClick={changePublication}
+                    disabled={demoMode || dirty || Boolean(busy)}
+                    title={
+                      draft.publicationState === "archived"
+                        ? "Recoloca o card no estado anterior"
+                        : "Retira o card da vitrine sem apagar seus dados"
+                    }
+                  >
+                    {busy === "publication"
+                      ? "Atualizando…"
+                      : draft.publicationState === "archived"
+                        ? "Restaurar card"
+                        : "Arquivar card"}
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   className="admin-secondary-button"
@@ -966,7 +1285,7 @@ export function AdminDashboard({
                         accept="image/jpeg,image/png,image/webp,image/avif"
                         onChange={(event) => {
                           const file = event.target.files?.[0];
-                          if (file) void uploadImage(file);
+                          if (file) void uploadImage(file, "card");
                         }}
                       />
                       <button
@@ -975,7 +1294,7 @@ export function AdminDashboard({
                         onClick={() => fileInputRef.current?.click()}
                         disabled={demoMode || Boolean(busy)}
                       >
-                        {busy === "upload" ? "Enviando…" : "Substituir imagem"}
+                        {busy === "upload-card" ? "Enviando…" : "Substituir imagem"}
                       </button>
                       <label className="admin-field">
                         <span>Endereço da imagem</span>
@@ -986,6 +1305,75 @@ export function AdminDashboard({
                         />
                         <small>
                           Gerenciado automaticamente. Use “Substituir imagem”.
+                        </small>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="admin-image-manager admin-image-manager--checkout">
+                    <div
+                      className="admin-image-manager__preview admin-image-manager__preview--checkout"
+                      style={{
+                        backgroundImage: `url("${(draft.product.checkoutBanner ?? draft.product.image).replaceAll('"', "%22")}")`,
+                      }}
+                      aria-label="Prévia do banner vertical do checkout"
+                      role="img"
+                    >
+                      <span>
+                        {draft.product.checkoutBanner
+                          ? "Banner do checkout"
+                          : "Fallback da thumbnail"}
+                      </span>
+                    </div>
+                    <div>
+                      <h3>Banner vertical do checkout</h3>
+                      <p>
+                        Use WEBP ou AVIF em proporção 4:5. Tamanho recomendado:
+                        1200 × 1500 px, até 5 MB. Essa arte aparece somente na
+                        lateral do checkout PIX.
+                      </p>
+                      <input
+                        ref={checkoutBannerInputRef}
+                        hidden
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/avif"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) void uploadImage(file, "checkout");
+                        }}
+                      />
+                      <div className="admin-image-manager__actions">
+                        <button
+                          type="button"
+                          className="admin-secondary-button"
+                          onClick={() => checkoutBannerInputRef.current?.click()}
+                          disabled={demoMode || Boolean(busy)}
+                        >
+                          {busy === "upload-checkout"
+                            ? "Enviando…"
+                            : "Substituir banner"}
+                        </button>
+                        {draft.product.checkoutBanner ? (
+                          <button
+                            type="button"
+                            className="admin-secondary-button admin-secondary-button--quiet"
+                            onClick={() => updateProduct("checkoutBanner", null)}
+                            disabled={demoMode || Boolean(busy)}
+                          >
+                            Usar thumbnail do card
+                          </button>
+                        ) : null}
+                      </div>
+                      <label className="admin-field">
+                        <span>Endereço do banner</span>
+                        <input
+                          value={draft.product.checkoutBanner ?? ""}
+                          readOnly
+                          aria-readonly="true"
+                          placeholder="Usando a thumbnail do card"
+                        />
+                        <small>
+                          Gerenciado automaticamente. Nunca cole links externos
+                          neste campo.
                         </small>
                       </label>
                     </div>

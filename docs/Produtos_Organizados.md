@@ -1,5 +1,11 @@
 # DayZ (Priv8 Software)
 
+> **ARQUIVO-FONTE HISTÓRICO — NÃO É ESTADO OPERACIONAL.** Nota adicionada em
+> 2026-08-03: preserve o conteúdo recebido abaixo, mas não use preços, links,
+> estoque, alegações ou descrições como autorização de venda. A retomada atual
+> está em `PROJECT_STATE.md`; decisões editoriais pertencem ao mapa e ao
+> catálogo validado.
+
 ## PREÇOS
 
 1 Dia: R\$ 30,99 7 Dias: R\$ 66,99 30 Dias: R\$ 173,99

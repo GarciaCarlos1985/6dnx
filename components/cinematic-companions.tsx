@@ -65,6 +65,7 @@ export function CinematicCompanions({
   const leftFrames = productScene ? PRODUCT_LEFT_FRAMES : OPERATOR_FRAMES;
   const rightFrames = productScene ? PRODUCT_RIGHT_FRAMES : ANGEL_FRAMES;
   const layerRef = useRef<HTMLDivElement>(null);
+  const beamLayerRef = useRef<HTMLDivElement>(null);
   const operatorRef = useRef<HTMLDivElement>(null);
   const angelRef = useRef<HTMLDivElement>(null);
   const operatorReactiveRef = useRef<HTMLDivElement>(null);
@@ -92,19 +93,22 @@ export function CinematicCompanions({
           finePointer: boolean;
         };
         const layer = layerRef.current;
+        const beamLayer = beamLayerRef.current;
         const storyTrigger = productScene
           ? document.querySelector<HTMLElement>("#produtos")
           : document.documentElement;
-        if (!layer || !storyTrigger) return;
+        if (!layer || !beamLayer || !storyTrigger) return;
 
         if (!motion || !desktop) {
           if (!productScene) {
-            gsap.set(layer, { opacity: 1 });
+            gsap.set([layer, beamLayer], { opacity: 1 });
             return;
           }
 
           const syncStaticVisibility = (self: ScrollTrigger) => {
-            gsap.set(layer, { opacity: self.isActive ? 1 : 0 });
+            gsap.set([layer, beamLayer], {
+              opacity: self.isActive ? 1 : 0,
+            });
           };
           ScrollTrigger.create({
             trigger: storyTrigger,
@@ -123,7 +127,7 @@ export function CinematicCompanions({
           (frame): frame is HTMLDivElement => frame !== null,
         );
 
-        gsap.set(layer, { opacity: productScene ? 0 : 1 });
+        gsap.set([layer, beamLayer], { opacity: productScene ? 0 : 1 });
         if (!beamsOnly) {
           const inactiveFrames = [
             ...operatorFrames.slice(1),
@@ -162,7 +166,7 @@ export function CinematicCompanions({
 
         if (productScene) {
           story.fromTo(
-            layer,
+            [layer, beamLayer],
             { opacity: 0 },
             {
               opacity: 1,
@@ -380,9 +384,7 @@ export function CinematicCompanions({
         let pointerY = -10_000;
         let pointerFrame = 0;
 
-        const updateController = (
-          controller: (typeof controllers)[number],
-        ) => {
+        const updateController = (controller: (typeof controllers)[number]) => {
           const rect = controller.actor.getBoundingClientRect();
           const centerX = rect.left + rect.width * 0.5;
           const centerY = rect.top + rect.height * 0.48;
@@ -394,8 +396,7 @@ export function CinematicCompanions({
           );
           const ellipticalDistance = Math.hypot(normalX, normalY * 0.9);
           const proximity = Math.max(0, 1 - ellipticalDistance);
-          const intensity =
-            proximity * proximity * (3 - 2 * proximity);
+          const intensity = proximity * proximity * (3 - 2 * proximity);
 
           controller.x(normalX * controller.movement.x * intensity);
           controller.y(normalY * controller.movement.y * intensity);
@@ -423,10 +424,8 @@ export function CinematicCompanions({
             `${localY.toFixed(2)}%`,
           );
 
-          const originX =
-            rect.left + rect.width * controller.beamOrigin.x;
-          const originY =
-            rect.top + rect.height * controller.beamOrigin.y;
+          const originX = rect.left + rect.width * controller.beamOrigin.x;
+          const originY = rect.top + rect.height * controller.beamOrigin.y;
           const deltaX = pointerX - originX;
           const deltaY = pointerY - originY;
           controller.beam.style.setProperty("--beam-x", `${originX}px`);
@@ -489,154 +488,155 @@ export function CinematicCompanions({
   }, [beamsOnly, productScene]);
 
   return (
-    <div
-      ref={layerRef}
-      className="cinematic-companions"
-      data-cinematic-mode={mode}
-      data-cinematic-scene={scene}
-      aria-hidden
-    >
-      <span
-        ref={operatorBeamRef}
-        className="cinematic-pointer-beam cinematic-pointer-beam--operator"
-      >
-        <span className="cinematic-pointer-beam__origin" />
-      </span>
-      <span
-        ref={angelBeamRef}
-        className="cinematic-pointer-beam cinematic-pointer-beam--angel"
-      >
-        <span className="cinematic-pointer-beam__origin" />
-      </span>
-
+    <>
       <div
-        ref={operatorRef}
-        data-cinematic-character={productScene ? "couple" : "operator"}
-        className={`cinematic-actor cinematic-actor--operator ${
-          productScene ? "cinematic-actor--couple" : ""
-        }`}
+        ref={beamLayerRef}
+        className="cinematic-pointer-overlay"
+        data-cinematic-scene={scene}
+        aria-hidden
       >
-        <div ref={operatorReactiveRef} className="cinematic-actor__reactive">
-          {!beamsOnly ? (
-            <>
-              <span className="cinematic-actor__aura" />
-              <span
-                ref={operatorTransitionRef}
-                className="cinematic-actor__transition"
-              />
-              <div className="cinematic-actor__frames">
-                {leftFrames.map((src, index) => (
-                  <div
-                    key={src}
-                    ref={(node) => {
-                      operatorFrameRefs.current[index] = node;
-                    }}
-                    data-cinematic-pose={index + 1}
-                    className={`cinematic-actor__frame ${
-                      index === 0 ? "opacity-100" : "opacity-0"
-                    }`}
-                  >
-                    <Image
-                      src={src}
-                      alt=""
-                      fill
-                      loading={index === 0 ? "eager" : "lazy"}
-                      fetchPriority={
-                        index === 0
-                          ? productScene
-                            ? "low"
-                            : "high"
-                          : "auto"
-                      }
-                      sizes="(max-width: 899px) 48vw, 46vw"
-                      className="object-contain object-left-bottom"
-                    />
-                  </div>
-                ))}
-              </div>
-              <span className="cinematic-pointer-light" />
-              <span className="cinematic-waist-smoke cinematic-waist-smoke--left" />
-              <div className="cinematic-embers">
-                {EMBERS.map((ember) => (
-                  <span
-                    key={`${ember.x}-${ember.delay}`}
-                    style={{
-                      left: `${ember.x}%`,
-                      animationDelay: `-${ember.delay}s`,
-                      animationDuration: `${ember.duration}s`,
-                    }}
-                  />
-                ))}
-              </div>
-            </>
-          ) : null}
-        </div>
+        <span
+          ref={operatorBeamRef}
+          className="cinematic-pointer-beam cinematic-pointer-beam--operator"
+        >
+          <span className="cinematic-pointer-beam__origin" />
+        </span>
+        <span
+          ref={angelBeamRef}
+          className="cinematic-pointer-beam cinematic-pointer-beam--angel"
+        >
+          <span className="cinematic-pointer-beam__origin" />
+        </span>
       </div>
 
       <div
-        ref={angelRef}
-        data-cinematic-character="angel"
-        className="cinematic-actor cinematic-actor--angel"
+        ref={layerRef}
+        className="cinematic-companions"
+        data-cinematic-mode={mode}
+        data-cinematic-scene={scene}
+        aria-hidden
       >
-        <div ref={angelReactiveRef} className="cinematic-actor__reactive">
-          {!beamsOnly ? (
-            <>
-              <span className="cinematic-actor__aura" />
-              <span
-                ref={angelTransitionRef}
-                className="cinematic-actor__transition"
-              />
-              <div className="cinematic-actor__frames">
-                {rightFrames.map((src, index) => (
-                  <div
-                    key={src}
-                    ref={(node) => {
-                      angelFrameRefs.current[index] = node;
-                    }}
-                    data-cinematic-pose={index + 1}
-                    className={`cinematic-actor__frame ${
-                      index === 0 ? "opacity-100" : "opacity-0"
-                    }`}
-                  >
-                    <Image
-                      src={src}
-                      alt=""
-                      fill
-                      loading={index === 0 ? "eager" : "lazy"}
-                      fetchPriority={
-                        index === 0
-                          ? productScene
-                            ? "low"
-                            : "high"
-                          : "auto"
-                      }
-                      sizes="(max-width: 899px) 54vw, 54vw"
-                      className="object-contain object-right-bottom"
+        <div
+          ref={operatorRef}
+          data-cinematic-character={productScene ? "couple" : "operator"}
+          className={`cinematic-actor cinematic-actor--operator ${
+            productScene ? "cinematic-actor--couple" : ""
+          }`}
+        >
+          <div ref={operatorReactiveRef} className="cinematic-actor__reactive">
+            {!beamsOnly ? (
+              <>
+                <span className="cinematic-actor__aura" />
+                <span
+                  ref={operatorTransitionRef}
+                  className="cinematic-actor__transition"
+                />
+                <div className="cinematic-actor__frames">
+                  {leftFrames.map((src, index) => (
+                    <div
+                      key={src}
+                      ref={(node) => {
+                        operatorFrameRefs.current[index] = node;
+                      }}
+                      data-cinematic-pose={index + 1}
+                      className={`cinematic-actor__frame ${
+                        index === 0 ? "opacity-100" : "opacity-0"
+                      }`}
+                    >
+                      <Image
+                        src={src}
+                        alt=""
+                        fill
+                        loading={index === 0 ? "eager" : "lazy"}
+                        fetchPriority={
+                          index === 0 ? (productScene ? "low" : "high") : "auto"
+                        }
+                        sizes="(max-width: 899px) 48vw, 46vw"
+                        className="object-contain object-left-bottom"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <span className="cinematic-pointer-light" />
+                <span className="cinematic-waist-smoke cinematic-waist-smoke--left" />
+                <div className="cinematic-embers">
+                  {EMBERS.map((ember) => (
+                    <span
+                      key={`${ember.x}-${ember.delay}`}
+                      style={{
+                        left: `${ember.x}%`,
+                        animationDelay: `-${ember.delay}s`,
+                        animationDuration: `${ember.duration}s`,
+                      }}
                     />
-                  </div>
-                ))}
-              </div>
-              <span className="cinematic-pointer-light" />
-              <span className="cinematic-waist-smoke cinematic-waist-smoke--right" />
-              <div className="cinematic-feathers">
-                {FEATHERS.map((feather) => (
-                  <span
-                    key={`${feather.x}-${feather.delay}`}
-                    style={
-                      {
-                        left: `${feather.x}%`,
-                        animationDelay: `-${feather.delay}s`,
-                        animationDuration: `${feather.duration}s`,
-                        "--feather-rotation": `${feather.rotate}deg`,
-                      } as FeatherStyle
-                    }
-                  />
-                ))}
-              </div>
-            </>
-          ) : null}
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </div>
+        </div>
+
+        <div
+          ref={angelRef}
+          data-cinematic-character="angel"
+          className="cinematic-actor cinematic-actor--angel"
+        >
+          <div ref={angelReactiveRef} className="cinematic-actor__reactive">
+            {!beamsOnly ? (
+              <>
+                <span className="cinematic-actor__aura" />
+                <span
+                  ref={angelTransitionRef}
+                  className="cinematic-actor__transition"
+                />
+                <div className="cinematic-actor__frames">
+                  {rightFrames.map((src, index) => (
+                    <div
+                      key={src}
+                      ref={(node) => {
+                        angelFrameRefs.current[index] = node;
+                      }}
+                      data-cinematic-pose={index + 1}
+                      className={`cinematic-actor__frame ${
+                        index === 0 ? "opacity-100" : "opacity-0"
+                      }`}
+                    >
+                      <Image
+                        src={src}
+                        alt=""
+                        fill
+                        loading={index === 0 ? "eager" : "lazy"}
+                        fetchPriority={
+                          index === 0 ? (productScene ? "low" : "high") : "auto"
+                        }
+                        sizes="(max-width: 899px) 54vw, 54vw"
+                        className="object-contain object-right-bottom"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <span className="cinematic-pointer-light" />
+                <span className="cinematic-waist-smoke cinematic-waist-smoke--right" />
+                <div className="cinematic-feathers">
+                  {FEATHERS.map((feather) => (
+                    <span
+                      key={`${feather.x}-${feather.delay}`}
+                      style={
+                        {
+                          left: `${feather.x}%`,
+                          animationDelay: `-${feather.delay}s`,
+                          animationDuration: `${feather.duration}s`,
+                          "--feather-rotation": `${feather.rotate}deg`,
+                        } as FeatherStyle
+                      }
+                    />
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

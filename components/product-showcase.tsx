@@ -20,11 +20,16 @@ import {
   type Product,
   type Variant,
 } from "@/lib/products";
-import { buildProductCatalogLayout } from "@/lib/product-catalog-layout";
+import {
+  buildProductCatalogLayout,
+  CATALOG_CARDS_PER_ROW,
+  CATALOG_VISIBLE_ROWS,
+} from "@/lib/product-catalog-layout";
+import { PixCheckoutModal } from "@/components/pix-checkout-modal";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const PER_PAGE = 3;
+const PER_PAGE = CATALOG_CARDS_PER_ROW;
 const MARGIN = 12;
 const GAP = 20;
 const INFO_W = 360;
@@ -64,10 +69,7 @@ function place(card: DOMRect): Placement {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const roomLeft = Math.max(INFO_MIN_W, card.left - GAP - MARGIN);
-  const roomRight = Math.max(
-    VIDEO_MIN_W,
-    vw - card.right - GAP - MARGIN,
-  );
+  const roomRight = Math.max(VIDEO_MIN_W, vw - card.right - GAP - MARGIN);
   const infoW = Math.min(INFO_W, roomLeft);
   const infoH = Math.min(INFO_MAX_H, Math.max(INFO_MIN_H, vh - MARGIN * 2));
   const maxVideoH = vh - MARGIN * 2;
@@ -85,11 +87,7 @@ function place(card: DOMRect): Placement {
     width: videoW,
     height: videoH,
     left: clamp(card.right + GAP, MARGIN, vw - videoW - MARGIN),
-    top: clamp(
-      centerY - videoH / 2,
-      MARGIN,
-      vh - videoH - MARGIN,
-    ),
+    top: clamp(centerY - videoH / 2, MARGIN, vh - videoH - MARGIN),
   };
 
   return {
@@ -194,7 +192,9 @@ function VariantRow({
             ) : null}
           </span>
           {variant.note ? (
-            <span className="block text-[0.7rem] text-muted">{variant.note}</span>
+            <span className="block text-[0.7rem] text-muted">
+              {variant.note}
+            </span>
           ) : null}
         </span>
         <span className="shrink-0 text-right">
@@ -251,232 +251,287 @@ function ProductMediaPreview({ product }: { product: Product }) {
 function Popups({
   product,
   placement,
+  checkoutAvailable,
+  paymentTestAvailable,
   onClose,
 }: {
   product: Product;
   placement: Placement;
+  checkoutAvailable: boolean;
+  paymentTestAvailable: boolean;
   onClose: () => void;
 }) {
   const selection = useProductSelection();
   const supportUrl = `/api/redirect?slug=${encodeURIComponent(product.slug)}`;
   const requiresVariant = product.variants.length > 0;
+  const [checkoutVariantName, setCheckoutVariantName] = useState<string | null>(
+    null,
+  );
+  const checkoutTriggerRef = useRef<HTMLButtonElement>(null);
+  const checkoutVariant =
+    product.variants.find((variant) => variant.name === checkoutVariantName) ??
+    null;
+
+  const closeCheckout = () => {
+    setCheckoutVariantName(null);
+    window.requestAnimationFrame(() =>
+      checkoutTriggerRef.current?.focus({ preventScroll: true }),
+    );
+  };
 
   return (
     <>
-      <Cords p={placement} />
-
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Detalhes de ${product.title}`}
-        data-popup-side="left"
-        className="product-popup product-popup--info-left fixed z-[80] flex flex-col overflow-hidden border border-primary/40 bg-surface/95 shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)] backdrop-blur-md"
-        style={placement.info}
+      <div
+        inert={checkoutVariant ? true : undefined}
+        aria-hidden={checkoutVariant ? true : undefined}
       >
-        <header className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3">
-          <div>
-            <h3 className="text-lg leading-tight text-ink">{product.title}</h3>
-            <p className="text-[0.7rem] uppercase tracking-[0.16em] text-muted">
-              {product.tagline}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Fechar"
-            autoFocus
-            data-product-dialog-close
-            className="shrink-0 border border-white/15 px-2 py-0.5 text-sm text-muted transition-colors hover:border-primary hover:text-primary"
-          >
-            ✕
-          </button>
-        </header>
+        <Cords p={placement} />
 
-        <div className="product-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-3">
-          {product.description && (
-            <p className="mb-6 text-sm leading-relaxed text-muted">
-              {product.description}
-            </p>
-          )}
+        <section
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Detalhes de ${product.title}`}
+          data-popup-side="left"
+          className="product-popup product-popup--info-left fixed z-[80] flex flex-col overflow-hidden border border-primary/40 bg-surface/95 shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)] backdrop-blur-md"
+          style={placement.info}
+        >
+          <header className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3">
+            <div>
+              <h3 className="text-lg leading-tight text-ink">
+                {product.title}
+              </h3>
+              <p className="text-[0.7rem] uppercase tracking-[0.16em] text-muted">
+                {product.tagline}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fechar"
+              autoFocus
+              data-product-dialog-close
+              className="shrink-0 border border-white/15 px-2 py-0.5 text-sm text-muted transition-colors hover:border-primary hover:text-primary"
+            >
+              ✕
+            </button>
+          </header>
 
-          {product.features && product.features.length > 0 && (
-            <div className="mb-6">
-              <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
-                AI Aimbot — Universal Edition
-              </h4>
-              <div className="grid grid-cols-2 gap-2">
-                {product.features.map((f, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col rounded-md border border-white/5 bg-black/40 p-2 shadow-[inset_0_0_12px_rgba(255,255,255,0.02)]"
-                  >
-                    <span className="mb-0.5 text-[0.6rem] font-medium tracking-wide text-muted/80 uppercase">
-                      {f.label}
-                    </span>
-                    <span
-                      className={`text-[0.75rem] font-bold ${
-                        f.value.toLowerCase().includes("sim") ||
-                        f.value.toLowerCase().includes("yes") ||
-                        f.value.toLowerCase().includes("external")
-                          ? "text-green-400/90"
-                          : "text-ink"
-                      }`}
+          <div className="product-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-3">
+            {product.description && (
+              <p className="mb-6 text-sm leading-relaxed text-muted">
+                {product.description}
+              </p>
+            )}
+
+            {product.features && product.features.length > 0 && (
+              <div className="mb-6">
+                <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+                  AI Aimbot — Universal Edition
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {product.features.map((f, i) => (
+                    <div
+                      key={i}
+                      className="flex flex-col rounded-md border border-white/5 bg-black/40 p-2 shadow-[inset_0_0_12px_rgba(255,255,255,0.02)]"
                     >
-                      {f.value}
-                    </span>
-                  </div>
-                ))}
+                      <span className="mb-0.5 text-[0.6rem] font-medium tracking-wide text-muted/80 uppercase">
+                        {f.label}
+                      </span>
+                      <span
+                        className={`text-[0.75rem] font-bold ${
+                          f.value.toLowerCase().includes("sim") ||
+                          f.value.toLowerCase().includes("yes") ||
+                          f.value.toLowerCase().includes("external")
+                            ? "text-green-400/90"
+                            : "text-ink"
+                        }`}
+                      >
+                        {f.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {product.systemSupport && product.systemSupport.length > 0 && (
+            {product.systemSupport && product.systemSupport.length > 0 && (
+              <div className="mb-6">
+                <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+                  Requisitos do Sistema
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {product.systemSupport.map((f, i) => (
+                    <div
+                      key={i}
+                      className="flex flex-col rounded-md border border-primary/20 bg-primary/[0.03] p-2"
+                    >
+                      <span className="mb-0.5 text-[0.6rem] font-medium tracking-wide text-primary/70 uppercase">
+                        {f.label}
+                      </span>
+                      <span className="text-[0.75rem] font-bold text-ink">
+                        {f.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {product.menuKeys && product.menuKeys.length > 0 && (
+              <div className="mb-6">
+                <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+                  Teclas do Menu
+                </h4>
+                <div className="flex flex-col gap-2">
+                  {product.menuKeys.map((k, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 rounded-md border border-white/10 bg-black/60 p-2"
+                    >
+                      <span className="shrink-0 rounded bg-primary/20 px-2 py-0.5 text-[0.65rem] font-black tracking-widest text-primary">
+                        {k.label}
+                      </span>
+                      <span className="text-[0.7rem] leading-tight text-muted">
+                        {k.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {product.tutorialSteps && product.tutorialSteps.length > 0 && (
+              <div className="mb-6">
+                <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+                  Tutorial de Inicialização
+                </h4>
+                <ul className="space-y-2">
+                  {product.tutorialSteps.map((step, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-2.5 text-[0.7rem] text-muted/90 rounded-md border border-white/5 bg-black/20 p-2.5"
+                    >
+                      <span className="flex mt-0.5 h-4 w-4 shrink-0 items-center justify-center rounded border border-primary/30 text-[0.55rem] font-black text-primary">
+                        {i + 1}
+                      </span>
+                      <span className="leading-relaxed">{step}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <div className="mb-6">
               <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
-                Requisitos do Sistema
-              </h4>
-              <div className="grid grid-cols-2 gap-2">
-                {product.systemSupport.map((f, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col rounded-md border border-primary/20 bg-primary/[0.03] p-2"
-                  >
-                    <span className="mb-0.5 text-[0.6rem] font-medium tracking-wide text-primary/70 uppercase">
-                      {f.label}
-                    </span>
-                    <span className="text-[0.75rem] font-bold text-ink">
-                      {f.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {product.menuKeys && product.menuKeys.length > 0 && (
-            <div className="mb-6">
-              <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
-                Teclas do Menu
+                Atendimento 6DNX
               </h4>
               <div className="flex flex-col gap-2">
-                {product.menuKeys.map((k, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 rounded-md border border-white/10 bg-black/60 p-2"
-                  >
-                    <span className="shrink-0 rounded bg-primary/20 px-2 py-0.5 text-[0.65rem] font-black tracking-widest text-primary">
-                      {k.label}
-                    </span>
-                    <span className="text-[0.7rem] leading-tight text-muted">
-                      {k.value}
-                    </span>
-                  </div>
-                ))}
+                <a
+                  href={supportUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between rounded-md border border-primary/30 bg-primary/10 px-4 py-3 transition-colors hover:border-primary/70 hover:bg-primary/20"
+                >
+                  <span className="text-[0.65rem] font-black uppercase tracking-widest text-primary">
+                    Discord · Canal Welcome
+                  </span>
+                  <span className="text-primary text-xs">↗</span>
+                </a>
+                <p className="rounded-md border border-white/10 bg-black/30 px-4 py-3 text-[0.68rem] leading-relaxed text-muted">
+                  O PIX é gerado somente depois de escolher uma variação com
+                  preço aprovado. A entrega continua pelo atendimento 6DNX.
+                </p>
               </div>
             </div>
-          )}
 
-          {product.tutorialSteps && product.tutorialSteps.length > 0 && (
-            <div className="mb-6">
-              <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
-                Tutorial de Inicialização
-              </h4>
-              <ul className="space-y-2">
-                {product.tutorialSteps.map((step, i) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2.5 text-[0.7rem] text-muted/90 rounded-md border border-white/5 bg-black/20 p-2.5"
-                  >
-                    <span className="flex mt-0.5 h-4 w-4 shrink-0 items-center justify-center rounded border border-primary/30 text-[0.55rem] font-black text-primary">
-                      {i + 1}
-                    </span>
-                    <span className="leading-relaxed">{step}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+            {requiresVariant ? (
+              <>
+                <p className="mb-2 text-[0.65rem] uppercase tracking-[0.2em] text-muted">
+                  Variações · escolha uma opção
+                </p>
+                <ul className="space-y-1.5">
+                  {product.variants.map((v) => (
+                    <VariantRow
+                      key={v.name}
+                      variant={v}
+                      selected={selection.selectedVariant === v.name}
+                      onPick={selection.selectVariant}
+                    />
+                  ))}
+                </ul>
+              </>
+            ) : null}
+          </div>
 
-          <div className="mb-6">
-            <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
-              Atendimento 6DNX
-            </h4>
-            <div className="flex flex-col gap-2">
+          <footer className="flex flex-col border-t border-primary">
+            {requiresVariant ? (
+              !selection.selectedVariant ? (
+                <button
+                  type="button"
+                  disabled
+                  className="min-h-[3.25rem] cursor-not-allowed bg-white/5 px-4 text-sm font-bold uppercase tracking-[0.12em] text-muted"
+                >
+                  Selecione uma variação
+                </button>
+              ) : checkoutAvailable ? (
+                <button
+                  ref={checkoutTriggerRef}
+                  type="button"
+                  onClick={() =>
+                    setCheckoutVariantName(selection.selectedVariant)
+                  }
+                  className="flex min-h-[3.25rem] items-center justify-center bg-primary px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-white hover:text-black"
+                >
+                  Comprar com PIX
+                </button>
+              ) : (
+                <a
+                  href={supportUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex min-h-[3.25rem] items-center justify-center bg-primary px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-white hover:text-black"
+                >
+                  Comprar pelo Discord
+                </a>
+              )
+            ) : (
               <a
                 href={supportUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-between rounded-md border border-primary/30 bg-primary/10 px-4 py-3 transition-colors hover:border-primary/70 hover:bg-primary/20"
+                className="flex min-h-[3.25rem] items-center justify-center bg-primary px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-white hover:text-black"
               >
-                <span className="text-[0.65rem] font-black uppercase tracking-widest text-primary">
-                  Discord · Canal Welcome
-                </span>
-                <span className="text-primary text-xs">↗</span>
+                Consultar no Discord
               </a>
-              <p className="rounded-md border border-white/10 bg-black/30 px-4 py-3 text-[0.68rem] leading-relaxed text-muted">
-                O pagamento e a entrega são combinados com o atendimento. O
-                site não libera arquivos automaticamente.
-              </p>
-            </div>
-          </div>
-
-          {requiresVariant ? (
-            <>
-              <p className="mb-2 text-[0.65rem] uppercase tracking-[0.2em] text-muted">
-                Variações · escolha uma opção
-              </p>
-              <ul className="space-y-1.5">
-                {product.variants.map((v) => (
-                  <VariantRow
-                    key={v.name}
-                    variant={v}
-                    selected={selection.selectedVariant === v.name}
-                    onPick={selection.selectVariant}
-                  />
-                ))}
-              </ul>
-            </>
-          ) : null}
-        </div>
-
-        <footer className="flex flex-col border-t border-primary">
-          {requiresVariant && !selection.selectedVariant ? (
-            <button
-              type="button"
-              disabled
-              className="min-h-[3.25rem] bg-white/5 px-4 text-sm font-bold uppercase tracking-[0.12em] text-muted cursor-not-allowed"
-            >
-              Selecione uma variação
-            </button>
-          ) : (
+            )}
             <a
               href={supportUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex min-h-[3.25rem] items-center justify-center bg-primary px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-white hover:text-black"
+              className="flex min-h-10 items-center justify-center border-t border-primary/20 bg-black/40 px-4 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-muted transition-colors hover:text-white"
             >
-              {requiresVariant
-                ? "Iniciar pedido no Discord"
-                : "Consultar no Discord"}
+              Dúvidas? Fale com o suporte
             </a>
-          )}
-          <a
-            href={supportUrl}
-            className="flex min-h-10 items-center justify-center border-t border-primary/20 bg-black/40 px-4 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-muted transition-colors hover:text-white"
-          >
-            Dúvidas? Fale com o suporte
-          </a>
-        </footer>
-      </section>
+          </footer>
+        </section>
 
-      <section
-        aria-label={`Prévia de ${product.title}`}
-        data-popup-side="right"
-        className="product-popup product-popup--video-right fixed z-[80] overflow-hidden border border-primary/40 bg-black shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)]"
-        style={placement.video}
-      >
-        <ProductMediaPreview product={product} />
-      </section>
+        <section
+          aria-label={`Prévia de ${product.title}`}
+          data-popup-side="right"
+          className="product-popup product-popup--video-right fixed z-[80] overflow-hidden border border-primary/40 bg-black shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)]"
+          style={placement.video}
+        >
+          <ProductMediaPreview product={product} />
+        </section>
+      </div>
+
+      {checkoutVariant ? (
+        <PixCheckoutModal
+          product={product}
+          variant={checkoutVariant}
+          checkoutAvailable={checkoutAvailable}
+          paymentTestAvailable={paymentTestAvailable}
+          onClose={closeCheckout}
+        />
+      ) : null}
     </>
   );
 }
@@ -524,16 +579,13 @@ function Card({
             : obscured
               ? "pointer-events-none opacity-0"
               : "reveal-up border-white/10 hover:-translate-y-1 hover:border-primary/60 hover:shadow-[0_0_38px_var(--primary-glow)]"
-      } ${
-        modalClone ? "select-none" : ""
-      }`}
+      } ${modalClone ? "select-none" : ""}`}
     >
       <div className="product-card__visual relative aspect-[16/9] overflow-hidden border-b border-white/10 bg-black">
         <Image
           src={product.image}
           alt=""
           fill
-          loading="eager"
           sizes="(max-width: 639px) 92vw, (max-width: 1023px) 46vw, 31vw"
           className="product-card__art object-cover opacity-[0.82] saturate-[0.82] transition duration-700 group-hover:scale-[1.055] group-hover:opacity-100 group-hover:saturate-100"
         />
@@ -569,10 +621,15 @@ function Card({
 
       <div className="product-card__body flex flex-1 flex-col p-6">
         <p className="product-card__eyebrow mb-2 flex items-center gap-2 text-[0.58rem] font-bold uppercase tracking-[0.28em] text-primary/80">
-          <span className="product-card__eyebrow-line inline-block h-px w-7 bg-primary/70" aria-hidden />
+          <span
+            className="product-card__eyebrow-line inline-block h-px w-7 bg-primary/70"
+            aria-hidden
+          />
           6DNX // catálogo seguro
         </p>
-        <h3 className="mb-1 text-2xl leading-tight text-ink">{product.title}</h3>
+        <h3 className="mb-1 text-2xl leading-tight text-ink">
+          {product.title}
+        </h3>
         <p className="mb-5 text-sm text-muted">{product.tagline}</p>
 
         <ul className="mb-6 flex flex-1 flex-wrap content-start gap-1.5">
@@ -595,7 +652,9 @@ function Card({
           {from ? (
             <>
               Referência a partir de{" "}
-              <span className="text-xl font-bold text-ink">{formatBRL(from)}</span>
+              <span className="text-xl font-bold text-ink">
+                {formatBRL(from)}
+              </span>
             </>
           ) : (
             <span className="text-base font-bold text-ink">
@@ -659,10 +718,12 @@ function AdjacentPagePeek({
   side,
   products: previewProducts,
   onNavigate,
+  disabled,
 }: {
   side: "previous" | "next";
   products: Product[];
   onNavigate: () => void;
+  disabled: boolean;
 }) {
   const previous = side === "previous";
   const directionLabel = previous ? "anterior" : "seguinte";
@@ -673,6 +734,7 @@ function AdjacentPagePeek({
     <button
       type="button"
       onClick={onNavigate}
+      disabled={disabled}
       data-catalog-peek={side}
       aria-label={`Ver página ${directionLabel}, com ${previewProducts.length} ${
         previewProducts.length === 1 ? "produto" : "produtos"
@@ -715,10 +777,137 @@ function AdjacentPagePeek({
   );
 }
 
+function CatalogShelfRow({
+  rowIndex,
+  pageIndex,
+  products,
+  previousProducts,
+  nextProducts,
+  openSlug,
+  wide,
+  transitioning,
+  onNavigate,
+  onOpen,
+}: {
+  rowIndex: number;
+  pageIndex: number;
+  products: Product[];
+  previousProducts: Product[];
+  nextProducts: Product[];
+  openSlug: string | null;
+  wide: boolean;
+  transitioning: boolean;
+  onNavigate: (nextPage: number) => void;
+  onOpen: (
+    product: Product,
+    element: HTMLElement,
+    trigger: HTMLButtonElement,
+  ) => void;
+}) {
+  const orderedProducts = useMemo(() => {
+    if (!wide || !openSlug) return products;
+    const selectedIndex = products.findIndex(
+      (product) => product.slug === openSlug,
+    );
+    if (selectedIndex < 0 || selectedIndex === 1 || products.length < 2) {
+      return products;
+    }
+
+    const ordered = [...products];
+    const [selected] = ordered.splice(selectedIndex, 1);
+    ordered.splice(Math.min(1, ordered.length), 0, selected);
+    return ordered;
+  }, [openSlug, products, wide]);
+
+  if (!products.length) return null;
+
+  return (
+    <div
+      className="product-catalog-row"
+      data-catalog-row={rowIndex + 1}
+      data-catalog-row-page={pageIndex}
+      aria-label={`Fileira ${rowIndex + 1} de produtos`}
+    >
+      <div className="product-catalog-stage relative mx-auto w-full max-w-[90rem] overflow-x-clip">
+        {!openSlug && previousProducts.length > 0 ? (
+          <AdjacentPagePeek
+            side="previous"
+            products={[...previousProducts].reverse()}
+            onNavigate={() => onNavigate(pageIndex - 1)}
+            disabled={transitioning}
+          />
+        ) : null}
+
+        {!openSlug && nextProducts.length > 0 ? (
+          <AdjacentPagePeek
+            side="next"
+            products={nextProducts}
+            onNavigate={() => onNavigate(pageIndex + 1)}
+            disabled={transitioning}
+          />
+        ) : null}
+
+        <div className="pointer-events-none relative z-[var(--z-content)] mx-auto flex w-full max-w-7xl items-center justify-center gap-1.5 md:gap-2 lg:gap-8">
+          <button
+            type="button"
+            onClick={() => onNavigate(pageIndex - 1)}
+            disabled={
+              previousProducts.length === 0 ||
+              Boolean(openSlug) ||
+              transitioning
+            }
+            aria-label={`Exibir cards anteriores da fileira ${rowIndex + 1}`}
+            className={`catalog-row-arrow pointer-events-auto relative flex h-16 w-8 shrink-0 items-center justify-center text-5xl font-light text-primary/70 transition-[color,opacity,transform] hover:scale-105 hover:text-primary disabled:pointer-events-none disabled:opacity-15 md:h-24 md:w-16 md:text-7xl ${
+              wide && openSlug ? "invisible" : ""
+            }`}
+          >
+            ‹
+          </button>
+
+          <div className="pointer-events-auto relative grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {orderedProducts.map((product) => (
+              <Card
+                key={product.slug}
+                product={product}
+                open={openSlug === product.slug}
+                obscured={
+                  wide && openSlug !== null && openSlug !== product.slug
+                }
+                centered={orderedProducts.length === 1}
+                onOpen={(element, trigger) => onOpen(product, element, trigger)}
+              />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onNavigate(pageIndex + 1)}
+            disabled={
+              nextProducts.length === 0 || Boolean(openSlug) || transitioning
+            }
+            aria-label={`Exibir próximos cards da fileira ${rowIndex + 1}`}
+            className={`catalog-row-arrow pointer-events-auto relative flex h-16 w-8 shrink-0 items-center justify-center text-5xl font-light text-primary/70 transition-[color,opacity,transform] hover:scale-105 hover:text-primary disabled:pointer-events-none disabled:opacity-15 md:h-24 md:w-16 md:text-7xl ${
+              wide && openSlug ? "invisible" : ""
+            }`}
+          >
+            ›
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ProductShowcase({
   catalogProducts,
+  checkoutAvailable,
+  paymentTestAvailable,
+  developerCreditUrl,
 }: {
   catalogProducts: Product[];
+  checkoutAvailable: boolean;
+  paymentTestAvailable: boolean;
+  developerCreditUrl: string | null;
 }) {
   if (catalogProducts.length === 0) {
     return (
@@ -755,70 +944,96 @@ export function ProductShowcase({
     );
   }
 
-  return <ProductCatalogShowcase catalogProducts={catalogProducts} />;
+  return (
+    <ProductCatalogShowcase
+      catalogProducts={catalogProducts}
+      checkoutAvailable={checkoutAvailable}
+      paymentTestAvailable={paymentTestAvailable}
+      developerCreditUrl={developerCreditUrl}
+    />
+  );
 }
 
 function ProductCatalogShowcase({
   catalogProducts,
+  checkoutAvailable,
+  paymentTestAvailable,
+  developerCreditUrl,
 }: {
   catalogProducts: Product[];
+  checkoutAvailable: boolean;
+  paymentTestAvailable: boolean;
+  developerCreditUrl: string | null;
 }) {
   const productCatalog = useMemo(
-    () => buildProductCatalogLayout(catalogProducts, PER_PAGE),
+    () =>
+      buildProductCatalogLayout(
+        catalogProducts,
+        PER_PAGE,
+        CATALOG_VISIBLE_ROWS,
+      ),
     [catalogProducts],
   );
-  const defaultProductPage = productCatalog.defaultPage;
-  const firstRightProductPage = productCatalog.firstRightPage;
-  const [page, setPage] = useState(defaultProductPage);
+  const [rowPages, setRowPages] = useState<number[]>(() =>
+    Array.from({ length: CATALOG_VISIBLE_ROWS }, () => 0),
+  );
+  const [transitioningRows, setTransitioningRows] = useState<boolean[]>(() =>
+    Array.from({ length: CATALOG_VISIBLE_ROWS }, () => false),
+  );
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [placement, setPlacement] = useState<Placement | null>(null);
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const pagerRef = useRef<HTMLElement>(null);
   const anchorRef = useRef<HTMLElement | null>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const originScrollRef = useRef<number | null>(null);
+  const rowTransitionTimerRefs = useRef<Array<number | null>>(
+    Array.from({ length: CATALOG_VISIBLE_ROWS }, () => null),
+  );
+  const rowTransitionLocksRef = useRef<boolean[]>(
+    Array.from({ length: CATALOG_VISIBLE_ROWS }, () => false),
+  );
   const wide = useSyncExternalStore(
     subscribeToWidePopup,
     getWidePopupSnapshot,
     getWidePopupServerSnapshot,
   );
 
-  const pages = productCatalog.pages.length;
-  const visible =
-    productCatalog.pages[page] ??
-    productCatalog.pages[defaultProductPage];
-  const previousPage = page > 0 ? productCatalog.pages[page - 1] : null;
-  const nextPage =
-    page < pages - 1 ? productCatalog.pages[page + 1] : null;
-  const previousPreviewProducts = previousPage
-    ? [...previousPage].reverse()
-    : [];
-  const nextPreviewProducts = nextPage ?? [];
-
   const openProduct =
     catalogProducts.find((product) => product.slug === openSlug) ?? null;
-  const orderedVisible = useMemo(() => {
-    if (!wide || !openSlug) return visible;
-    const selectedIndex = visible.findIndex(
-      (product) => product.slug === openSlug,
-    );
-    if (selectedIndex < 0 || selectedIndex === 1 || visible.length < 2) {
-      return visible;
-    }
-
-    const ordered = [...visible];
-    const [selected] = ordered.splice(selectedIndex, 1);
-    ordered.splice(Math.min(1, ordered.length), 0, selected);
-    return ordered;
-  }, [openSlug, visible, wide]);
+  const visibleRows = productCatalog.rows.map(
+    (row, rowIndex) => row[rowPages[rowIndex] ?? 0] ?? row[0] ?? [],
+  );
+  const visibleCount = visibleRows.reduce(
+    (total, products) => total + products.length,
+    0,
+  );
+  const maxStage = Math.max(0, productCatalog.pageCount - 1);
+  const globalStage = Math.max(0, ...rowPages);
+  const uniformStage = rowPages.every((page) => page === rowPages[0])
+    ? rowPages[0]
+    : null;
+  const pageTransitioning = transitioningRows.some(Boolean);
 
   useEffect(() => {
     const resetRestoredPage = (event: PageTransitionEvent) => {
-      if (event.persisted) setPage(defaultProductPage);
+      if (event.persisted) {
+        setRowPages(Array.from({ length: CATALOG_VISIBLE_ROWS }, () => 0));
+      }
     };
     window.addEventListener("pageshow", resetRestoredPage);
     return () => window.removeEventListener("pageshow", resetRestoredPage);
-  }, [defaultProductPage]);
+  }, []);
+
+  useEffect(
+    () => () => {
+      rowTransitionTimerRefs.current.forEach((timer) => {
+        if (timer !== null) window.clearTimeout(timer);
+      });
+      rowTransitionLocksRef.current.fill(false);
+    },
+    [],
+  );
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
@@ -909,7 +1124,8 @@ function ProductCatalogShowcase({
       if (originScroll !== null) {
         window.scrollTo({
           top: originScroll,
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
             ? "auto"
             : "smooth",
         });
@@ -941,7 +1157,11 @@ function ProductCatalogShowcase({
       modalRoot
         ? Array.from(
             modalRoot.querySelectorAll<HTMLElement>(focusableSelector),
-          ).filter((element) => element.getClientRects().length > 0)
+          ).filter(
+            (element) =>
+              element.getClientRects().length > 0 &&
+              !element.closest("[inert]"),
+          )
         : [];
 
     root.style.overflow = "hidden";
@@ -954,6 +1174,7 @@ function ProductCatalogShowcase({
     });
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        if (modalRoot?.querySelector("[data-pix-checkout-root]")) return;
         close();
         return;
       }
@@ -1046,232 +1267,306 @@ function ProductCatalogShowcase({
     setOpenSlug(slug);
   };
 
-  const changePage = (nextPage: number) => {
-    if (openSlug) {
-      originScrollRef.current = null;
-      close();
-    }
-    setPage(clamp(nextPage, 0, pages - 1));
+  const beginTransitions = (rowIndexes: number[]) => {
+    if (!rowIndexes.length) return;
+    setTransitioningRows((current) =>
+      current.map((value, index) =>
+        rowIndexes.includes(index) ? true : value,
+      ),
+    );
+
+    rowIndexes.forEach((rowIndex) => {
+      rowTransitionLocksRef.current[rowIndex] = true;
+      const previousTimer = rowTransitionTimerRefs.current[rowIndex];
+      if (previousTimer !== null) window.clearTimeout(previousTimer);
+      rowTransitionTimerRefs.current[rowIndex] = window.setTimeout(() => {
+        rowTransitionTimerRefs.current[rowIndex] = null;
+        rowTransitionLocksRef.current[rowIndex] = false;
+        setTransitioningRows((current) =>
+          current.map((value, index) => (index === rowIndex ? false : value)),
+        );
+      }, 420);
+    });
   };
 
+  const closeBeforeNavigation = () => {
+    if (!openSlug) return;
+    originScrollRef.current = null;
+    close();
+  };
+
+  const changeRowPage = (rowIndex: number, nextPage: number) => {
+    const row = productCatalog.rows[rowIndex] ?? [];
+    const boundedPage = clamp(nextPage, 0, Math.max(0, row.length - 1));
+    if (
+      !row.length ||
+      rowTransitionLocksRef.current[rowIndex] ||
+      boundedPage === rowPages[rowIndex]
+    ) {
+      return;
+    }
+
+    closeBeforeNavigation();
+    setRowPages((current) =>
+      current.map((page, index) => (index === rowIndex ? boundedPage : page)),
+    );
+    beginTransitions([rowIndex]);
+  };
+
+  const changeAllRows = (nextStage: number) => {
+    if (rowTransitionLocksRef.current.some(Boolean)) return;
+    const boundedStage = clamp(nextStage, 0, maxStage);
+    const nextPages = productCatalog.rows.map((row) =>
+      clamp(boundedStage, 0, Math.max(0, row.length - 1)),
+    );
+    const changedRows = nextPages.flatMap((nextPage, rowIndex) =>
+      nextPage === rowPages[rowIndex] ? [] : [rowIndex],
+    );
+    if (!changedRows.length) return;
+
+    closeBeforeNavigation();
+    setRowPages(nextPages);
+    beginTransitions(changedRows);
+  };
+
+  const renderRows = (rowIndexes: number[]) =>
+    rowIndexes.map((rowIndex) => {
+      const row = productCatalog.rows[rowIndex] ?? [];
+      const pageIndex = clamp(
+        rowPages[rowIndex] ?? 0,
+        0,
+        Math.max(0, row.length - 1),
+      );
+      return (
+        <CatalogShelfRow
+          key={`catalog-row-${rowIndex}`}
+          rowIndex={rowIndex}
+          pageIndex={pageIndex}
+          products={row[pageIndex] ?? []}
+          previousProducts={row[pageIndex - 1] ?? []}
+          nextProducts={row[pageIndex + 1] ?? []}
+          openSlug={openSlug}
+          wide={wide}
+          transitioning={transitioningRows[rowIndex] ?? false}
+          onNavigate={(nextPage) => changeRowPage(rowIndex, nextPage)}
+          onOpen={(product, element, trigger) =>
+            openCard(product.slug, element, trigger)
+          }
+        />
+      );
+    });
+
   return (
-    <section
+    <div
       ref={sectionRef}
-      id="produtos"
-      data-catalog-page={page}
-      data-catalog-pages={pages}
-      data-catalog-default-page={defaultProductPage}
-      className="product-showcase-section site-flow-section relative bg-transparent px-4 py-20 md:px-8 md:py-28"
-      aria-labelledby="produtos-heading"
+      data-catalog-row-pages={rowPages.join(",")}
+      data-catalog-pages={productCatalog.pageCount}
+      data-catalog-transitioning={pageTransitioning ? "true" : "false"}
+      aria-busy={pageTransitioning}
+      className="product-showcase-experience relative"
     >
-      <div className="reveal-up relative z-[var(--z-content)] mx-auto mb-12 max-w-6xl text-center">
-        <h2
-          id="produtos-heading"
-          className="mb-3 text-[clamp(2rem,5vw,3.25rem)] tracking-tight text-ink"
-        >
-          Soluções 6DNX
-        </h2>
-        <p className="mx-auto max-w-2xl text-white/72">
-          Cada produto possui seu próprio card, arte 6DNX, informações e
-          variações de preço.
-        </p>
-      </div>
-
-      <div className="product-catalog-stage relative mx-auto w-full max-w-[90rem] overflow-x-clip">
-        {!openSlug && previousPreviewProducts.length > 0 ? (
-          <AdjacentPagePeek
-            key={`previous-${page}`}
-            side="previous"
-            products={previousPreviewProducts}
-            onNavigate={() => changePage(page - 1)}
-          />
-        ) : null}
-
-        {!openSlug && nextPreviewProducts.length > 0 ? (
-          <AdjacentPagePeek
-            key={`next-${page}`}
-            side="next"
-            products={nextPreviewProducts}
-            onNavigate={() => changePage(page + 1)}
-          />
-        ) : null}
-
-        <div className="pointer-events-none relative z-[var(--z-content)] mx-auto flex w-full max-w-7xl items-center justify-center gap-2 lg:gap-8">
-          <button
-            type="button"
-            onClick={() => changePage(page - 1)}
-            disabled={page === 0 || Boolean(openSlug)}
-            aria-label="Exibir cards anteriores"
-            data-catalog-previous
-            className={`pointer-events-auto relative hidden h-24 w-16 shrink-0 items-center justify-center text-7xl font-light text-primary/70 transition-[color,opacity,transform] hover:scale-105 hover:text-primary disabled:pointer-events-none disabled:opacity-15 md:flex ${
-              wide && openSlug ? "invisible" : ""
-            }`}
+      <section
+        id="produtos"
+        className="product-showcase-section site-flow-section relative bg-transparent px-2 py-20 sm:px-4 md:px-8 md:py-28"
+        aria-labelledby="produtos-heading"
+      >
+        <div className="reveal-up relative z-[var(--z-content)] mx-auto mb-12 max-w-6xl text-center">
+          <h2
+            id="produtos-heading"
+            className="mb-3 text-[clamp(2rem,5vw,3.25rem)] tracking-tight text-ink"
           >
-            ‹
-          </button>
+            Soluções 6DNX
+          </h2>
+          <p className="mx-auto max-w-2xl text-white/72">
+            Doze soluções ficam à vista. Cada fileira possui navegação própria
+            para explorar o restante do catálogo sem perder a posição.
+          </p>
+        </div>
 
-          <div className="pointer-events-auto relative grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {orderedVisible.map((product) => (
-              <Card
-                key={product.slug}
-                product={product}
-                open={openSlug === product.slug}
-                obscured={
-                  wide && openSlug !== null && openSlug !== product.slug
-                }
-                centered={orderedVisible.length === 1}
-                onOpen={(el, trigger) => openCard(product.slug, el, trigger)}
+        <div className="product-catalog-rows">{renderRows([0, 1])}</div>
+      </section>
+
+      <section
+        id="produtos-continuacao"
+        className="product-showcase-section product-showcase-section--continuation site-flow-section relative bg-transparent px-2 pb-20 pt-16 sm:px-4 md:px-8 md:pb-28 md:pt-24"
+        aria-labelledby="produtos-continuacao-heading"
+      >
+        <div className="reveal-up relative z-[var(--z-content)] mx-auto mb-12 max-w-6xl text-center">
+          <span className="text-[0.6rem] font-black uppercase tracking-[0.24em] text-primary">
+            Catálogo em profundidade
+          </span>
+          <h2
+            id="produtos-continuacao-heading"
+            className="mt-3 text-[clamp(1.8rem,4vw,2.8rem)] tracking-tight text-ink"
+          >
+            Continue explorando
+          </h2>
+        </div>
+
+        <div className="product-catalog-rows">{renderRows([2, 3])}</div>
+
+        <nav
+          ref={pagerRef}
+          className="product-pager relative z-[var(--z-content)] mx-auto mt-16 flex max-w-5xl flex-col items-center gap-4"
+          aria-label="Navegar por todas as fileiras de produtos"
+        >
+          <div className="flex items-center justify-center gap-1.5 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => changeAllRows(globalStage - 1)}
+              disabled={
+                globalStage === 0 || Boolean(openSlug) || pageTransitioning
+              }
+              aria-label="Voltar todas as fileiras"
+              className="product-pager__arrow inline-flex size-11 items-center justify-center text-3xl leading-none text-primary/70 transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-20"
+            >
+              ‹
+            </button>
+
+            <button
+              type="button"
+              onClick={() => changeAllRows(globalStage - 1)}
+              disabled={
+                globalStage === 0 || Boolean(openSlug) || pageTransitioning
+              }
+              aria-label="Conjunto anterior de produtos"
+              className="relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none text-muted transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-35"
+            >
+              <span className="relative z-[1]">6</span>
+              <span
+                aria-hidden
+                data-pager-shadow="6"
+                className="product-pager__shadow"
+              >
+                6
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => changeAllRows(0)}
+              disabled={Boolean(openSlug) || pageTransitioning}
+              aria-label="Voltar aos doze cards iniciais"
+              aria-current={uniformStage === 0 ? "page" : undefined}
+              className={`relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
+                uniformStage === 0
+                  ? "text-primary drop-shadow-[0_0_18px_var(--primary-glow)]"
+                  : "text-muted/55 hover:text-muted"
+              }`}
+            >
+              <span className="relative z-[1]">D</span>
+              <span
+                aria-hidden
+                data-pager-shadow="D"
+                className="product-pager__shadow"
+              >
+                D
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => changeAllRows(1)}
+              disabled={maxStage < 1 || Boolean(openSlug) || pageTransitioning}
+              aria-label="Abrir o segundo conjunto em todas as fileiras"
+              aria-current={uniformStage === 1 ? "page" : undefined}
+              className={`relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
+                uniformStage === 1
+                  ? "text-primary drop-shadow-[0_0_18px_var(--primary-glow)]"
+                  : "text-muted/55 hover:text-muted"
+              } disabled:pointer-events-none disabled:opacity-35`}
+            >
+              <span className="relative z-[1]">N</span>
+              <span
+                aria-hidden
+                data-pager-shadow="N"
+                className="product-pager__shadow"
+              >
+                N
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => changeAllRows(globalStage + 1)}
+              disabled={
+                globalStage >= maxStage ||
+                Boolean(openSlug) ||
+                pageTransitioning
+              }
+              aria-label="Próximo conjunto em todas as fileiras"
+              className="relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none text-muted transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-35"
+            >
+              <span className="relative z-[1]">X</span>
+              <span
+                aria-hidden
+                data-pager-shadow="X"
+                className="product-pager__shadow"
+              >
+                X
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => changeAllRows(globalStage + 1)}
+              disabled={
+                globalStage >= maxStage ||
+                Boolean(openSlug) ||
+                pageTransitioning
+              }
+              aria-label="Avançar todas as fileiras"
+              className="product-pager__arrow inline-flex size-11 items-center justify-center text-3xl leading-none text-primary/70 transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-20"
+            >
+              ›
+            </button>
+          </div>
+
+          <div
+            aria-hidden
+            className="flex max-w-full items-center justify-center gap-1"
+          >
+            {Array.from({ length: productCatalog.pageCount }, (_, index) => (
+              <span
+                key={index}
+                className={`h-px transition-[width,background-color,box-shadow] ${
+                  uniformStage === index
+                    ? "w-5 bg-primary shadow-[0_0_10px_var(--primary-glow)]"
+                    : "w-2 bg-white/15"
+                }`}
               />
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={() => changePage(page + 1)}
-            disabled={page === pages - 1 || Boolean(openSlug)}
-            aria-label="Exibir próximos cards"
-            data-catalog-next
-            className={`pointer-events-auto relative hidden h-24 w-16 shrink-0 items-center justify-center text-7xl font-light text-primary/70 transition-[color,opacity,transform] hover:scale-105 hover:text-primary disabled:pointer-events-none disabled:opacity-15 md:flex ${
-              wide && openSlug ? "invisible" : ""
-            }`}
-          >
-            ›
-          </button>
-        </div>
-      </div>
+          <p className="sr-only" aria-live="polite">
+            Exibindo {visibleCount} produtos em quatro fileiras. Cada fileira
+            pode estar em uma posição diferente.
+          </p>
+        </nav>
 
-      <nav
-        ref={pagerRef}
-        className="relative z-[var(--z-content)] mx-auto mt-14 flex max-w-5xl flex-col items-center gap-4"
-        aria-label="Navegar pelos cards de produtos"
-      >
-        <div className="flex items-center justify-center gap-1.5 sm:gap-3">
-          <button
-            type="button"
-            onClick={() => changePage(page - 1)}
-            disabled={page === 0 || Boolean(openSlug)}
-            aria-label="Página anterior de produtos"
-            className="inline-flex size-11 items-center justify-center text-3xl leading-none text-primary/70 transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-20"
-          >
-            ‹
-          </button>
-
-          <button
-            type="button"
-            onClick={() => changePage(page - 1)}
-            disabled={page === 0 || Boolean(openSlug)}
-            aria-label="Produtos anteriores"
-            className="relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none text-muted transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-35"
-          >
-            <span className="relative z-[1]">6</span>
-            <span
-              aria-hidden
-              data-pager-shadow="6"
-              className="product-pager__shadow"
-            >
-              6
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => changePage(defaultProductPage)}
-            disabled={Boolean(openSlug)}
-            aria-label="Abrir a página inicial D"
-            aria-current={page === defaultProductPage ? "page" : undefined}
-            className={`relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
-              page === defaultProductPage
-                ? "text-primary drop-shadow-[0_0_18px_var(--primary-glow)]"
-                : "text-muted/55 hover:text-muted"
-            }`}
-          >
-            <span className="relative z-[1]">D</span>
-            <span
-              aria-hidden
-              data-pager-shadow="D"
-              className="product-pager__shadow"
-            >
-              D
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => changePage(firstRightProductPage)}
-            disabled={
-              firstRightProductPage >= pages || Boolean(openSlug)
-            }
-            aria-label="Abrir a página N"
-            aria-current={
-              page === firstRightProductPage ? "page" : undefined
-            }
-            className={`relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
-              page === firstRightProductPage
-                ? "text-primary drop-shadow-[0_0_18px_var(--primary-glow)]"
-                : "text-muted/55 hover:text-muted"
-            } disabled:pointer-events-none disabled:opacity-35`}
-          >
-            <span className="relative z-[1]">N</span>
-            <span
-              aria-hidden
-              data-pager-shadow="N"
-              className="product-pager__shadow"
-            >
-              N
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => changePage(page + 1)}
-            disabled={page === pages - 1 || Boolean(openSlug)}
-            aria-label="Próximos produtos"
-            className="relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none text-muted transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-35"
-          >
-            <span className="relative z-[1]">X</span>
-            <span
-              aria-hidden
-              data-pager-shadow="X"
-              className="product-pager__shadow"
-            >
-              X
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => changePage(page + 1)}
-            disabled={page === pages - 1 || Boolean(openSlug)}
-            aria-label="Próxima página de produtos"
-            className="inline-flex size-11 items-center justify-center text-3xl leading-none text-primary/70 transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-20"
-          >
-            ›
-          </button>
-        </div>
-
-        <div
-          aria-hidden
-          className="flex max-w-full items-center justify-center gap-1"
+        <footer
+          id="creditos"
+          className="site-developer-credit relative z-[var(--z-content)]"
         >
-          {Array.from({ length: pages }, (_, index) => (
-            <span
-              key={index}
-              className={`h-px transition-[width,background-color,box-shadow] ${
-                page === index
-                  ? "w-5 bg-primary shadow-[0_0_10px_var(--primary-glow)]"
-                  : "w-2 bg-white/15"
-              }`}
-            />
-          ))}
-        </div>
-
-        <p className="sr-only" aria-live="polite">
-          Exibindo o grupo {page + 1} de {pages}, com{" "}
-          {visible.length === 1
-            ? "1 produto"
-            : `${visible.length} produtos`}.
-        </p>
-      </nav>
+          <span>© 6DNX</span>
+          <span aria-hidden>·</span>
+          <a
+            id="developer-bicho"
+            href={developerCreditUrl ?? "#creditos"}
+            target={developerCreditUrl ? "_blank" : undefined}
+            rel={developerCreditUrl ? "noreferrer" : undefined}
+            aria-disabled={developerCreditUrl ? undefined : true}
+            title={
+              developerCreditUrl
+                ? "Abrir contato público do Developer Bicho"
+                : "O contato público será adicionado quando estiver disponível"
+            }
+          >
+            Desenvolvido por Developer Bicho
+          </a>
+          {!developerCreditUrl ? <small>Contato em breve</small> : null}
+        </footer>
+      </section>
 
       {typeof document !== "undefined" && openProduct
         ? createPortal(
@@ -1291,18 +1586,25 @@ function ProductCatalogShowcase({
                     <Popups
                       product={openProduct}
                       placement={placement}
+                      checkoutAvailable={checkoutAvailable}
+                      paymentTestAvailable={paymentTestAvailable}
                       onClose={close}
                     />
                   </>
                 ) : null
               ) : (
-                <MobileSheet product={openProduct} onClose={close} />
+                <MobileSheet
+                  product={openProduct}
+                  checkoutAvailable={checkoutAvailable}
+                  paymentTestAvailable={paymentTestAvailable}
+                  onClose={close}
+                />
               )}
             </div>,
             document.body,
           )
         : null}
-    </section>
+    </div>
   );
 }
 
@@ -1310,97 +1612,149 @@ function ProductCatalogShowcase({
     rule matters more than the layout choreography here. */
 function MobileSheet({
   product,
+  checkoutAvailable,
+  paymentTestAvailable,
   onClose,
 }: {
   product: Product;
+  checkoutAvailable: boolean;
+  paymentTestAvailable: boolean;
   onClose: () => void;
 }) {
   const selection = useProductSelection();
   const supportUrl = `/api/redirect?slug=${encodeURIComponent(product.slug)}`;
   const requiresVariant = product.variants.length > 0;
+  const [checkoutVariantName, setCheckoutVariantName] = useState<string | null>(
+    null,
+  );
+  const checkoutTriggerRef = useRef<HTMLButtonElement>(null);
+  const checkoutVariant =
+    product.variants.find((variant) => variant.name === checkoutVariantName) ??
+    null;
+
+  const closeCheckout = () => {
+    setCheckoutVariantName(null);
+    window.requestAnimationFrame(() =>
+      checkoutTriggerRef.current?.focus({ preventScroll: true }),
+    );
+  };
 
   return (
-    <section
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Detalhes de ${product.title}`}
-      className="fixed left-1/2 top-1/2 z-[80] flex max-h-[86vh] w-[min(30rem,92vw)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden border border-primary/40 bg-surface shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)]"
-    >
-      <header className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3">
-        <div>
-          <h3 className="text-lg leading-tight text-ink">{product.title}</h3>
-          <p className="text-[0.7rem] uppercase tracking-[0.16em] text-muted">
-            {product.tagline}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Fechar"
-          autoFocus
-          data-product-dialog-close
-          className="shrink-0 border border-white/15 px-2 py-0.5 text-sm text-muted"
-        >
-          ✕
-        </button>
-      </header>
-
-      <div className="product-scrollbar min-h-0 flex-1 overflow-y-auto">
-        <div className="aspect-video w-full bg-black">
-          <ProductMediaPreview product={product} />
-        </div>
-
-        <div className="px-4 py-3">
-          <p className="mb-4 text-sm leading-relaxed text-muted">
-            {product.description}
-          </p>
-          {requiresVariant ? (
-            <ul className="space-y-1.5">
-              {product.variants.map((v) => (
-                <VariantRow
-                  key={v.name}
-                  variant={v}
-                  selected={selection.selectedVariant === v.name}
-                  onPick={selection.selectVariant}
-                />
-              ))}
-            </ul>
-          ) : (
-            <p className="rounded border border-white/10 bg-black/30 px-3 py-3 text-xs leading-relaxed text-muted">
-              Este item precisa de confirmação direta com o atendimento.
+    <>
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Detalhes de ${product.title}`}
+        inert={checkoutVariant ? true : undefined}
+        aria-hidden={checkoutVariant ? true : undefined}
+        className="fixed left-1/2 top-1/2 z-[80] flex max-h-[86vh] w-[min(30rem,92vw)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden border border-primary/40 bg-surface shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)]"
+      >
+        <header className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3">
+          <div>
+            <h3 className="text-lg leading-tight text-ink">{product.title}</h3>
+            <p className="text-[0.7rem] uppercase tracking-[0.16em] text-muted">
+              {product.tagline}
             </p>
-          )}
-        </div>
-      </div>
-
-      <footer className="grid border-t border-primary">
-        {requiresVariant && !selection.selectedVariant ? (
+          </div>
           <button
             type="button"
-            disabled
-            className="min-h-12 cursor-not-allowed bg-white/10 px-4 text-sm font-bold uppercase tracking-[0.12em] text-muted"
+            onClick={onClose}
+            aria-label="Fechar"
+            autoFocus
+            data-product-dialog-close
+            className="shrink-0 border border-white/15 px-2 py-0.5 text-sm text-muted"
           >
-            Selecione uma variação
+            ✕
           </button>
-        ) : (
+        </header>
+
+        <div className="product-scrollbar min-h-0 flex-1 overflow-y-auto">
+          <div className="aspect-video w-full bg-black">
+            <ProductMediaPreview product={product} />
+          </div>
+
+          <div className="px-4 py-3">
+            <p className="mb-4 text-sm leading-relaxed text-muted">
+              {product.description}
+            </p>
+            {requiresVariant ? (
+              <ul className="space-y-1.5">
+                {product.variants.map((v) => (
+                  <VariantRow
+                    key={v.name}
+                    variant={v}
+                    selected={selection.selectedVariant === v.name}
+                    onPick={selection.selectVariant}
+                  />
+                ))}
+              </ul>
+            ) : (
+              <p className="rounded border border-white/10 bg-black/30 px-3 py-3 text-xs leading-relaxed text-muted">
+                Este item precisa de confirmação direta com o atendimento.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <footer className="grid border-t border-primary">
+          {requiresVariant ? (
+            !selection.selectedVariant ? (
+              <button
+                type="button"
+                disabled
+                className="min-h-12 cursor-not-allowed bg-white/10 px-4 text-sm font-bold uppercase tracking-[0.12em] text-muted"
+              >
+                Selecione uma variação
+              </button>
+            ) : checkoutAvailable ? (
+              <button
+                ref={checkoutTriggerRef}
+                type="button"
+                onClick={() =>
+                  setCheckoutVariantName(selection.selectedVariant)
+                }
+                className="inline-flex min-h-12 items-center justify-center bg-primary px-4 text-center text-sm font-bold uppercase tracking-[0.12em] text-ink"
+              >
+                Comprar com PIX
+              </button>
+            ) : (
+              <a
+                href={supportUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-12 items-center justify-center bg-primary px-4 text-center text-sm font-bold uppercase tracking-[0.12em] text-ink"
+              >
+                Comprar pelo Discord
+              </a>
+            )
+          ) : (
+            <a
+              href={supportUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-12 items-center justify-center bg-primary px-4 text-center text-sm font-bold uppercase tracking-[0.12em] text-ink"
+            >
+              Consultar no Discord
+            </a>
+          )}
           <a
             href={supportUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex min-h-12 items-center justify-center bg-primary px-4 text-center text-sm font-bold uppercase tracking-[0.12em] text-ink"
+            className="inline-flex min-h-11 items-center justify-center border-t border-primary/40 text-[0.62rem] font-bold uppercase tracking-[0.13em] text-muted"
           >
-            {requiresVariant
-              ? "Iniciar pedido no Discord"
-              : "Consultar no Discord"}
+            Suporte Discord
           </a>
-        )}
-        <a
-          href={supportUrl}
-          className="inline-flex min-h-11 items-center justify-center border-t border-primary/40 text-[0.62rem] font-bold uppercase tracking-[0.13em] text-muted"
-        >
-          Suporte Discord
-        </a>
-      </footer>
-    </section>
+        </footer>
+      </section>
+
+      {checkoutVariant ? (
+        <PixCheckoutModal
+          product={product}
+          variant={checkoutVariant}
+          checkoutAvailable={checkoutAvailable}
+          paymentTestAvailable={paymentTestAvailable}
+          onClose={closeCheckout}
+        />
+      ) : null}
+    </>
   );
 }

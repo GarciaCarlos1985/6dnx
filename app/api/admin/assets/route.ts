@@ -29,6 +29,10 @@ export async function POST(request: NextRequest) {
 
   const declaredType = request.headers.get("content-type")?.toLowerCase();
   const sourceKey = request.headers.get("x-product-source-key");
+  const assetSlot =
+    request.headers.get("x-asset-slot") === "checkout-banner"
+      ? "checkout"
+      : "card";
   if (!declaredType || !sourceKey) {
     return noStoreJson({ error: "Selecione uma imagem válida." }, 400);
   }
@@ -56,7 +60,7 @@ export async function POST(request: NextRequest) {
   const extension = ACCEPTED_IMAGE_TYPES[detectedType];
 
   const safeSourceKey = sourceKey.replace(/[^A-Za-z0-9_-]/g, "-").slice(0, 80);
-  const path = `products/${safeSourceKey || "custom"}/${randomUUID()}.${extension}`;
+  const path = `products/${safeSourceKey || "custom"}/${assetSlot}/${randomUUID()}.${extension}`;
   const { error } = await auth.supabase.storage
     .from("product-assets")
     .upload(path, bytes, {

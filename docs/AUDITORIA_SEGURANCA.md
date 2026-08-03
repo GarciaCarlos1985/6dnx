@@ -1,6 +1,47 @@
 # Auditoria severa de segurança e bugs — 6DNX
 
-Auditoria pré-commit realizada em 29 de julho de 2026. Nenhum pagamento real,
+## Atualização consolidada — 2026-08-03
+
+### Gate breve antes do lançamento público
+
+- `npm audit --omit=dev --audit-level=high`: zero vulnerabilidades conhecidas.
+- Busca por segredos de alta confiança: nenhum valor real encontrado no código
+  ou documentação versionável; o único webhook literal é fixture falsa de teste.
+- Rotas administrativas novas exigem sessão admin e origem exata; checkout usa
+  preço server-side, entrada limitada e chaves somente no servidor.
+- Lint, Next typegen + TypeScript estrito, 22 testes e build de Production
+  passaram. Browser desktop e mobile não apresentaram erro, warning, overflow,
+  botão PIX ou CPF com as flags desligadas.
+- Veredito deste gate: a vitrine pode ser publicada com atendimento pelo
+  Discord. Pagamento automático permanece bloqueado até replay e homologação
+  final; este gate não autoriza ligar as duas flags.
+
+A auditoria atual separa **conclusão da homologação financeira** de
+**endurecimento antes de escala pública**:
+
+- Para concluir o PIX real já pago faltam três ações: migration corretiva da
+  RPC, replay original assinado da StorM e confirmação de `paid`, evento único e
+  Discord sanitizado.
+- O teste real comprovou criação da cobrança, pagamento no provedor, chegada do
+  webhook, HMAC sobre corpo bruto e chamada ao Supabase. O único erro foi
+  PostgreSQL `42702` em `ON CONFLICT (order_id)`; Production permanece intacta
+  e o pedido segue `pending_payment`.
+- A correção por `ON CONFLICT ON CONSTRAINT
+  commerce_payment_attempts_pkey` passou em transação com rollback e replay
+  idempotente, mas ainda depende de autorização específica para aplicação.
+- Nenhum segredo de alta confiança foi encontrado no histórico Git ou bundle
+  client-side; as tabelas comerciais bloquearam leitura e escrita por `anon`;
+  CPF completo não é persistido nem enviado ao Discord.
+- Antes de divulgação em escala, priorizar MFA/AAL2 do admin, janela temporal e
+  rate limit do webhook, reconciliação, CSP completa, ferramentas de segurança
+  do GitHub e política de retenção. Esses itens são backlog de hardening, não
+  dez novos passos para reparar o teste de R$ 1,00.
+
+O restante deste documento preserva as auditorias históricas de 29 e 31 de
+julho. Em divergência de estado, prevalecem esta atualização,
+`PROJECT_STATE.md` e `REVIEW_HANDOFF.md`.
+
+Auditoria pré-commit histórica realizada em 29 de julho de 2026. Nenhum pagamento real,
 webhook, migration, push ou deploy foi executado durante a revisão.
 
 ## Veredito simples

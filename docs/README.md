@@ -1,5 +1,11 @@
 # Documentação 6DNX
 
+> **Contexto sincronizado em 2026-08-03.** Para retomar o projeto em um novo
+> chat, leia primeiro [`PROJECT_STATE.md`](PROJECT_STATE.md) e
+> [`REVIEW_HANDOFF.md`](REVIEW_HANDOFF.md). Eles distinguem o lançamento
+> público da vitrine, o checkout deliberadamente desligado e a homologação
+> pendente do replay StorM.
+
 Este diretório é a fonte central de documentação do projeto. O `README.md` da
 raiz continua sendo a apresentação e o guia rápido; os documentos abaixo
 guardam arquitetura, regras, decisões, auditorias e fontes históricas.
@@ -7,15 +13,40 @@ guardam arquitetura, regras, decisões, auditorias e fontes históricas.
 ## Ordem recomendada de leitura
 
 1. [`CODEX.md`](CODEX.md)
-2. [`governance/REGRAS_DO_PROJETO.md`](governance/REGRAS_DO_PROJETO.md)
-3. [`PRODUCT.md`](PRODUCT.md)
-4. [`DESIGN.md`](DESIGN.md)
-5. [`PROJECT_STATE.md`](PROJECT_STATE.md)
-6. [`COMMERCE_ARCHITECTURE.md`](COMMERCE_ARCHITECTURE.md)
-7. [`ADMIN.md`](ADMIN.md)
-8. [`GUIA_ADMIN_MAYCON.md`](GUIA_ADMIN_MAYCON.md)
-9. [`MAPA_EDITORIAL_31_ENTRADAS.md`](MAPA_EDITORIAL_31_ENTRADAS.md)
-10. [`ESTADO_BANCO_SUPABASE_6DNX.md`](ESTADO_BANCO_SUPABASE_6DNX.md)
+2. [`PROJECT_STATE.md`](PROJECT_STATE.md)
+3. [`REVIEW_HANDOFF.md`](REVIEW_HANDOFF.md)
+4. [`governance/REGRAS_DO_PROJETO.md`](governance/REGRAS_DO_PROJETO.md)
+5. [`PRODUCT.md`](PRODUCT.md)
+6. [`DESIGN.md`](DESIGN.md)
+7. [`COMMERCE_ARCHITECTURE.md`](COMMERCE_ARCHITECTURE.md)
+8. [`STORM_PIX_CHECKOUT.md`](STORM_PIX_CHECKOUT.md)
+9. [`ADMIN.md`](ADMIN.md)
+10. [`GUIA_ADMIN_MAYCON.md`](GUIA_ADMIN_MAYCON.md)
+11. [`ESTADO_BANCO_SUPABASE_6DNX.md`](ESTADO_BANCO_SUPABASE_6DNX.md)
+
+## Retomada rápida — 2026-08-03
+
+- O domínio, DNS e HTTPS estão funcionando em `https://www.6dnx.com.br/`.
+- O proprietário autorizou o lançamento público da vitrine nova. O release
+  Git-backed reúne os doze cards em quatro fileiras, o rodapé com copyright,
+  o painel e o webhook já validado, substituindo o snapshot manual antigo.
+- O checkout StorM existe no código, mas permanece fail-closed em Production:
+  as duas flags de ativação estão ausentes/desligadas e a compra pública abre o
+  atendimento no Discord. Nenhum formulário PIX fica exposto neste lançamento.
+- Um PIX real de R$ 1,00 foi criado e pago. A StorM chamou o webhook, o HMAC
+  passou e a RPC foi alcançada, mas Production respondeu `422` por ambiguidade
+  SQL em `ON CONFLICT (order_id)`; o pedido permanece `pending_payment`.
+- A oferta usada no teste está `suspended`; as flags de pagamento Production
+  continuam desligadas.
+- A migration corretiva autorizada foi aplicada e registrada sem alterar o
+  pedido pendente. O e-mail de suporte publicado pela StorM voltou como endereço
+  inexistente; depois disso, o proprietário autenticou a conta geral e abriu um
+  ticket privado no Discord oficial solicitando o replay original assinado.
+  Para encerrar a homologação falta a resposta/reexecução do provedor e a
+  confirmação de pedido `paid` + evento único + Discord sanitizado.
+- MFA, CSP completa, rate limit, reconciliação e demais itens da auditoria são
+  endurecimentos de pré-escala; não devem ser confundidos com os três passos
+  necessários para concluir o teste que já foi pago.
 
 ## Governança
 
@@ -34,6 +65,7 @@ continua sendo a regra operacional autoritativa para agentes.
 | --- | --- |
 | [`PROJECT_STATE.md`](PROJECT_STATE.md) | memória operacional, decisões confirmadas, trabalho concluído e pendências |
 | [`COMMERCE_ARCHITECTURE.md`](COMMERCE_ARCHITECTURE.md) | fluxo profissional de compra, estados e invariantes financeiros |
+| [`STORM_PIX_CHECKOUT.md`](STORM_PIX_CHECKOUT.md) | implementação StorM, dados do CPF, travas, migration e ativação segura |
 | [`ADMIN.md`](ADMIN.md) | operação do CMS, autenticação, RLS, primeira conta e checklist de ativação |
 | [`GUIA_ADMIN_MAYCON.md`](GUIA_ADMIN_MAYCON.md) | manual leigo e seguro para Maycon editar produtos, imagens, preços e desfazer erros |
 

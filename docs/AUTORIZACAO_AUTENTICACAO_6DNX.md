@@ -1,5 +1,11 @@
 # Autenticação e autorização na 6DNX
 
+> **Contexto de 2026-08-03:** autenticação administrativa e RLS já existem. Um
+> PIX real foi pago, mas ainda não existe autorização de entrega porque o pedido
+> permanece `pending_payment` após a RPC falhar. Somente o replay assinado,
+> processado após a migration corretiva, pode produzir `paid`; comprovante,
+> polling `COMPLETO` ou marcação manual não substituem essa autorização.
+
 Atualizado em 29 de julho de 2026.
 
 ## Resposta curta
@@ -23,11 +29,11 @@ confirmação de pagamento.
 | Tipo | Pergunta respondida | Exemplo na 6DNX | Estado atual |
 | --- | --- | --- | --- |
 | Autenticação do usuário | Quem é o visitante? | login com Google | provedor Google habilitado no Supabase, mas login ainda não implementado no site |
-| Autorização técnica | O usuário autenticado pode ler ou alterar este dado? | RLS, papéis `anon`, `authenticated` e `service_role` | preparada somente na migration de notícias, ainda não aplicada |
+| Autorização técnica | O usuário autenticado pode ler ou alterar este dado? | RLS, papéis `anon`, `authenticated` e `service_role` | ativa no catálogo, painel e tabelas comerciais; `anon` foi testado sem acesso às tabelas financeiras |
 | Autorização comercial | A 6DNX tem direito de anunciar e revender? | contrato ou permissão do parceiro | não comprovada para as 31 entradas originais |
 | Autorização de mídia | A 6DNX pode usar esta imagem ou este vídeo? | licença, cessão ou conteúdo próprio | não comprovada para materiais copiados de parceiros |
-| Autorização de pagamento | O provedor confirmou que o dinheiro foi recebido? | webhook assinado com estado `paid` | não existe; o checkout atual é simulado |
-| Autorização de entrega | A equipe pode liberar o atendimento daquele pedido? | pedido persistido como `paid`, conferido pelo backend | não existe em produção; o laboratório apenas mostra uma aprovação fictícia |
+| Autorização de pagamento | O provedor confirmou que o dinheiro foi recebido? | webhook assinado com estado `paid` | o provedor confirmou o PIX de R$ 1,00 e assinou o callback, mas a RPC falhou antes de persistir `paid` |
+| Autorização de entrega | A equipe pode liberar o atendimento daquele pedido? | pedido persistido como `paid`, conferido pelo backend | ainda não: o pedido real segue `pending_payment` e não deve ser corrigido manualmente |
 | Autorização operacional | Um sistema pode executar uma rotina protegida? | `Authorization: Bearer <CRON_SECRET>` | implementada no cron de notícias |
 | Autorização de deploy | Esta mudança pode chegar à produção? | revisão humana antes de DDL, push e deploy | decisão manual do responsável |
 

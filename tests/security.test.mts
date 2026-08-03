@@ -8,7 +8,23 @@ import {
 import { isTrustedMutationOrigin } from "../lib/security/request-origin.ts";
 import { shouldProtectSiteReview } from "../lib/security/review-mode.ts";
 import { shouldEnablePaymentTestMode } from "../lib/security/payment-test-mode.ts";
+import { resolvePublicHttpsLink } from "../lib/security/public-link.ts";
 import { protectedCatalogUpdateErrors } from "../lib/catalog/admin-safety.ts";
+import {
+  buildRustCloneProducts,
+  isRustCloneCatalogKey,
+  products,
+  RUST_CLONE_COUNT,
+  RUST_SOURCE_CATALOG_KEY,
+  selectMissingRustCloneProducts,
+} from "../lib/products.ts";
+import {
+  buildProductCatalogLayout,
+  CATALOG_CARDS_PER_ROW,
+  CATALOG_INITIAL_VISIBLE_COUNT,
+  CATALOG_VISIBLE_ROWS,
+} from "../lib/product-catalog-layout.ts";
+import { parseCatalogOrderPayload } from "../lib/catalog/order.ts";
 import type {
   CatalogAdminItem,
   CatalogMutation,
@@ -40,6 +56,27 @@ test("payment laboratory can never be enabled in Vercel Production", () => {
       VERCEL_ENV: "preview",
     }),
     true,
+  );
+});
+
+test("public footer links reject webhook credentials and non-HTTPS destinations", () => {
+  assert.equal(resolvePublicHttpsLink(""), null);
+  assert.equal(resolvePublicHttpsLink("http://example.com/profile"), null);
+  assert.equal(
+    resolvePublicHttpsLink(
+      "https://discord.com/api/webhooks/123456789/secret-token",
+    ),
+    null,
+  );
+  assert.equal(
+    resolvePublicHttpsLink(
+      "https://discord.com/api/v10/webhooks/123456789/secret-token",
+    ),
+    null,
+  );
+  assert.equal(
+    resolvePublicHttpsLink("https://example.com/developer-bicho"),
+    "https://example.com/developer-bicho",
   );
 });
 
@@ -147,4 +184,110 @@ test("owner-safe catalog updates cannot change structural fields", () => {
     protectedCatalogUpdateErrors(current, unsafeMutation).length,
     5,
   );
+});
+
+test("Rust expansion creates exactly twenty complete and independent cards", () => {
+  const source = products.find(
+    (product) =>
+      (product.catalogKey ?? product.slug) === RUST_SOURCE_CATALOG_KEY,
+  );
+  assert.ok(source);
+
+  const clones = products.filter((product) =>
+    isRustCloneCatalogKey(product.catalogKey ?? product.slug),
+  );
+  assert.equal(clones.length, RUST_CLONE_COUNT);
+  assert.deepEqual(
+    clones.map((product) => product.title),
+    Array.from({ length: RUST_CLONE_COUNT }, (_, index) => `Rust${index + 1}`),
+  );
+  assert.equal(new Set(clones.map((product) => product.slug)).size, 20);
+
+  const rebuilt = buildRustCloneProducts(source);
+  const withoutIdentity = (product: (typeof products)[number]) => {
+    const content = structuredClone(product) as unknown as Record<
+      string,
+      unknown
+    >;
+    Reflect.deleteProperty(content, "slug");
+    Reflect.deleteProperty(content, "catalogKey");
+    Reflect.deleteProperty(content, "title");
+    return content;
+  };
+  rebuilt.forEach((clone) => {
+    assert.deepEqual(withoutIdentity(clone), withoutIdentity(source));
+    assert.notEqual(clone.variants, source.variants);
+    assert.notEqual(clone.features, source.features);
+  });
+});
+
+test("Rust creation defaults to one next missing card and honors an explicit limit", () => {
+  const source = products.find(
+    (product) =>
+      (product.catalogKey ?? product.slug) === RUST_SOURCE_CATALOG_KEY,
+  );
+  assert.ok(source);
+
+  const existing = new Set([
+    RUST_SOURCE_CATALOG_KEY,
+    "rust-1-6dnx-software",
+    "rust-3-6dnx-software",
+  ]);
+  assert.deepEqual(
+    selectMissingRustCloneProducts(source, existing).map(
+      (product) => product.title,
+    ),
+    ["Rust2"],
+  );
+  assert.deepEqual(
+    selectMissingRustCloneProducts(source, existing, 3).map(
+      (product) => product.title,
+    ),
+    ["Rust2", "Rust4", "Rust5"],
+  );
+  assert.throws(
+    () => selectMissingRustCloneProducts(source, existing, 0),
+    RangeError,
+  );
+});
+
+test("the catalog exposes twelve unique cards across four independent rows", () => {
+  const layout = buildProductCatalogLayout(products);
+  assert.equal(layout.rows.length, CATALOG_VISIBLE_ROWS);
+  assert.ok(
+    layout.rows.every((row) =>
+      row.every((page) => page.length <= CATALOG_CARDS_PER_ROW),
+    ),
+  );
+
+  const initialCards = layout.rows.flatMap((row) => row[0] ?? []);
+  assert.equal(initialCards.length, CATALOG_INITIAL_VISIBLE_COUNT);
+  assert.deepEqual(
+    initialCards.map((product) => product.slug),
+    products
+      .slice(0, CATALOG_INITIAL_VISIBLE_COUNT)
+      .map((product) => product.slug),
+  );
+
+  const allCards = layout.rows
+    .flatMap((row) => row)
+    .flatMap((page) => page);
+  assert.equal(allCards.length, products.length);
+  assert.equal(new Set(allCards.map((product) => product.slug)).size, products.length);
+});
+
+test("catalog ordering accepts only one complete-looking list of unique UUIDs", () => {
+  const first = "11111111-1111-4111-8111-111111111111";
+  const second = "22222222-2222-4222-8222-222222222222";
+
+  assert.deepEqual(parseCatalogOrderPayload({ orderedIds: [first, second] }), {
+    ok: true,
+    orderedIds: [first, second],
+  });
+  assert.equal(
+    parseCatalogOrderPayload({ orderedIds: [first, first] }).ok,
+    false,
+  );
+  assert.equal(parseCatalogOrderPayload({ orderedIds: ["not-a-uuid"] }).ok, false);
+  assert.equal(parseCatalogOrderPayload({ orderedIds: [] }).ok, false);
 });
