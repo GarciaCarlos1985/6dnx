@@ -37,7 +37,8 @@ Committed: crimson carries identity (~30–40% of accent moments). Surface is pu
 ## Social sharing
 
 - A prévia principal de WhatsApp, Discord e redes sociais usa arte estática em
-  proporção 1.9:1 para não depender de uma função em tempo de execução.
+  1200×630 e JPEG otimizado para não depender de uma função em tempo de
+  execução nem exceder o orçamento dos geradores de miniatura.
 - A composição preserva os arquivos oficiais: casal tático à esquerda, logo
   alado no centro e anjo à direita, sobre cenário pós-apocalíptico em preto,
   bordô e carmesim.

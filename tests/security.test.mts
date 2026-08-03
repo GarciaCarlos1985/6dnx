@@ -9,6 +9,7 @@ import { isTrustedMutationOrigin } from "../lib/security/request-origin.ts";
 import { shouldProtectSiteReview } from "../lib/security/review-mode.ts";
 import { shouldEnablePaymentTestMode } from "../lib/security/payment-test-mode.ts";
 import { resolvePublicHttpsLink } from "../lib/security/public-link.ts";
+import { isSocialPreviewImagePath } from "../lib/security/social-preview.ts";
 import { protectedCatalogUpdateErrors } from "../lib/catalog/admin-safety.ts";
 import {
   buildRustCloneProducts,
@@ -78,6 +79,14 @@ test("public footer links reject webhook credentials and non-HTTPS destinations"
     resolvePublicHttpsLink("https://example.com/developer-bicho"),
     "https://example.com/developer-bicho",
   );
+});
+
+test("only root social preview images bypass image indexing restrictions", () => {
+  assert.equal(isSocialPreviewImagePath("/opengraph-image.jpg"), true);
+  assert.equal(isSocialPreviewImagePath("/opengraph-image.png"), true);
+  assert.equal(isSocialPreviewImagePath("/twitter-image.jpeg"), true);
+  assert.equal(isSocialPreviewImagePath("/admin/opengraph-image.jpg"), false);
+  assert.equal(isSocialPreviewImagePath("/api/opengraph-image.jpg"), false);
 });
 
 test("admin mutations require the exact same origin", () => {

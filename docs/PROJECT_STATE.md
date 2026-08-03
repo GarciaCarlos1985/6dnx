@@ -7,9 +7,10 @@ Last updated: 2026-08-03
 - The owner explicitly approved publication of the social-sharing release on
   2026-08-03. `app/opengraph-image.png` is a static 1.9:1 key art using the
   official operators, winged logo and angel; root metadata now includes
-  canonical, Open Graph and large Twitter card fields. The image route returns
-  `200 image/png` at 2.73 MB, and lint, typecheck, 22 tests and the production
-  build pass.
+  canonical, Open Graph and large Twitter card fields. The delivery asset was
+  optimized to a 1200×630 JPEG at about 159 KB. Social preview image routes are
+  the only public paths exempt from `X-Robots-Tag`; every page keeps the
+  `noindex`/`nofollow` policy and strict same-origin resource isolation.
 - The owner explicitly authorized the public storefront launch on 2026-08-03.
   The Git-backed release publishes the current twelve-card/four-row catalog,
   responsive dialogs, admin improvements and footer copyright. Checkout code is
