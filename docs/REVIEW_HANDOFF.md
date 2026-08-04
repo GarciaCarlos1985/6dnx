@@ -24,36 +24,38 @@ permitido sem reconstruir o histórico.
    `20260803120000_fix_storm_payment_event_conflict.sql`. A migration consta no
    histórico do Supabase, preservou o pedido pendente e manteve a RPC restrita
    a `service_role`.
-5. Para terminar a homologação faltam somente: replay original assinado
-   pela StorM e confirmação final no banco e Discord. A tentativa enviada para
-   `contato@stormapplications.com` voltou como endereço inexistente. O
-   proprietário autenticou a conta geral StorM e abriu um ticket privado no
-   Discord oficial solicitando o replay original assinado. O provedor ainda não
-   respondeu nem confirmou o reenvio. Não criar outro PIX e não reconstruir o
-   pagamento manualmente.
-6. O release de lançamento consolida o webhook da PR #2 e a vitrine atual numa
+5. O suporte oficial respondeu que não reenvia webhooks e orientou usar polling
+   pelo endpoint de consulta. O proprietário autorizou implementar e validar a
+   reconciliação server-side sem nova cobrança, exigindo testes antes de aplicar
+   migration ou publicar.
+6. A branch local `codex/storm-server-reconciliation` contém a migration
+   aditiva ainda não aplicada, reconciliação imediata no status do cliente,
+   fallback diário limitado e proteção contra transição/notificação duplicada.
+   Os testes PostgreSQL locais cobrem idempotência, mismatch, RLS/grants e
+   webhook tardio. Lint, tipos, 28 testes, build, audit sem vulnerabilidades e
+   varredura de segredos também passaram. Production ainda não mudou.
+7. O release de lançamento consolida o webhook da PR #2 e a vitrine atual numa
    branch Git-backed revisada. O snapshot manual antigo permanece apenas como
    histórico/rollback; não volte a promovê-lo como se fosse a versão atual.
-7. A conta administrativa recriada existia confirmada no Supabase, mas
+8. A conta administrativa recriada existia confirmada no Supabase, mas
    sem papel. Após autorização explícita foi promovida somente com
    `app_metadata.role=admin`, preservando os metadados do provedor e sem alterar
    senha. É necessário sair e entrar novamente para renovar o claim da sessão.
-8. O código de seis dígitos abriu a conta geral StorM do proprietário. O ticket
-   de suporte já foi aberto no Discord oficial e aguarda resposta; a senha
-   própria da Wallet não é necessária para esse pedido e não deve ser
-   compartilhada.
+9. O código de seis dígitos abriu a conta geral StorM do proprietário. A senha
+   própria da Wallet não é necessária e não deve ser compartilhada.
 
 ### Responsabilidades
 
-- **Codex:** versionar/validar a correção; aplicá-la somente após autorização;
-  verificar logs, pedido, tentativa e evento.
-- **Proprietário:** acompanhar o ticket privado na StorM, conferir o Discord e
-  decidir qualquer ativação de Production.
+- **Codex:** apresentar os gates da reconciliação; aplicar a migration e
+  publicar somente com nova autorização; depois verificar pedido, evidência e
+  Discord.
+- **Proprietário:** revisar os testes e decidir separadamente migration,
+  publicação e qualquer ativação de Production.
 - **Operação durante o lançamento:** vendas seguem pelo Discord. Não criar as
   flags de checkout como `true`, não aprovar ofertas e não gerar outro PIX para
-  substituir o replay pendente.
-- **Retaguarda de segurança:** MFA/AAL2, CSP, freshness/rate limit,
-  reconciliação e ferramentas do GitHub são endurecimentos posteriores à
+  substituir a reconciliação pendente.
+- **Retaguarda de segurança:** MFA/AAL2, CSP, freshness/rate limit e
+  ferramentas do GitHub são endurecimentos posteriores à
   correção do R$ 1,00, embora devam ser tratados antes de divulgação em escala.
 
 ## Checkpoint histórico de produção de 2026-08-02

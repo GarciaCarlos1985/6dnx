@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   detectImageType,
@@ -25,7 +26,11 @@ import {
   CATALOG_INITIAL_VISIBLE_COUNT,
   CATALOG_VISIBLE_ROWS,
 } from "../lib/product-catalog-layout.ts";
-import { parseCatalogOrderPayload } from "../lib/catalog/order.ts";
+import {
+  moveCatalogItem,
+  parseCatalogOrderPayload,
+  swapCatalogItems,
+} from "../lib/catalog/order.ts";
 import type {
   CatalogAdminItem,
   CatalogMutation,
@@ -299,4 +304,46 @@ test("catalog ordering accepts only one complete-looking list of unique UUIDs", 
   );
   assert.equal(parseCatalogOrderPayload({ orderedIds: ["not-a-uuid"] }).ok, false);
   assert.equal(parseCatalogOrderPayload({ orderedIds: [] }).ok, false);
+});
+
+test("catalog quick move can send one distant card directly to any position", () => {
+  const original = ["a", "b", "c", "d", "e"];
+
+  assert.deepEqual(moveCatalogItem(original, "e", 0), ["e", "a", "b", "c", "d"]);
+  assert.deepEqual(moveCatalogItem(original, "a", 4), ["b", "c", "d", "e", "a"]);
+  assert.deepEqual(moveCatalogItem(original, "d", 1), ["a", "d", "b", "c", "e"]);
+  assert.deepEqual(moveCatalogItem(original, "missing", 1), original);
+  assert.deepEqual(moveCatalogItem(original, "c", 99), original);
+  assert.deepEqual(original, ["a", "b", "c", "d", "e"]);
+});
+
+test("catalog board swaps exactly two selected cards without mutating input", () => {
+  const original = ["a", "b", "c", "d", "e"];
+
+  assert.deepEqual(swapCatalogItems(original, "b", "e"), [
+    "a",
+    "e",
+    "c",
+    "d",
+    "b",
+  ]);
+  assert.deepEqual(swapCatalogItems(original, "a", "a"), original);
+  assert.deepEqual(swapCatalogItems(original, "missing", "c"), original);
+  assert.deepEqual(original, ["a", "b", "c", "d", "e"]);
+});
+
+test("catalog ordering migration stays atomic and admin-only", async () => {
+  const sql = await readFile(
+    new URL(
+      "../supabase/migrations/20260801143000_add_catalog_ordering.sql",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  assert.match(sql, /security definer/i);
+  assert.match(sql, /if not public\.is_catalog_admin\(\)/i);
+  assert.match(sql, /lock table public\.product_catalog/i);
+  assert.match(sql, /published_count <> cardinality\(p_ordered_ids\)/i);
+  assert.match(sql, /grant execute[\s\S]*to authenticated/i);
 });

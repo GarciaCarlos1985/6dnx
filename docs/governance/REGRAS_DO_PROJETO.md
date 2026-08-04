@@ -2,9 +2,10 @@
 
 > **Sincronizado em 2026-08-03:** existe uma integração StorM server-only já
 > exercitada com um PIX real controlado. Ela continua desligada para novos
-> clientes porque o pedido do teste aguarda a correção/replay da RPC. As regras
-> abaixo devem ser lidas junto de `PROJECT_STATE.md`; snapshots antigos de
-> laboratório não anulam o estado mais recente.
+> clientes. A correção original da RPC já foi aplicada, a StorM informou que não
+> reenvia callbacks e a reconciliação complementar está validada somente no
+> worktree local. As regras abaixo devem ser lidas junto de `PROJECT_STATE.md`;
+> snapshots antigos de laboratório não anulam o estado mais recente.
 
 Atualizado em 29 de julho de 2026.
 
@@ -128,8 +129,9 @@ O planejamento interno obedece:
   bloqueada em Production por flags explícitas.
 - Um único PIX real autorizado de R$ 1,00 comprovou criação, liquidação no
   provedor, webhook e HMAC; o pedido ainda não está `paid` porque a RPC falhou.
-- Não marcar pedido manualmente como pago. Aplicar somente migration versionada
-  autorizada e usar replay do payload original assinado.
+- Não marcar pedido manualmente como pago. A reconciliação só pode consultar a
+  cobrança existente, conferir IDs/valor exatos e usar migration versionada
+  aplicada mediante autorização específica.
 - Valor cobrado sempre vem do backend.
 - Nunca confiar em valor, estado `paid` ou redirecionamento enviados pelo
   navegador.

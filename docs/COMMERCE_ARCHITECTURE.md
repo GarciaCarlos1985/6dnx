@@ -4,9 +4,10 @@
 > with one owner-authorized real R$ 1.00 PIX. Creation, provider settlement,
 > callback delivery, raw-body HMAC and the Supabase RPC call worked. The live
 > RPC then failed with PostgreSQL `42702`/HTTP `422` because
-> `ON CONFLICT (order_id)` is ambiguous. Payment creation remains disabled in
-> Production until the versioned fix, original signed replay and final state
-> verification are complete.
+> `ON CONFLICT (order_id)` is ambiguous. The fix is already applied, and StorM
+> support later confirmed callbacks are not replayed. An authenticated,
+> exact-match reconciliation fallback is implemented and locally validated but
+> remains unapplied/unpublished. Payment creation is still disabled.
 
 This document defines the professional purchase flow. The R$ 1,00 simulator
 remains an isolated laboratory. A real StorM implementation now exists behind
@@ -19,6 +20,12 @@ treated as active until the checklist in `STORM_PIX_CHECKOUT.md` passes.
 `POST /api/webhooks/storm-wallet` are implemented and compile. The backend uses
 an exact provider-host allowlist, idempotent external IDs, bounded payloads,
 minimal CPF persistence and transactional webhook processing.
+
+Branch `codex/storm-server-reconciliation` additionally contains immediate
+server-side reconciliation in `/api/checkout/status`, a bounded daily
+`GET /api/cron/storm-reconciliation`, separate reconciliation evidence and a
+versioned webhook RPC. These additions are locally validated but not yet
+applied or deployed.
 
 Enquanto as travas estão desligadas, o modal mostra apenas o estado de
 homologação e o contato de suporte: nome e CPF não aparecem como campos até o
@@ -50,10 +57,10 @@ sends a sanitized staff notification.
 4. Pix displays the StorM Wallet QR Code and copy-and-paste code. A future card
    provider can stay in the same visual flow. Both show pending, approved,
    rejected, or expired states without making the customer restart the purchase.
-5. A signed provider webhook is the source of truth for payment approval. For
-   StorM Wallet, the raw request body must be verified against
-   `X-Storm-Signature` before processing. Redirect pages and browser messages
-   are never sufficient proof of payment.
+5. Payment approval requires provider proof obtained server-to-server: either
+   a raw-body HMAC-verified webhook or an authenticated lookup of the existing
+   payment with exact provider ID, external ID and amount. Redirect pages,
+   screenshots and browser messages are never sufficient proof.
 6. After approval, the backend records the paid order and sends one concise
    staff notification. Supabase remains the canonical financial record.
 7. The confirmation page displays the official Discord destination and the
@@ -87,6 +94,8 @@ Ticket states are independent: `open`, `waiting_staff`, `waiting_customer`, and
 - `commerce_orders`: immutable commercial snapshot and minimum payer data;
 - `commerce_payment_attempts`: provider ID, amount state and timestamps;
 - `commerce_webhook_events`: unique event digest and idempotent result;
+- `commerce_reconciliation_events`: idempotent evidence from authenticated
+  provider-status lookups, kept distinct from signed callback evidence;
 - `tickets` and `ticket_messages`: support history;
 - `fulfillment_events`: who released manually, delivered, cancelled, or
   refunded.

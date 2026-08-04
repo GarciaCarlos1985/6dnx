@@ -1,10 +1,10 @@
 # Guia simples do Painel Administrativo 6DNX
 
-> **Atualização de 2026-08-03:** o painel e a organização ampliada do catálogo
-> estão no worktree local e ainda não correspondem ao site Production de três
-> cards. O banco comercial já existe. O PIX real de R$ 1,00 permanece pendente
-> no banco por uma correção técnica da RPC; não altere manualmente pedido,
-> tentativa ou evento e não reative a oferta de teste.
+> **Atualização de 2026-08-03:** o painel, a organização ampliada e a vitrine de
+> doze cards já estão publicados. O banco comercial existe, mas novas cobranças
+> StorM continuam desligadas e o botão público abre o Discord. O PIX real de
+> R$ 1,00 permanece pendente; não altere manualmente pedido, tentativa ou evento
+> e não reative a oferta de teste.
 
 Este guia foi escrito para o Maycon operar o catálogo sem precisar entender
 programação e sem correr o risco de danificar o site.
@@ -27,7 +27,7 @@ Pense assim:
 
 ## Como entrar
 
-1. Abra `https://6dnx.vercel.app/admin/login`.
+1. Abra `https://www.6dnx.com.br/admin/login`.
 2. Digite o e-mail e a senha da conta administrativa.
 3. Clique em **Entrar com segurança**.
 
@@ -54,15 +54,16 @@ Esse modo exige trabalho humano, mas é honesto e pode funcionar enquanto o
 volume de pedidos é pequeno. O site não afirma que cobrou, não libera arquivo e
 não trata uma mensagem do Discord como prova de pagamento.
 
-### Opção 2 — cobrança automática (futura)
+### Opção 2 — cobrança automática (preparada, mas ainda desligada)
 
 1. O servidor do 6DNX cria um pedido com identificador único no Supabase.
 2. O servidor pede à API oficial da carteira uma cobrança para aquele pedido.
 3. O cliente paga usando os dados devolvidos pela carteira.
-4. A carteira chama um webhook do 6DNX.
-5. O servidor verifica a assinatura criptográfica do webhook e impede que o
-   mesmo evento seja processado duas vezes.
-6. Só então o pedido muda para **Pago** e o Discord recebe o aviso.
+4. A carteira chama um webhook do 6DNX; se ele falhar, o backend consulta a
+   cobrança existente pelo endpoint oficial.
+5. O servidor verifica a assinatura do webhook ou confere, server-to-server,
+   ID da cobrança, ID externo e valor exatos, sempre com idempotência.
+6. Só então o pedido muda para **Pago** e o Discord recebe um único aviso.
 
 Esse modo é melhor para muitas vendas, mas depende de documentação oficial,
 sandbox, formato da cobrança, assinatura do webhook, regras de estorno e teste
@@ -86,12 +87,13 @@ GitHub, no Discord ou enviadas por mensagem.
 O código entre a loja e a Wallet cria pedido, solicita PIX, exibe QR Code/copia
 e cola, consulta o estado e valida `X-Storm-Signature` no corpo bruto. O banco
 comercial e o webhook já existem. No teste real de R$ 1,00, o pagamento chegou
-à última etapa, mas a função do banco falhou antes de registrar `paid`.
+à última etapa, mas a função anterior do banco falhou antes de registrar `paid`.
 
 Por isso, não altere manualmente o pedido e não ligue as flags sozinho. O
-procedimento correto é aplicar a migration corretiva autorizada, pedir à StorM
-o replay do callback original assinado e só liberar atendimento depois que o
-banco mostrar `paid` e o evento único.
+suporte informou que não reenvia callbacks. A equipe técnica preparou uma
+reconciliação que consulta somente a cobrança existente, mas ela ainda depende
+de autorização para migration e publicação. Só libere atendimento depois que o
+banco mostrar `paid` e existir a evidência única correspondente.
 
 ### Atenção ao campo “Webhook de pagamentos” da StorM
 
@@ -104,29 +106,23 @@ O destino correto já está configurado como
 
 1. nunca substitua essa URL por um webhook do Discord;
 2. não gere outra API key nem regenere o secret HMAC sem necessidade;
-3. não altere o callback enquanto houver pedido pendente ou replay aguardado;
-4. após a correção do banco, solicite o replay do evento original no painel ou
-   suporte da StorM;
+3. não altere o callback enquanto houver pedido pendente ou reconciliação em
+   andamento;
+4. não crie outra cobrança para substituir o PIX já pago;
 5. continue confirmando o estado `paid` no backend antes de atender ou entregar
    no painel da Wallet.
 
-Depois de a rota publicada passar pelos testes de sandbox/homologação e o novo
-domínio estar verificado, o campo deverá
-apontar para:
+O domínio e a rota já estão verificados. O campo deve continuar apontando para:
 
 ```text
-https://6dnx.com.br/api/webhooks/storm-wallet
+https://www.6dnx.com.br/api/webhooks/storm-wallet
 ```
 
-Essa URL ainda não deve ser configurada hoje. `6dnx.com.br` foi adquirido, mas
-primeiro precisa ser anexado à Vercel, receber DNS/HTTPS e passar pelo teste
-financeiro controlado. Configurá-la antes disso criaria eventos perdidos e uma
-falsa impressão de automação.
-
-Para terminar a integração, a equipe precisa da documentação expandida da API,
-sem nenhum segredo: endpoint e corpo para criar Pix, formato da resposta, ID e
-estados da cobrança, expiração, consulta, eventos do webhook, cálculo exato da
-assinatura HMAC, idempotência, sandbox, cancelamento e reembolso.
+Para liberar a cobrança automática, a equipe ainda precisa aplicar e publicar
+a reconciliação já testada, confirmar o pedido real como `paid`, validar a
+notificação única e obter regras comerciais definitivas de expiração,
+cancelamento e reembolso. Sandbox continua desejável, mas não se deve criar
+outra cobrança para substituir o teste já pago.
 
 ### O que foi retirado dos cards
 
@@ -139,7 +135,7 @@ ser publicado.
 ### Posso entrar de outro computador ou de outro estado?
 
 Sim. O painel fica na internet e não está preso ao computador em que foi
-configurado. Maycon pode abrir `https://6dnx.vercel.app/admin/login` no
+configurado. Maycon pode abrir `https://www.6dnx.com.br/admin/login` no
 computador dele, entrar com a conta administrativa e usar o mesmo catálogo.
 
 Cada navegador mantém sua própria sessão. Por padrão, o Supabase permite que a
@@ -245,10 +241,25 @@ mostra claramente:
 4. os três cards da segunda fileira da seção 3;
 5. todos os demais cards que aparecem pelas setas.
 
-Arraste um card para a posição desejada ou use os botões `↑` e `↓`. Isso não
-altera texto, imagem, preço ou arquivo. Antes de salvar, o painel exige que você
-marque **Conferi as quatro fileiras e os doze cards iniciais** e ainda mostra uma
-confirmação final. Se desistir, clique em **Cancelar**; nada muda no site.
+Para mover um card distante, use **Buscar e posicionar**: digite parte do nome,
+selecione o resultado e informe a posição desejada. Também existem os atalhos
+**Levar ao topo** e **Levar ao fim**. Arraste ou use `↑` e `↓` somente para
+ajustes curtos.
+
+Cada card tem um botão de **três pontos**. Ele abre o **Tabuleiro da vitrine**,
+um minimapa com todas as posições. Escolha outra casa e use:
+
+- **Mover para esta casa:** insere o card ali e desloca os cards entre as duas
+  posições;
+- **Trocar os dois cards:** troca somente o card escolhido e o card da casa de
+  destino;
+- **Arquivar card:** retira imediatamente o card do site, sem apagar dados. Ele
+  continua na aba **Arquivo** e pode ser restaurado depois.
+
+Mover ou trocar não altera texto, imagem, preço ou arquivo. Antes de salvar,
+o painel exige que você marque **Conferi as quatro fileiras e os doze cards
+iniciais** e ainda mostra uma confirmação final. Se desistir, clique em
+**Cancelar**; nada muda no site.
 
 ### Ação temporária Rust1–Rust20
 

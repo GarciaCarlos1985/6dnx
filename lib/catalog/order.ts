@@ -3,6 +3,51 @@ const UUID_PATTERN =
 
 export const MAX_REORDERED_PRODUCTS = 500;
 
+export function moveCatalogItem(
+  orderedIds: readonly string[],
+  sourceId: string,
+  destinationIndex: number,
+) {
+  const sourceIndex = orderedIds.indexOf(sourceId);
+  if (
+    sourceIndex < 0 ||
+    !Number.isInteger(destinationIndex) ||
+    destinationIndex < 0 ||
+    destinationIndex >= orderedIds.length ||
+    sourceIndex === destinationIndex
+  ) {
+    return [...orderedIds];
+  }
+
+  const next = [...orderedIds];
+  const [source] = next.splice(sourceIndex, 1);
+  next.splice(destinationIndex, 0, source);
+  return next;
+}
+
+export function swapCatalogItems(
+  orderedIds: readonly string[],
+  firstId: string,
+  secondId: string,
+) {
+  const firstIndex = orderedIds.indexOf(firstId);
+  const secondIndex = orderedIds.indexOf(secondId);
+  if (
+    firstIndex < 0 ||
+    secondIndex < 0 ||
+    firstIndex === secondIndex
+  ) {
+    return [...orderedIds];
+  }
+
+  const next = [...orderedIds];
+  [next[firstIndex], next[secondIndex]] = [
+    next[secondIndex],
+    next[firstIndex],
+  ];
+  return next;
+}
+
 export type CatalogOrderPayloadResult =
   | { ok: true; orderedIds: string[] }
   | { ok: false; error: string };

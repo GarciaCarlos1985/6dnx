@@ -2,10 +2,10 @@
 
 > **Documento histórico de evidências.** Sincronizado em 2026-08-03 somente
 > para contexto: preços e estados abaixo não autorizam venda. O estado
-> operacional do catálogo está em `PROJECT_STATE.md`; Production ainda mostra
-> três cards, enquanto o worktree local prepara doze posições iniciais e o
-> banco medido possui mais registros publicados que precisam ser reconciliados
-> antes da nova vitrine.
+> operacional do catálogo está em `PROJECT_STATE.md`; Production já mostra as
+> doze posições iniciais da vitrine Git-backed. O banco possui registros
+> adicionais que continuam sujeitos à revisão editorial e comercial antes de
+> qualquer oferta real.
 
 Fonte de verdade visual: os 45 arquivos de `discord-imagens/`, revisados em
 2026-07-28. Este documento preserva o que os prints comprovam sem transformar

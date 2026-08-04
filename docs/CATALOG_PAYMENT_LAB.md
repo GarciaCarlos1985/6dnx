@@ -2,10 +2,11 @@
 
 > **Snapshot histórico do simulador.** Em 2026-08-03 já existe uma fundação
 > StorM server-only e houve um único PIX real autorizado de R$ 1,00. O webhook
-> chegou e passou HMAC, mas a RPC falhou e o pedido permanece
-> `pending_payment`. Para o estado vigente consulte `STORM_PIX_CHECKOUT.md` e
-> `PROJECT_STATE.md`; o laboratório cenográfico descrito abaixo continua sendo
-> um fluxo separado e nunca prova pagamento.
+> chegou e passou HMAC, mas a RPC original falhou e o pedido permanece
+> `pending_payment`. A correção original já foi aplicada e a reconciliação
+> complementar está apenas validada localmente. Para o estado vigente consulte
+> `STORM_PIX_CHECKOUT.md` e `PROJECT_STATE.md`; o laboratório cenográfico
+> descrito abaixo continua sendo um fluxo separado e nunca prova pagamento.
 
 Atualizado em 29 de julho de 2026.
 

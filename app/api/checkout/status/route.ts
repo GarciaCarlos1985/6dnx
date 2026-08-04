@@ -1,4 +1,4 @@
-import { type NextRequest } from "next/server";
+import { after, type NextRequest } from "next/server";
 import {
   CheckoutDomainError,
   getCommerceCheckoutStatus,
@@ -8,6 +8,7 @@ import {
   getCheckoutObservationConfig,
 } from "@/lib/checkout/config";
 import { CommerceDatabaseError } from "@/lib/checkout/commerce-repository";
+import { notifyDiscordPaidOrder } from "@/lib/checkout/paid-order-notification";
 import {
   BoundedJsonError,
   readBoundedJson,
@@ -54,11 +55,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await getCommerceCheckoutStatus({
+    const { notification, ...result } = await getCommerceCheckoutStatus({
       config: getCheckoutObservationConfig(),
       orderId: payload.orderId,
       statusToken: payload.statusToken,
     });
+    if (notification) {
+      after(() => notifyDiscordPaidOrder(notification));
+    }
     return noStore({
       ...result,
       supportUrl:

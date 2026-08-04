@@ -576,6 +576,56 @@ export function AdminDashboard({
     }
   };
 
+  const archiveCatalogItem = async (itemId: string) => {
+    if (demoMode || busy) return;
+    const item = items.find((candidate) => candidate.id === itemId);
+    if (!item || item.publicationState !== "published") {
+      throw new Error("Este card não está publicado e não pode ser arquivado aqui.");
+    }
+
+    setBusy("catalog-publication");
+    setNotice("");
+    try {
+      const payload = await readApi<{ item: CatalogAdminItem }>(
+        await fetch(
+          `/api/admin/products/${encodeURIComponent(item.id)}/publication`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              action: "archive",
+              expectedRevision: item.revision,
+            }),
+          },
+        ),
+      );
+      setItems((current) =>
+        current.map((candidate) =>
+          candidate.id === payload.item.id ? payload.item : candidate,
+        ),
+      );
+      if (selectedId === payload.item.id) {
+        setDraft(cloneItem(payload.item));
+        setSavedFingerprint(fingerprint(payload.item));
+        setReviewConfirmed(false);
+      }
+      announce(
+        `${payload.item.product.title} foi arquivado e saiu da vitrine. Ele pode ser restaurado pela aba Arquivo.`,
+        "ok",
+      );
+      router.refresh();
+    } catch (reason) {
+      const error =
+        reason instanceof Error
+          ? reason
+          : new Error("Não foi possível arquivar o card.");
+      announce(error.message, "error");
+      throw error;
+    } finally {
+      setBusy("");
+    }
+  };
+
   const bootstrap = async () => {
     if (demoMode || busy) return;
     setBusy("bootstrap");
@@ -1022,9 +1072,10 @@ export function AdminDashboard({
         <section className="admin-workspace admin-workspace--order">
           <CatalogOrderBoard
             items={orderedPublishedItems}
-            busy={busy === "catalog-order"}
+            busy={Boolean(busy)}
             demoMode={demoMode}
             onCancel={() => setOrganizingOrder(false)}
+            onArchive={archiveCatalogItem}
             onSave={saveCatalogOrder}
           />
         </section>

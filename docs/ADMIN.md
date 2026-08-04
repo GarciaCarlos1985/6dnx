@@ -3,8 +3,8 @@
 > **Contexto de 2026-08-03:** o painel usa Supabase Auth, papel `admin`, RLS e
 > validação server-side nas rotas. O cadastro público está desligado. Ainda não
 > existe exigência de MFA/AAL2 para o único administrador; isso é hardening de
-> pré-escala e não é a causa do `422` do PIX. A vitrine/painel ampliados deste
-> worktree ainda não foram publicados na Production atual.
+> pré-escala e não é a causa do pedido PIX pendente. A vitrine e o painel
+> ampliados já estão publicados na Production Git-backed atual.
 
 Para o manual operacional em linguagem simples, consulte
 [`GUIA_ADMIN_MAYCON.md`](GUIA_ADMIN_MAYCON.md).
@@ -55,8 +55,12 @@ Existem somente três ações estruturais estreitas e deliberadas:
   dados e o recoloca no estado anterior quando solicitado. Um card publicado
   restaurado retorna no fim do catálogo para evitar colisão de posições;
 - **Organizar vitrine:** reordena somente os cards publicados em uma tela
-  separada. O painel mostra as quatro fileiras iniciais, permite arrastar ou
-  usar botões de posição, exige confirmação e envia a lista completa de uma vez.
+  separada. O painel mostra as quatro fileiras iniciais, oferece busca por nome,
+  posição exata e atalhos de topo/fim. O menu de três pontos abre um tabuleiro
+  visual no qual o administrador escolhe uma casa para inserir o card, trocar
+  dois cards diretamente ou arquivar o escolhido de forma reversível. Arraste
+  e setas permanecem para ajustes curtos. A confirmação envia a lista completa
+  de uma vez; arquivamento é uma ação imediata e separada da nova ordem.
 
 ## Proteções contra erro
 
@@ -103,8 +107,10 @@ Ela cria:
 - bucket público `product-assets` com escrita administrativa.
 
 A segunda migração remove a antiga trava dos seis cards fixos e cria a RPC
-administrativa que grava uma ordem completa de forma atômica. Nenhuma das três
-migrações é aplicada automaticamente pelo painel.
+administrativa que grava uma ordem completa de forma atômica. Ela foi aplicada
+e registrada no Supabase de Production em 2026-08-03, depois de um ensaio com
+troca, repetição idempotente e rollback integral. O painel nunca aplica
+migrations automaticamente.
 
 A terceira adiciona somente o campo opcional `checkout_banner`. Ela não altera
 thumbnails existentes. Antes de aplicá-la, os cards continuam funcionando com

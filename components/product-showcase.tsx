@@ -48,6 +48,127 @@ type Placement = {
   card: Box;
 };
 
+function PurchaseFlowGuide({ checkoutAvailable }: { checkoutAvailable: boolean }) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const closeWithEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", closeWithEscape, true);
+    return () => window.removeEventListener("keydown", closeWithEscape, true);
+  }, [open]);
+
+  const close = () => {
+    setOpen(false);
+    window.requestAnimationFrame(() =>
+      triggerRef.current?.focus({ preventScroll: true }),
+    );
+  };
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex min-h-10 items-center justify-center gap-2 border-t border-primary/20 bg-black/70 px-4 text-[0.6rem] font-bold uppercase tracking-[0.14em] text-muted transition-colors hover:text-white focus-visible:text-white"
+        aria-haspopup="dialog"
+      >
+        <span
+          className="grid h-4 w-4 place-items-center rounded-full border border-primary/60 text-[0.55rem] text-primary"
+          aria-hidden
+        >
+          i
+        </span>
+        Como funciona a compra
+      </button>
+
+      {open && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-[120] grid place-items-center bg-black/85 p-3 backdrop-blur-md"
+              role="presentation"
+              onMouseDown={(event) => {
+                if (event.currentTarget === event.target) close();
+              }}
+            >
+              <section
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="purchase-flow-title"
+                className="product-scrollbar max-h-[92vh] w-[min(64rem,96vw)] overflow-y-auto border border-primary/50 bg-[#080506] shadow-[0_0_70px_oklch(0.55_0.22_25_/_0.32)]"
+              >
+                <header className="flex items-start justify-between gap-4 border-b border-white/10 px-4 py-3 sm:px-5">
+                  <div>
+                    <p className="text-[0.58rem] font-black uppercase tracking-[0.2em] text-primary">
+                      Compra protegida 6DNX
+                    </p>
+                    <h3 id="purchase-flow-title" className="mt-1 text-xl text-white sm:text-2xl">
+                      Como seu pedido avança
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={close}
+                    autoFocus
+                    aria-label="Fechar guia de compra"
+                    className="grid h-10 w-10 shrink-0 place-items-center border border-white/15 text-lg text-muted hover:border-primary hover:text-white"
+                  >
+                    ×
+                  </button>
+                </header>
+
+                {!checkoutAvailable ? (
+                  <>
+                    <div className="relative aspect-[8/5] w-full bg-black">
+                      <Image
+                        src="/guides/como-comprar-6dnx.webp"
+                        alt="Guia em sete etapas: entrar no site, escolher o card, selecionar a variação, abrir o Discord, confirmar produto e valor, ter o pagamento verificado e receber entrega e suporte."
+                        fill
+                        sizes="(max-width: 1024px) 96vw, 1024px"
+                        className="object-contain"
+                        priority={false}
+                      />
+                    </div>
+                    <div className="grid gap-3 border-t border-white/10 px-4 py-4 text-sm leading-relaxed text-muted sm:grid-cols-[1fr_auto] sm:items-center sm:px-5">
+                      <p>
+                        Hoje a compra é concluída com atendimento humano pelo
+                        Discord. O atendente confirma o produto, a variação e o
+                        valor antes de orientar o pagamento e liberar a entrega.
+                      </p>
+                      <span className="border border-amber-400/30 bg-amber-300/5 px-3 py-2 text-[0.62rem] font-bold uppercase tracking-[0.12em] text-amber-200">
+                        PIX automático em homologação
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="grid gap-3 p-4 sm:grid-cols-5 sm:p-5">
+                    {[
+                      "Escolha o card e a variação",
+                      "Informe os dados do titular",
+                      "Gere e pague o PIX",
+                      "A confirmação acontece no servidor",
+                      "Entrega e suporte seguem pelo Discord",
+                    ].map((step, index) => (
+                      <article key={step} className="border border-white/10 bg-black/40 p-3">
+                        <span className="text-xs font-black text-primary">0{index + 1}</span>
+                        <p className="mt-3 text-xs leading-relaxed text-white/80">{step}</p>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
+  );
+}
+
 const clamp = (v: number, min: number, max: number) =>
   Math.max(min, Math.min(v, max));
 
@@ -504,6 +625,7 @@ function Popups({
                 Consultar no Discord
               </a>
             )}
+            <PurchaseFlowGuide checkoutAvailable={checkoutAvailable} />
             <a
               href={supportUrl}
               className="flex min-h-10 items-center justify-center border-t border-primary/20 bg-black/40 px-4 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-muted transition-colors hover:text-white"
@@ -1737,6 +1859,7 @@ function MobileSheet({
               Consultar no Discord
             </a>
           )}
+          <PurchaseFlowGuide checkoutAvailable={checkoutAvailable} />
           <a
             href={supportUrl}
             className="inline-flex min-h-11 items-center justify-center border-t border-primary/40 text-[0.62rem] font-bold uppercase tracking-[0.13em] text-muted"

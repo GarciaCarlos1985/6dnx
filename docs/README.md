@@ -3,8 +3,8 @@
 > **Contexto sincronizado em 2026-08-03.** Para retomar o projeto em um novo
 > chat, leia primeiro [`PROJECT_STATE.md`](PROJECT_STATE.md) e
 > [`REVIEW_HANDOFF.md`](REVIEW_HANDOFF.md). Eles distinguem o lançamento
-> público da vitrine, o checkout deliberadamente desligado e a homologação
-> pendente do replay StorM.
+> público da vitrine, o checkout deliberadamente desligado e a reconciliação
+> StorM preparada localmente, ainda não aplicada/publicada.
 
 Este diretório é a fonte central de documentação do projeto. O `README.md` da
 raiz continua sendo a apresentação e o guia rápido; os documentos abaixo
@@ -39,12 +39,12 @@ guardam arquitetura, regras, decisões, auditorias e fontes históricas.
 - A oferta usada no teste está `suspended`; as flags de pagamento Production
   continuam desligadas.
 - A migration corretiva autorizada foi aplicada e registrada sem alterar o
-  pedido pendente. O e-mail de suporte publicado pela StorM voltou como endereço
-  inexistente; depois disso, o proprietário autenticou a conta geral e abriu um
-  ticket privado no Discord oficial solicitando o replay original assinado.
-  Para encerrar a homologação falta a resposta/reexecução do provedor e a
-  confirmação de pedido `paid` + evento único + Discord sanitizado.
-- MFA, CSP completa, rate limit, reconciliação e demais itens da auditoria são
+  pedido pendente. O suporte oficial respondeu que não reenvia webhooks e
+  recomendou polling pelo endpoint de consulta da cobrança. A reconciliação
+  server-side foi implementada numa branch isolada e validada em PostgreSQL
+  local, mas sua migration não foi aplicada e o código não foi publicado.
+  Não criar outro PIX nem marcar o pedido manualmente.
+- MFA, CSP completa, rate limit e demais itens da auditoria são
   endurecimentos de pré-escala; não devem ser confundidos com os três passos
   necessários para concluir o teste que já foi pago.
 
