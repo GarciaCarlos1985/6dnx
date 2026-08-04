@@ -35,14 +35,17 @@ mostram uma indisponibilidade segura, sem ressuscitar produtos arquivados.
 - estado comercial;
 - vídeo do YouTube e orientação horizontal/vertical;
 - recursos, compatibilidade, teclas e passos de tutorial;
-- dados das variações existentes: nome, observação, selo e preço;
+- variações: criar, duplicar, reordenar, editar, destacar, colorir, esgotar,
+  arquivar, reativar e remover;
+- estado **Esgotado** do card inteiro, preservando seus dados para reativação;
 - nota da alteração.
 
-O modo cotidiano não oferece criação ou duplicação genérica, alteração manual
-de `slug`/`source_key`, paleta arbitrária ou
-inclusão/remoção de variações. Esses campos não apenas sumiram da interface: a
-rota de atualização lê o registro atual e recusa qualquer tentativa de mudar
-essa estrutura.
+O modo cotidiano não oferece criação ou duplicação genérica de produtos,
+alteração manual de `slug`/`source_key`, publicação, posição ou paleta
+estrutural. A rota de atualização lê o registro atual e recusa qualquer
+tentativa de mudar esses campos. A estrutura de variações é deliberadamente
+editável e validada: no máximo 40 opções, nomes únicos, preço limitado e cor no
+formato `#RRGGBB`.
 
 Existem somente três ações estruturais estreitas e deliberadas:
 
@@ -57,9 +60,10 @@ Existem somente três ações estruturais estreitas e deliberadas:
 - **Organizar vitrine:** reordena somente os cards publicados em uma tela
   separada. O painel mostra as quatro fileiras iniciais, oferece busca por nome,
   posição exata e atalhos de topo/fim. O menu de três pontos abre um tabuleiro
-  visual no qual o administrador escolhe uma casa para inserir o card, trocar
-  dois cards diretamente ou arquivar o escolhido de forma reversível. Arraste
-  e setas permanecem para ajustes curtos. A confirmação envia a lista completa
+  visual no qual o administrador seleciona ou desseleciona casas, escolhe uma
+  posição para inserir o card, troca dois cards diretamente ou arrasta um card
+  sobre outro. O primeiro card não nasce mais selecionado. Arraste e setas
+  permanecem na lista para ajustes curtos. A confirmação envia a lista completa
   de uma vez; arquivamento é uma ação imediata e separada da nova ordem.
 
 ## Proteções contra erro
@@ -71,8 +75,8 @@ Existem somente três ações estruturais estreitas e deliberadas:
 - cada atualização gera uma revisão automática;
 - histórico é somente leitura no painel cotidiano;
 - gravação usa controle otimista de revisão e bloqueia sobrescrita concorrente;
-- a API cotidiana preserva rota, ordem, publicação, paleta e quantidade de
-  variações;
+- a API cotidiana preserva rota, ordem, publicação e paleta; a quantidade e os
+  estados das variações são validados no servidor;
 - a API cotidiana de produtos não aceita criação e a API de revisões não aceita
   restauração de conteúdo pelo navegador;
 - criação do lote Rust, arquivamento e ordenação usam rotas próprias, autenticação
@@ -95,6 +99,7 @@ Arquivo:
 supabase/migrations/20260731090000_create_product_catalog_admin.sql
 supabase/migrations/20260801143000_add_catalog_ordering.sql
 supabase/migrations/20260801170000_add_checkout_banner.sql
+supabase/migrations/20260804120000_add_catalog_availability_controls.sql
 ```
 
 Ela cria:
@@ -115,6 +120,11 @@ migrations automaticamente.
 A terceira adiciona somente o campo opcional `checkout_banner`. Ela não altera
 thumbnails existentes. Antes de aplicá-la, os cards continuam funcionando com
 o fallback 16:9; salvar um banner dedicado no Supabase depende dessa migration.
+
+A quarta libera o estado `sold-out` do card e ensina a sincronização comercial
+a suspender opções esgotadas ou arquivadas. Ela deve ser aplicada antes de
+publicar o novo editor; até lá, o código e a migration permanecem somente no
+laboratório local. O painel nunca aplica migration automaticamente.
 
 ### Formato das duas artes
 
@@ -253,8 +263,8 @@ continua exigindo uma tarefa técnica; nunca altere linhas manualmente no banco.
 - [ ] Rascunho e arquivado não aparecem no site.
 - [ ] Publicado aparece no card e o pedido manual abre o atendimento correto.
 - [ ] Duas edições simultâneas geram conflito em vez de sobrescrita.
-- [ ] A rota cotidiana recusa alteração de rota, ordem, publicação, paleta ou
-  quantidade de variações.
+- [ ] A rota cotidiana recusa alteração de rota, ordem, publicação ou paleta e
+  aceita apenas variações válidas e limitadas.
 - [ ] A rota dedicada de ordem recusa listas incompletas, repetidas ou obsoletas.
 - [ ] Upload acima de 5 MB ou MIME inválido é recusado.
 - [ ] Desktop e mobile revisados.
@@ -267,9 +277,10 @@ continua exigindo uma tarefa técnica; nunca altere linhas manualmente no banco.
 - O painel não ativa pagamento real.
 - O painel não cria a primeira conta automaticamente no deploy.
 - O painel não aplica a migração sozinho.
-- O modo cotidiano não cria ou duplica produtos genericamente nem altera
-  estrutura. As únicas exceções isoladas são o lote fechado Rust1–Rust20, o
-  arquivamento/restauração reversível e a organização integral da vitrine.
+- O modo cotidiano não cria ou duplica produtos genericamente nem altera sua
+  identidade estrutural. Variações têm ciclo de vida próprio e reversível; as
+  outras exceções isoladas são o lote fechado Rust1–Rust20, o
+  arquivamento/restauração do card e a organização integral da vitrine.
 - O fallback estático existe somente sem configuração Supabase. Após ativação,
   mantenha o catálogo remoto completo e válido; falhas ficam visíveis como
   indisponibilidade em vez de publicar dados antigos.

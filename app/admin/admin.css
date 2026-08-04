@@ -1143,13 +1143,30 @@
 
 .admin-order-quick__selected {
   display: grid;
-  grid-template-columns: 3.3rem minmax(0, 1fr);
+  grid-template-columns: 3.3rem minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
   min-height: 5rem;
   border: 1px solid var(--admin-line);
   background: rgb(255 255 255 / 1.5%);
   padding: 0.75rem;
+}
+
+.admin-order-quick__clear {
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid var(--admin-line);
+  color: var(--admin-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.admin-order-quick__clear:hover,
+.admin-order-quick__clear:focus-visible {
+  border-color: var(--admin-red-bright);
+  color: white;
 }
 
 .admin-order-quick__selected p {
@@ -1531,6 +1548,13 @@
   border-color: var(--admin-red-bright);
   color: white;
   background: rgb(227 6 44 / 8%);
+}
+
+.admin-order-minimap button[data-drag-target="true"] {
+  outline: 2px dashed white;
+  outline-offset: -4px;
+  border-color: var(--admin-red-bright);
+  background: rgb(227 6 44 / 14%);
 }
 
 .admin-order-minimap button:disabled {
@@ -2212,15 +2236,72 @@
   gap: 0.8rem;
 }
 
+.admin-variant-editor__header-actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.admin-stock-toggle {
+  min-height: 2.75rem;
+  border: 1px solid var(--admin-line-strong);
+  color: var(--admin-muted);
+  background: #080607;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.admin-stock-toggle[data-active="true"] {
+  border-color: #ff8d8d;
+  color: white;
+  background: rgb(151 8 28 / 34%);
+  box-shadow: inset 3px 0 0 #ff3255;
+}
+
+.admin-variant-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: -0.75rem 0 1rem;
+  border: 1px solid var(--admin-line);
+  color: var(--admin-muted);
+  background: rgb(255 255 255 / 1.5%);
+  padding: 0.75rem 0.9rem;
+  font-size: 0.62rem;
+}
+
+.admin-variant-summary strong {
+  color: white;
+}
+
 .admin-variant-editor fieldset {
   position: relative;
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr 1fr 0.8fr;
+  grid-template-columns: 1.15fr 0.7fr 0.9fr 0.75fr 0.9fr 0.85fr;
   gap: 0.75rem;
   margin: 0;
   padding: 1rem;
   border: 1px solid var(--admin-line);
   background: #080607;
+}
+
+.admin-variant-editor fieldset[data-availability="archived"] {
+  border-style: dashed;
+  opacity: 0.64;
+}
+
+.admin-variant-editor fieldset[data-highlighted="true"] {
+  border-color: rgb(227 6 44 / 55%);
+  background:
+    linear-gradient(120deg, rgb(227 6 44 / 6%), transparent 38%),
+    #080607;
 }
 
 .admin-variant-editor legend {
@@ -2230,6 +2311,58 @@
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.admin-variant-color > span:last-child {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 0.45rem;
+}
+
+.admin-variant-color input[type="color"] {
+  min-height: 3rem;
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+.admin-variant-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  border-top: 1px solid var(--admin-line);
+  padding-top: 0.75rem;
+}
+
+.admin-variant-actions button {
+  min-height: 2.25rem;
+  border: 1px solid var(--admin-line);
+  color: var(--admin-muted);
+  background: #050405;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.55rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.admin-variant-actions button:hover:not(:disabled),
+.admin-variant-actions button[data-active="true"] {
+  border-color: var(--admin-red-bright);
+  color: white;
+  background: rgb(227 6 44 / 10%);
+}
+
+.admin-variant-actions button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.admin-variant-actions .admin-variant-actions__remove {
+  border-color: rgb(255 92 92 / 30%);
+  color: #ff8d8d;
 }
 
 .admin-danger-link {
@@ -2988,6 +3121,10 @@
   .admin-order-minimap {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+
+  .admin-variant-editor fieldset {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 680px) {
@@ -3020,6 +3157,23 @@
 
   .admin-section-heading {
     flex-direction: column;
+  }
+
+  .admin-variant-editor__header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .admin-variant-editor__header-actions button {
+    flex: 1;
+  }
+
+  .admin-variant-summary {
+    display: grid;
+  }
+
+  .admin-variant-editor fieldset {
+    grid-template-columns: 1fr;
   }
 
   .admin-order-header,

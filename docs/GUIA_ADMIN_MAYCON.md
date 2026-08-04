@@ -247,7 +247,10 @@ selecione o resultado e informe a posição desejada. Também existem os atalhos
 ajustes curtos.
 
 Cada card tem um botão de **três pontos**. Ele abre o **Tabuleiro da vitrine**,
-um minimapa com todas as posições. Escolha outra casa e use:
+um minimapa com todas as posições. Nenhuma casa nasce selecionada. Clique em
+uma casa para selecionar, clique de novo para desselecionar, ou arraste um card
+sobre outro para trocar os dois no rascunho. Também é possível escolher outra
+casa e usar:
 
 - **Mover para esta casa:** insere o card ali e desloca os cards entre as duas
   posições;
@@ -287,7 +290,8 @@ sobrescreve um número já criado.
 1. **Básico:** nome, categoria, status, frase curta e descrição;
 2. **Visual:** troca segura de imagem; a paleta oficial é protegida;
 3. **Conteúdo:** vídeo, recursos, compatibilidade e tutorial;
-4. **Variações:** edição dos planos e preços que já existem;
+4. **Variações:** criação, edição, destaque, cor, estoque e organização dos
+   planos e preços;
 5. **Revisão:** mostra o que está protegido, pede uma conferência e salva.
 
 ### Prévia da direita
@@ -307,8 +311,10 @@ ficam disponíveis:
 - arquivar exige confirmação e nunca apaga dados;
 - não há campo de ordem misturado com a edição do produto; a ordem inteira só
   pode ser salva em **Organizar vitrine**;
-- não há seletor livre de cores;
-- não há botão para adicionar ou apagar uma variação comercial;
+- a paleta estrutural do card continua protegida, mas cada variação pode receber
+  uma cor própria validada;
+- remover uma variação exige confirmação; arquivar é a opção reversível e mais
+  segura para preservar histórico/configuração;
 - o histórico não possui botão de restauração;
 - não existe exclusão permanente.
 
@@ -411,9 +417,20 @@ Depois escolha **Horizontal (16:9)** ou **Vertical (Shorts)**.
 ### Variações e preços
 
 Cada duração ou plano é uma variação. Confira nome e valor antes de salvar. Não
-coloque `R$` dentro do campo numérico; digite somente o valor. O painel permite
-editar as opções existentes, mas não oferece botões para criar ou apagar uma
-delas por acidente.
+coloque `R$` dentro do campo numérico; digite somente o valor. O painel permite:
+
+- **Nova variação:** cria outra opção comercial;
+- **Duplicar:** reaproveita uma opção como ponto de partida;
+- **Destacar:** mantém um único plano em evidência;
+- **Cor da variação:** personaliza somente aquela opção;
+- **Esgotada, mas visível:** mostra a opção ao cliente e bloqueia compra;
+- **Arquivada e oculta:** guarda a opção, mas a retira da vitrine;
+- **Reativar:** devolve uma opção arquivada;
+- **Remover:** exclui a opção do card somente depois de confirmação;
+- **Setas:** mudam a ordem das opções.
+
+O botão **Marcar card esgotado** bloqueia todas as variações de uma vez sem
+apagar preço ou configuração. Ao reativar, o estado comercial anterior volta.
 
 ## O que Maycon não deve fazer
 

@@ -6,6 +6,10 @@ import type {
   Variant,
 } from "@/lib/products";
 import {
+  MAX_PRODUCT_VARIANTS,
+  variantAvailabilityStates,
+} from "@/lib/products";
+import {
   catalogPublicationStates,
   type CatalogMutation,
   type CatalogPublicationState,
@@ -14,7 +18,6 @@ import {
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 const YOUTUBE_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
-const MAX_VARIANTS = 40;
 const MAX_FEATURES = 40;
 const MAX_TUTORIAL_STEPS = 80;
 
@@ -129,12 +132,14 @@ function parseVariants(value: unknown, errors: string[]): Variant[] {
     errors.push("Variações deve ser uma lista.");
     return [];
   }
-  if (value.length > MAX_VARIANTS) {
-    errors.push(`São permitidas no máximo ${MAX_VARIANTS} variações.`);
+  if (value.length > MAX_PRODUCT_VARIANTS) {
+    errors.push(
+      `São permitidas no máximo ${MAX_PRODUCT_VARIANTS} variações.`,
+    );
   }
 
   const seenNames = new Set<string>();
-  return value.slice(0, MAX_VARIANTS).flatMap((entry, index) => {
+  const variants = value.slice(0, MAX_PRODUCT_VARIANTS).flatMap((entry, index) => {
     if (!isRecord(entry)) {
       errors.push(`Variação ${index + 1} inválida.`);
       return [];
@@ -173,6 +178,45 @@ function parseVariants(value: unknown, errors: string[]): Variant[] {
       }
     }
 
+    let availability: Variant["availability"];
+    if (entry.availability !== undefined) {
+      if (
+        typeof entry.availability !== "string" ||
+        !variantAvailabilityStates.includes(
+          entry.availability as NonNullable<Variant["availability"]>,
+        )
+      ) {
+        itemErrors.push(
+          `Disponibilidade da variação ${index + 1} é inválida.`,
+        );
+      } else {
+        availability = entry.availability as NonNullable<
+          Variant["availability"]
+        >;
+      }
+    }
+
+    let highlighted: boolean | undefined;
+    if (entry.highlighted !== undefined) {
+      if (typeof entry.highlighted !== "boolean") {
+        itemErrors.push(`Destaque da variação ${index + 1} é inválido.`);
+      } else if (entry.highlighted) {
+        highlighted = true;
+      }
+    }
+
+    const accentColor = optionalText(
+      entry.accentColor,
+      `Cor da variação ${index + 1}`,
+      7,
+      itemErrors,
+    );
+    if (accentColor && !HEX_COLOR_PATTERN.test(accentColor)) {
+      itemErrors.push(
+        `Cor da variação ${index + 1} deve usar o formato #RRGGBB.`,
+      );
+    }
+
     const variant: Variant = {
       name,
       note: optionalText(
@@ -188,10 +232,20 @@ function parseVariants(value: unknown, errors: string[]): Variant[] {
         40,
         itemErrors,
       ),
+      ...(availability ? { availability } : {}),
+      ...(highlighted ? { highlighted } : {}),
+      ...(accentColor && HEX_COLOR_PATTERN.test(accentColor)
+        ? { accentColor: accentColor.toLowerCase() }
+        : {}),
     };
     errors.push(...itemErrors);
     return itemErrors.length ? [] : [variant];
   });
+
+  if (variants.filter((variant) => variant.highlighted).length > 1) {
+    errors.push("Somente uma variação pode ficar em destaque por card.");
+  }
+  return variants;
 }
 
 function parseTutorialSteps(
@@ -301,8 +355,14 @@ export function parseProduct(value: unknown): ValidationResult<Product> {
   }
 
   const status: ProductStatus =
-    value.status === "custom" ? "custom" : "available";
-  if (value.status !== "custom" && value.status !== "available") {
+    value.status === "custom" || value.status === "sold-out"
+      ? value.status
+      : "available";
+  if (
+    value.status !== "custom" &&
+    value.status !== "available" &&
+    value.status !== "sold-out"
+  ) {
     errors.push("Status comercial inválido.");
   }
 

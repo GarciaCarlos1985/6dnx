@@ -102,9 +102,10 @@ export function CatalogOrderBoard({
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragTargetId, setDragTargetId] = useState<string | null>(null);
   const [quickQuery, setQuickQuery] = useState("");
-  const [quickSelectedId, setQuickSelectedId] = useState(initialIds[0] ?? "");
-  const [quickDestination, setQuickDestination] = useState("1");
+  const [quickSelectedId, setQuickSelectedId] = useState("");
+  const [quickDestination, setQuickDestination] = useState("");
   const [confirmed, setConfirmed] = useState(false);
+  const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionCardId, setActionCardId] = useState<string | null>(null);
   const [actionTargetId, setActionTargetId] = useState<string | null>(null);
   const dirty = orderedIds.some((id, index) => id !== initialIds[index]);
@@ -125,13 +126,17 @@ export function CatalogOrderBoard({
   }, [items, quickQuery]);
 
   useEffect(() => {
-    if (!actionCardId) return;
+    if (!actionDialogOpen) return;
     const closeWithEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setActionCardId(null);
+      if (event.key === "Escape") {
+        setActionDialogOpen(false);
+        setActionCardId(null);
+        setActionTargetId(null);
+      }
     };
     window.addEventListener("keydown", closeWithEscape);
     return () => window.removeEventListener("keydown", closeWithEscape);
-  }, [actionCardId]);
+  }, [actionDialogOpen]);
 
   const updateOrder = (next: string[]) => {
     setOrderedIds(next);
@@ -169,14 +174,40 @@ export function CatalogOrderBoard({
   };
 
   const openCardActions = (id: string) => {
+    setActionDialogOpen(true);
     setActionCardId(id);
     setActionTargetId(null);
   };
 
   const closeCardActions = () => {
     if (busy) return;
+    setActionDialogOpen(false);
     setActionCardId(null);
     setActionTargetId(null);
+  };
+
+  const selectActionHouse = (id: string) => {
+    if (!actionCardId) {
+      setActionCardId(id);
+      setActionTargetId(null);
+      return;
+    }
+    if (id === actionCardId) {
+      setActionCardId(null);
+      setActionTargetId(null);
+      return;
+    }
+    setActionTargetId((current) => (current === id ? null : id));
+  };
+
+  const swapDroppedCards = (sourceId: string, targetId: string) => {
+    if (!sourceId || sourceId === targetId) return;
+    const next = swapCatalogItems(orderedIds, sourceId, targetId);
+    updateOrder(next);
+    setActionCardId(sourceId);
+    setActionTargetId(targetId);
+    setQuickSelectedId(sourceId);
+    setQuickDestination(String(next.indexOf(sourceId) + 1));
   };
 
   const moveActionCard = () => {
@@ -214,11 +245,10 @@ export function CatalogOrderBoard({
       setOrderedIds(remainingIds);
       setConfirmed(false);
       if (quickSelectedId === actionCardId) {
-        setQuickSelectedId(remainingIds[0] ?? "");
-        setQuickDestination(remainingIds.length ? "1" : "");
+        setQuickSelectedId("");
+        setQuickDestination("");
       }
-      setActionCardId(null);
-      setActionTargetId(null);
+      closeCardActions();
     } catch {
       // The parent dashboard already exposes the protected API error.
     }
@@ -347,6 +377,17 @@ export function CatalogOrderBoard({
                     {positionDescription(quickSelectedIndex)}
                   </span>
                 </p>
+                <button
+                  type="button"
+                  className="admin-order-quick__clear"
+                  onClick={() => {
+                    setQuickSelectedId("");
+                    setQuickDestination("");
+                  }}
+                  aria-label="Limpar card selecionado"
+                >
+                  ×
+                </button>
               </>
             ) : (
               <p>Busque e selecione um card.</p>
@@ -432,7 +473,9 @@ export function CatalogOrderBoard({
                         event.dataTransfer.setData("text/plain", id);
                       }}
                       onDragOver={(event) => {
-                        if (!draggedId || draggedId === id) return;
+                        const sourceId =
+                          draggedId || event.dataTransfer.getData("text/plain");
+                        if (sourceId === id) return;
                         event.preventDefault();
                         event.dataTransfer.dropEffect = "move";
                         setDragTargetId(id);
@@ -527,7 +570,7 @@ export function CatalogOrderBoard({
         </p>
       ) : null}
 
-      {actionCardId && actionCard ? (
+      {actionDialogOpen ? (
         <div
           className="admin-order-board-backdrop"
           role="presentation"
@@ -545,11 +588,13 @@ export function CatalogOrderBoard({
               <div>
                 <span className="admin-kicker">Tabuleiro da vitrine</span>
                 <h2 id="catalog-board-dialog-title">
-                  Mover {actionCard.product.title}
+                  {actionCard
+                    ? `Mover ${actionCard.product.title}`
+                    : "Escolha o primeiro card"}
                 </h2>
                 <p>
-                  Escolha uma casa. Você pode inserir o card nessa posição ou
-                  trocar diretamente com o card que já está nela.
+                  Clique para escolher e desselecionar. Ou arraste um card sobre
+                  outro para trocar os dois imediatamente neste rascunho.
                 </p>
               </div>
               <button
@@ -566,6 +611,7 @@ export function CatalogOrderBoard({
             <div className="admin-order-board-dialog__legend" role="note">
               <span><i data-kind="origin" /> Card escolhido</span>
               <span><i data-kind="target" /> Destino selecionado</span>
+              <span>Arrastar sobre outro card troca as duas casas</span>
               <span>Casas 01–12 formam a vitrine inicial</span>
             </div>
 
@@ -580,10 +626,37 @@ export function CatalogOrderBoard({
                     <button
                       type="button"
                       className={isOrigin ? "is-origin" : isTarget ? "is-target" : ""}
-                      onClick={() => setActionTargetId(isOrigin ? null : id)}
-                      disabled={isOrigin || busy}
-                      aria-pressed={isTarget}
+                      draggable={!busy}
+                      onClick={() => selectActionHouse(id)}
+                      onDragStart={(event) => {
+                        setDraggedId(id);
+                        event.dataTransfer.effectAllowed = "move";
+                        event.dataTransfer.setData("text/plain", id);
+                      }}
+                      onDragOver={(event) => {
+                        const sourceId =
+                          draggedId || event.dataTransfer.getData("text/plain");
+                        if (sourceId === id) return;
+                        event.preventDefault();
+                        event.dataTransfer.dropEffect = "move";
+                        setDragTargetId(id);
+                      }}
+                      onDrop={(event) => {
+                        event.preventDefault();
+                        const sourceId =
+                          draggedId || event.dataTransfer.getData("text/plain");
+                        swapDroppedCards(sourceId, id);
+                        setDraggedId(null);
+                        setDragTargetId(null);
+                      }}
+                      onDragEnd={() => {
+                        setDraggedId(null);
+                        setDragTargetId(null);
+                      }}
+                      disabled={busy}
+                      aria-pressed={isOrigin || isTarget}
                       aria-label={`Posição ${index + 1}: ${item.product.title}`}
+                      data-drag-target={dragTargetId === id ? "true" : undefined}
                     >
                       <span>{String(index + 1).padStart(2, "0")}</span>
                       <i
@@ -602,11 +675,18 @@ export function CatalogOrderBoard({
             <div className="admin-order-board-dialog__selection" aria-live="polite">
               {actionTarget ? (
                 <p>
-                  Destino: <strong>{actionTarget.product.title}</strong> · posição{" "}
-                  {orderedIds.indexOf(actionTarget.id) + 1}
+                  <strong>{actionCard?.product.title}</strong> →{" "}
+                  <strong>{actionTarget.product.title}</strong> · posição{" "}
+                  {orderedIds.indexOf(actionTarget.id) + 1}. Escolha mover ou
+                  trocar.
+                </p>
+              ) : actionCard ? (
+                <p>
+                  Origem: <strong>{actionCard.product.title}</strong>. Agora
+                  escolha o destino; clique nele novamente para limpar.
                 </p>
               ) : (
-                <p>Selecione uma casa do tabuleiro para liberar as ações.</p>
+                <p>Nenhum card selecionado. Clique ou arraste qualquer casa.</p>
               )}
             </div>
 
@@ -615,7 +695,7 @@ export function CatalogOrderBoard({
                 type="button"
                 className="admin-secondary-button"
                 onClick={moveActionCard}
-                disabled={!actionTargetId || busy}
+                disabled={!actionCardId || !actionTargetId || busy}
               >
                 Mover para esta casa
               </button>
@@ -623,7 +703,7 @@ export function CatalogOrderBoard({
                 type="button"
                 className="admin-primary-button"
                 onClick={swapActionCards}
-                disabled={!actionTargetId || busy}
+                disabled={!actionCardId || !actionTargetId || busy}
               >
                 Trocar os dois cards
               </button>
@@ -631,7 +711,7 @@ export function CatalogOrderBoard({
                 type="button"
                 className="admin-order-board-dialog__archive"
                 onClick={() => void archiveActionCard()}
-                disabled={busy || demoMode}
+                disabled={!actionCardId || busy || demoMode}
                 title={
                   demoMode
                     ? "Arquivamento desativado na demonstração"

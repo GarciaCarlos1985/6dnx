@@ -8,6 +8,10 @@ type DatabaseConfig = {
   supabaseSecretKey: string;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 export type ApprovedOffer = {
   id: string;
   productSourceKey: string;
@@ -144,7 +148,7 @@ export class CommerceRepository {
   async findApprovedOffer(productSlug: string, variantName: string) {
     const productResult = await this.client
       .from("product_catalog")
-      .select("source_key, slug, title")
+      .select("source_key, slug, title, status, variants")
       .eq("slug", productSlug)
       .eq("publication_state", "published")
       .maybeSingle();
@@ -152,6 +156,21 @@ export class CommerceRepository {
       throw databaseError("find-product", productResult.error);
     }
     if (!productResult.data) return null;
+    if (productResult.data.status === "sold-out") return null;
+
+    const catalogVariants = Array.isArray(productResult.data.variants)
+      ? productResult.data.variants
+      : [];
+    const catalogVariant = catalogVariants.find(
+      (entry) => isRecord(entry) && entry.name === variantName,
+    );
+    if (!isRecord(catalogVariant)) return null;
+    if (
+      catalogVariant.availability === "sold-out" ||
+      catalogVariant.availability === "archived"
+    ) {
+      return null;
+    }
 
     const offerResult = await this.client
       .from("commerce_offers")

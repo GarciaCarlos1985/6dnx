@@ -1,4 +1,15 @@
-export type ProductStatus = "available" | "custom";
+export type ProductStatus = "available" | "custom" | "sold-out";
+
+export const variantAvailabilityStates = [
+  "available",
+  "sold-out",
+  "archived",
+] as const;
+
+export type VariantAvailability =
+  (typeof variantAvailabilityStates)[number];
+
+export const MAX_PRODUCT_VARIANTS = 40;
 
 export type Variant = {
   name: string;
@@ -9,6 +20,12 @@ export type Variant = {
    */
   priceBRL?: number;
   badge?: string;
+  /** Estado operacional da opção. Ausente preserva compatibilidade como ativa. */
+  availability?: VariantAvailability;
+  /** Mantém no máximo um destaque editorial por card no painel. */
+  highlighted?: boolean;
+  /** Cor exclusiva da opção, sem alterar a paleta estrutural do produto. */
+  accentColor?: string;
 };
 
 export type ProductFeature = {
@@ -3192,7 +3209,29 @@ export const products: Product[] = [
 ];
 
 export function productStatusLabel(status: ProductStatus) {
+  if (status === "sold-out") return "Esgotado";
   return status === "available" ? "Disponível" : "Sob medida";
+}
+
+export function isVariantArchived(variant: Variant) {
+  return variant.availability === "archived";
+}
+
+export function isVariantSoldOut(variant: Variant) {
+  return variant.availability === "sold-out";
+}
+
+export function isVariantPurchasable(variant: Variant) {
+  return !isVariantArchived(variant) && !isVariantSoldOut(variant);
+}
+
+export function visibleProductVariants(product: Product) {
+  return product.variants.filter((variant) => !isVariantArchived(variant));
+}
+
+export function purchasableProductVariants(product: Product) {
+  if (product.status === "sold-out") return [];
+  return product.variants.filter(isVariantPurchasable);
 }
 
 export function formatBRL(value: number) {
@@ -3201,7 +3240,7 @@ export function formatBRL(value: number) {
 
 /** Menor preço de referência definido entre as variações. */
 export function priceFrom(product: Product): number | null {
-  const prices = product.variants
+  const prices = visibleProductVariants(product)
     .map((variant) => variant.priceBRL)
     .filter((price): price is number => typeof price === "number");
   return prices.length ? Math.min(...prices) : null;
