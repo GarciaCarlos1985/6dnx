@@ -65,15 +65,17 @@ export async function GET(request: Request) {
       "Falha na reconciliação periódica da StorM:",
       error instanceof Error ? error.name : "UnknownError",
     );
+    const configCode =
+      error instanceof CheckoutConfigError ? error.code : undefined;
     const unavailable =
-      error instanceof CheckoutConfigError ||
-      error instanceof CommerceDatabaseError;
+      Boolean(configCode) || error instanceof CommerceDatabaseError;
     return jsonNoStore(
       {
         ok: false,
         error: unavailable
           ? "Storm reconciliation unavailable"
           : "Storm reconciliation failed",
+        ...(configCode ? { code: configCode } : {}),
       },
       503,
     );
