@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { StormReconciliationCandidate } from "@/lib/checkout/storm-reconciliation";
 
 type DatabaseConfig = {
   supabaseUrl: string;
@@ -46,6 +47,14 @@ export type StormWebhookResult = {
   amountCents: number;
   orderStatus: string;
   eventInserted: boolean;
+  paymentTransitioned: boolean;
+};
+
+export type StormReconciliationResult = Omit<
+  StormWebhookResult,
+  "eventInserted"
+> & {
+  reconciliationInserted: boolean;
 };
 
 export class CommerceDatabaseError extends Error {
@@ -93,6 +102,32 @@ function mapAttempt(row: Record<string, unknown>): PaymentAttempt {
         : null,
     lastPolledAt:
       typeof row.last_polled_at === "string" ? row.last_polled_at : null,
+  };
+}
+
+function mapProcessingResult(
+  row: unknown,
+  insertedField: "event_inserted" | "reconciliation_inserted",
+) {
+  if (!row || typeof row !== "object") {
+    throw new CommerceDatabaseError("process-storm-empty");
+  }
+
+  const record = row as Record<string, unknown>;
+  const amountCents = Number(record.amount_cents);
+  if (!Number.isSafeInteger(amountCents) || amountCents <= 0) {
+    throw new CommerceDatabaseError("process-storm-invalid");
+  }
+
+  return {
+    orderId: String(record.order_id),
+    productSlug: String(record.product_slug),
+    productTitle: String(record.product_title),
+    variantName: String(record.variant_name),
+    amountCents,
+    orderStatus: String(record.order_status),
+    inserted: record[insertedField] === true,
+    paymentTransitioned: record.payment_transitioned === true,
   };
 }
 
@@ -326,6 +361,47 @@ export class CommerceRepository {
     }
   }
 
+  async listStormReconciliationCandidates(limit: number) {
+    const result = await this.client.rpc(
+      "list_storm_reconciliation_candidates",
+      { p_limit: limit },
+    );
+    if (result.error) {
+      throw databaseError("list-reconciliation-candidates", result.error);
+    }
+    if (!Array.isArray(result.data)) {
+      throw new CommerceDatabaseError("list-reconciliation-candidates-empty");
+    }
+
+    return result.data.map((row) => {
+      if (!row || typeof row !== "object") {
+        throw new CommerceDatabaseError("invalid-reconciliation-candidate");
+      }
+      const record = row as Record<string, unknown>;
+      const amountCents = Number(record.amount_cents);
+      const candidate = {
+        orderId: String(record.order_id),
+        externalId: String(record.external_id),
+        amountCents,
+        productSlug: String(record.product_slug),
+        productTitle: String(record.product_title),
+        variantName: String(record.variant_name),
+        providerPaymentId: String(record.provider_payment_id),
+      } satisfies StormReconciliationCandidate;
+
+      if (
+        !candidate.orderId ||
+        !candidate.externalId ||
+        !candidate.providerPaymentId ||
+        !Number.isSafeInteger(amountCents) ||
+        amountCents <= 0
+      ) {
+        throw new CommerceDatabaseError("invalid-reconciliation-candidate");
+      }
+      return candidate;
+    });
+  }
+
   async processStormWebhook(input: {
     eventKey: string;
     eventName: string;
@@ -335,7 +411,7 @@ export class CommerceRepository {
     providerStatus: string;
     completedAt: string | null;
   }) {
-    const result = await this.client.rpc("process_storm_payment_event", {
+    const result = await this.client.rpc("process_storm_payment_event_v2", {
       p_event_key: input.eventKey,
       p_event_name: input.eventName,
       p_provider_payment_id: input.providerPaymentId,
@@ -346,19 +422,53 @@ export class CommerceRepository {
     });
     if (result.error) throw databaseError("process-webhook", result.error);
 
-    const row = Array.isArray(result.data) ? result.data[0] : result.data;
-    if (!row || typeof row !== "object") {
-      throw new CommerceDatabaseError("process-webhook-empty");
-    }
-    const record = row as Record<string, unknown>;
+    const mapped = mapProcessingResult(
+      Array.isArray(result.data) ? result.data[0] : result.data,
+      "event_inserted",
+    );
     return {
-      orderId: String(record.order_id),
-      productSlug: String(record.product_slug),
-      productTitle: String(record.product_title),
-      variantName: String(record.variant_name),
-      amountCents: Number(record.amount_cents),
-      orderStatus: String(record.order_status),
-      eventInserted: record.event_inserted === true,
+      orderId: mapped.orderId,
+      productSlug: mapped.productSlug,
+      productTitle: mapped.productTitle,
+      variantName: mapped.variantName,
+      amountCents: mapped.amountCents,
+      orderStatus: mapped.orderStatus,
+      eventInserted: mapped.inserted,
+      paymentTransitioned: mapped.paymentTransitioned,
     } satisfies StormWebhookResult;
+  }
+
+  async reconcileStormPayment(input: {
+    reconciliationKey: string;
+    providerPaymentId: string;
+    externalId: string;
+    amountCents: number;
+    providerStatus: "COMPLETO" | "FALHA";
+    observedAt: string;
+  }) {
+    const result = await this.client.rpc("reconcile_storm_payment", {
+      p_reconciliation_key: input.reconciliationKey,
+      p_provider_payment_id: input.providerPaymentId,
+      p_external_id: input.externalId,
+      p_amount_cents: input.amountCents,
+      p_provider_status: input.providerStatus,
+      p_observed_at: input.observedAt,
+    });
+    if (result.error) throw databaseError("reconcile-payment", result.error);
+
+    const mapped = mapProcessingResult(
+      Array.isArray(result.data) ? result.data[0] : result.data,
+      "reconciliation_inserted",
+    );
+    return {
+      orderId: mapped.orderId,
+      productSlug: mapped.productSlug,
+      productTitle: mapped.productTitle,
+      variantName: mapped.variantName,
+      amountCents: mapped.amountCents,
+      orderStatus: mapped.orderStatus,
+      reconciliationInserted: mapped.inserted,
+      paymentTransitioned: mapped.paymentTransitioned,
+    } satisfies StormReconciliationResult;
   }
 }

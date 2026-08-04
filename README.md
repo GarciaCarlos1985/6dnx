@@ -35,8 +35,12 @@ O painel administrativo e sua ativação segura estão documentados em
 - Painel CMS em `/admin`, protegido por Supabase Auth + papel administrativo +
   RLS, com prévia, upload, histórico somente para consulta e edição cotidiana
   em modo seguro. Qualquer card pode ser arquivado sem exclusão, e um modo
-  separado **Organizar vitrine** permite ordenar por arraste ou por botões sem
-  editar o conteúdo. Criação genérica, rota, paleta e estrutura de variações
+  separado **Organizar vitrine** permite buscar qualquer card e enviá-lo
+  diretamente para uma posição, para o topo ou para o fim. Cada card também
+  possui um menu de três pontos com tabuleiro visual para mover, trocar ou
+  arquivar; arraste e setas continuam disponíveis para ajustes curtos. A ordem
+  completa é salva de forma
+  atômica sem editar o conteúdo. Criação genérica, rota, paleta e estrutura de variações
   continuam protegidas pela API. A expansão `Rust1`–`Rust20` usa uma
   ação idempotente com quantidade explícita e padrão seguro de um card por vez;
   ela desaparece quando o lote está completo.
@@ -49,8 +53,9 @@ O painel administrativo e sua ativação segura estão documentados em
   do release versionado. Novas cobranças continuam bloqueadas em Production:
   `STORM_WALLET_CHECKOUT_ENABLED` e
   `STORM_WALLET_PRODUCTION_APPROVED` ausentes equivalem a `false`. Enquanto a
-  homologação aguarda o replay do provedor, a vitrine encaminha compras ao
-  Discord e não exibe formulário, CPF, QR Code ou botão PIX.
+  reconciliação do pagamento já criado aguarda revisão/aplicação, a vitrine
+  encaminha compras ao Discord e não exibe formulário, CPF, QR Code ou botão
+  PIX.
 
 Ainda faltam decisões comerciais que precisam de validação do proprietário:
 

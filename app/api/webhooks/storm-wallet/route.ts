@@ -88,7 +88,7 @@ export async function POST(request: Request) {
     });
 
     if (
-      result.eventInserted &&
+      result.paymentTransitioned &&
       result.orderStatus === "paid" &&
       event.event === "payment.completed"
     ) {
@@ -98,6 +98,7 @@ export async function POST(request: Request) {
           productTitle: result.productTitle,
           variantName: result.variantName,
           amountCents: result.amountCents,
+          confirmationSource: "signed_webhook",
         });
       });
     }

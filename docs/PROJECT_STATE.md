@@ -1,6 +1,56 @@
 # 6DNX project state
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
+
+## Checkout UX checkpoint — 2026-08-04
+
+- The checkout-conversion pass moved the variation selector and primary PIX
+  action into a fixed purchase block immediately below the product-dialog
+  header on desktop and mobile. Customers no longer need to scroll through
+  descriptions, requirements or tutorials to reach the variation. A product
+  with exactly one variation selects it automatically; products with multiple
+  variations still require an explicit choice so the wrong option cannot be
+  charged.
+- Discord is a clearly secondary, optional action beside the purchase guide: a
+  translucent light control with the Discord mark and `CANAL WELCOME`. The
+  previous internal copy about an "approved commercial price" was removed.
+- `Como funciona a compra` now always opens the branded seven-stage artwork
+  that documents the intended real flow: choose card, choose variation, create
+  and pay PIX, receive automatic confirmation, then open Discord for delivery
+  and support. The old five-box PIX guide and the outdated flow that opened
+  Discord before payment were removed.
+- Read-only Production Supabase evidence confirmed why the local Moonwalk
+  checkout still refuses payment: `dayz-moonwalk / Lifetime` exists at `2200`
+  cents but is `draft`, not `approved`. This is an internal 6DNX commercial
+  gate, not a Banco do Brasil or StorM Wallet refusal. Browser QA exercised the
+  exact path with synthetic customer data; it stopped before order/provider
+  creation and explicitly confirmed that no charge was created.
+- The current pass is green on ESLint, strict TypeScript, all 32 tests and the
+  Production build. Browser QA confirmed the new guide in the live local
+  product dialog. No offer, order, payment, migration, deployment or Production
+  environment value was changed; both Production checkout flags remain false.
+- The remaining `offer-unavailable` failure was traced to duplicated commercial
+  state: Production has 59 published products and 154 currently priced
+  variants, while `commerce_offers` still had 156 `draft` rows and one
+  suspended R$ 1.00 test row. Migration
+  `20260804030000_sync_published_catalog_offers.sql` now makes publication the
+  owner-facing sales switch: valid positive prices on published products are
+  synchronized as approved server-side offers; removed/unpriced variants and
+  draft/archived products are suspended. Existing orders keep their immutable
+  price snapshots and the browser still cannot provide a charge amount.
+- The synchronization passed 32/32 Node tests and a PostgreSQL 16 integration
+  transaction covering initial approval, price change, new/removed variants,
+  archive/restore and direct-function privilege denial. Migrations
+  `20260801170000`, `20260803235717` and `20260804030000` were then applied by
+  the official Supabase CLI. Production verification found 154 approved offers
+  matching the current published priced variants, three stale/unpriced offers
+  suspended, Rust1 restored from the R$ 1.00 test value to R$ 21.99, and no new
+  order, payment attempt, webhook or reconciliation event.
+- `STORM_WALLET_CHECKOUT_ENABLED` and
+  `STORM_WALLET_PRODUCTION_APPROVED` now exist as sensitive Production-only
+  Vercel variables with value `true`. Vercel applies environment changes only
+  to a new deployment, so the prior Production deployment remained disabled
+  while the database and Git release gates were completed.
 
 ## Resume here — authoritative checkpoint for a new chat
 
@@ -36,26 +86,38 @@ Last updated: 2026-08-03
   uses `ON CONFLICT ON CONSTRAINT commerce_payment_attempts_pkey`, keeps the
   RPC executable only by `service_role`, and did not change the pending order,
   payment attempt or event count during deployment.
-- Two external/verification actions remain to finish the R$ 1.00 homologation:
-  (1) ask StorM to replay the original signed payload; (2) verify `paid`, one
-  event and the sanitized Discord notification. Do not create another charge
-  and do not reconstruct or mark the payment manually.
+- StorM support answered that callbacks are not replayed and that delivery
+  retries are not guaranteed. Their official operational guidance is to answer
+  `2xx` quickly and combine the webhook with authenticated status polling. The
+  owner therefore authorized a server-side reconciliation implementation that
+  queries the already-created payment; no new charge may be created.
+- Branch `codex/storm-server-reconciliation` now contains the additive, still
+  **unapplied and unpublished** migration
+  `20260803235717_storm_server_reconciliation.sql`, immediate reconciliation in
+  the signed customer-status flow, a bounded daily fallback cron, distinct
+  audit evidence and duplicate-notification protection across webhook/polling.
+  The migration passed local PostgreSQL 16 tests for exact matching,
+  idempotency, RLS/grants, amount mismatch and a late webhook after polling.
+  The complete local gate also passed lint, generated route types + strict
+  TypeScript, 28 tests, the Production build, `npm audit --omit=dev` with zero
+  vulnerabilities and a high-confidence secret scan.
+  Production state has not changed; tests must be reviewed before a separate
+  authorization to apply or deploy.
 - Responsibility split: Codex prepares, validates and—when explicitly
   authorized—applies the targeted migration, then verifies Supabase and Vercel.
   The attempted Discord OAuth login was blocked until the owner verifies an
-  e-mail address or phone number, and the public StorM assistant has no replay
-  procedure. A replay request sent to the address published in StorM's terms
-  bounced as address not found. The owner then authenticated the general StorM
-  account and opened a private ticket in the official Discord requesting the
-  original signed replay. The provider has not answered or replayed it yet. No
-  Wallet password needs to be shared. Final Production activation remains an
-  owner decision.
+  e-mail address or phone number. The owner authenticated the general StorM
+  account and opened a private ticket in the official Discord. Support then
+  confirmed that they do not replay callbacks and directed 6DNX to the official
+  payment-status endpoint. No Wallet password needs to be shared. Applying the
+  prepared migration, publishing the code and final Production activation are
+  three separate owner decisions.
 - Security hardening found during the broader audit (admin MFA/AAL2, full CSP,
-  webhook freshness/rate limit, reconciliation, GitHub security tooling and
+  webhook freshness/rate limit, GitHub security tooling and
   retention policy) is a pre-scale backlog. It must not be presented as ten
   additional steps required to repair the already-paid R$ 1.00 test.
-- The StorM replay has not happened and no Production payment flag was enabled.
-  The storefront release is independent from that pending provider action and
+- No Production payment flag was enabled. The storefront release is independent
+  from the pending reconciliation release and
   must keep purchases routed to Discord until both activation flags are
   explicitly approved later.
 - The recreated Supabase Auth administrator was found confirmed
@@ -65,9 +127,44 @@ Last updated: 2026-08-03
   password was not changed. The user must sign out and back in so a fresh JWT
   contains the new claim.
 - The six-digit StorM code successfully authenticated the owner's general
-  account. A private support ticket is open in the official Discord and now
-  awaits the provider response; the separate Wallet password is not required
-  for that support request and must not be shared.
+  account. The private support ticket produced the definitive no-replay/polling
+  guidance above; the separate Wallet password is not required and must not be
+  shared.
+- The **Organizar vitrine** persistence incident was traced to Production, not
+  to drag-and-drop: the deployed API called
+  `reorder_published_product_catalog`, but that RPC did not exist in the live
+  database. Migration `20260801143000_add_catalog_ordering.sql` was first
+  exercised inside a rolled-back transaction against all 59 published cards;
+  direct swapping and repeated idempotent execution passed and rollback
+  restored every order/revision. The owner explicitly requested the repair, so
+  the exact versioned migration was then applied and recorded in Supabase.
+  A no-op call confirmed the live function without changing the current order.
+- The organizer UI now has a fast path: search by title/category/slug, select a
+  card and move it directly to an exact position, the top or the end. Native
+  drag-and-drop and one-step arrows remain only for small adjustments. Every
+  card now has an actual three-dot action button that opens a responsive
+  minimap: selecting a destination can either insert the card at that position
+  or swap exactly two cards. The same dialog can archive the card through the
+  existing revision-protected publication API; archive is immediate,
+  reversible and distinct from the pending order save. The home invalidates
+  both the catalog tag and `/` after catalog mutations. This UI/code update is
+  local and uncommitted until the owner reviews it.
+- Added a customer-facing **Como funciona a compra** control to desktop and
+  mobile product details. While Production checkout remains disabled it opens
+  the optimized 229 KB guide at
+  `public/guides/como-comprar-6dnx.webp`, documenting the current Discord order
+  path and clearly labelling automatic StorM PIX as homologation. If checkout
+  is enabled later, the popup switches to the server-confirmed PIX steps and
+  does not display the obsolete manual-flow artwork.
+- The temporary local `Teste` presentation was not a catalog row: it was a
+  development-only overlay that renamed `Rust1`. That overlay and its test were
+  removed; `Rust1` and its database history remain intact.
+- This organizer checkpoint passes ESLint, generated Next route types plus
+  strict TypeScript, 30 Node tests, the Next.js 16.2.12 Production build and
+  `npm audit --omit=dev` with zero vulnerabilities. Browser QA proved direct
+  distant movement, exact two-card swap, a responsive 390 × 844 minimap with no
+  horizontal overflow, a responsive purchase guide, no console warning/error
+  and no `Teste` title on the local storefront.
 
 ## Current objective
 
@@ -78,8 +175,9 @@ isolated test checkout, and an automated games-and-AI news area.
 ## Release checkpoint — 2026-08-03
 
 - This release replaces the manual storefront snapshot with a traceable Git
-  branch and the complete current UI. The webhook route remains present, so a
-  late signed replay can still settle the existing pending order.
+  branch and the complete current UI. The signed webhook remains active; the
+  authenticated reconciliation fallback is prepared locally but not yet
+  applied or published.
 - `/api/checkout` is deployed but returns `503` before parsing customer data
   while either activation flag is absent/false. This is intentional. Missing
   flags are the safe state and do not need to be created as literal `false`.
@@ -89,8 +187,8 @@ isolated test checkout, and an automated games-and-AI news area.
   to the already configured public `DISCORD_INVITE_URL`; invalid/non-HTTPS
   values remain blocked by the public-link allowlist.
 - No Supabase migration or offer-status mutation is part of the storefront
-  deployment. The paid R$ 1.00 order remains pending until StorM replays the
-  original signed event.
+  deployment. The paid R$ 1.00 order remains pending until the separately
+  reviewed reconciliation migration and code are authorized.
 
 ## Historical Production checkpoint — 2026-08-02
 
@@ -169,12 +267,12 @@ isolated test checkout, and an automated games-and-AI news area.
   `STORM_WALLET_PRODUCTION_APPROVED` remains absent. A local empty checkout
   request returned `400` for invalid order data instead of configuration `503`,
   proving local activation without calling StorM or creating a payment.
-- In local development only, the published `Rust1` entry is presented first as
-  `Teste`, with only its existing `1 Dia` variation visible at R$ 1,00. The
-  immutable slug/source key remains `rust-1-6dnx-software`; the shared catalog
-  is untouched. That exact commercial offer was approved server-side for 100
-  cents after the Production webhook repeated the fail-closed `422/401/400`
-  probe; all order, attempt and event counters were still zero afterward.
+- For the controlled real-payment test, local development temporarily presented
+  `Rust1` first as `Teste`, with only its existing `1 Dia` variation visible at
+  R$ 1,00. The immutable slug/source key remained
+  `rust-1-6dnx-software`; the shared catalog was untouched. That overlay has now
+  been deleted and must not return. The historical offer/payment evidence is
+  preserved separately from the storefront presentation.
 - The replacement `VERCEL_TOKEN` is still rejected by Vercel CLI. GitHub
   publication succeeded through the separately authenticated `gh` session;
   do not rely on the local Vercel token until it is replaced again.
@@ -272,10 +370,11 @@ isolated test checkout, and an automated games-and-AI news area.
   own adjacent cascade; the footer keeps the global arrows and `6 D N X` pager.
   The first twelve canonical positions map exactly to those four shelves.
 - Added the dedicated **Organizar vitrine** admin mode. It supports native
-  drag-and-drop plus keyboard/touch-friendly up/down buttons, clearly labels
-  all four initial shelves, requires an explicit review checkbox and saves the
-  complete published order through one validated atomic RPC. The regular edit
-  route still rejects order changes.
+  drag-and-drop plus keyboard/touch-friendly up/down buttons, search and direct
+  positioning, and a three-dot minimap for move, exact swap and reversible
+  archive actions. It clearly labels all four initial shelves, requires an
+  explicit review checkbox and saves the complete published order through one
+  validated atomic RPC. The regular edit route still rejects order changes.
 - Added the small footer credit **Desenvolvido por Developer Bicho**. It remains
   an honest disabled anchor with `Contato em breve` until a public HTTPS profile
   or Discord invite is supplied through `DEVELOPER_CREDIT_URL`; a Discord
@@ -582,11 +681,12 @@ isolated test checkout, and an automated games-and-AI news area.
   stays legible, requests no personal data, has no horizontal overflow, focuses
   its close control, closes with Escape and restores focus to `Comprar com PIX`.
   No migration, charge, deploy, commit or push was executed.
-- Added the unapplied additive migration
+- Added the additive migration
   `20260801143000_add_catalog_ordering.sql`. It removes the obsolete fixed-card
   constraint and adds an admin-only, transaction-locked RPC that rejects
   incomplete, duplicate, stale or non-published order lists before changing any
-  position. No migration was applied by Codex.
+  position. It was applied and recorded on 2026-08-03 after rollback-only
+  validation proved atomicity and idempotency against the live catalog.
 - Corrected the checkout artwork contract. Each product can now have an
   optional dedicated **4:5** banner (`1200 x 1500 px` recommended) uploaded from
   the admin panel. Without that banner, the existing 16:9 card thumbnail is
@@ -658,9 +758,9 @@ isolated test checkout, and an automated games-and-AI news area.
 - The commerce migration is applied and every imported offer was confirmed as
   `draft`. Still generate an independent `CHECKOUT_DATA_HASH_SECRET` and
   approve only one human-reviewed test offer after provider homologation.
-- Review and apply `20260801143000_add_catalog_ordering.sql` in an isolated
-  Supabase branch before expecting **Organizar vitrine** or archive-all behavior
-  to persist in the production panel.
+- `20260801143000_add_catalog_ordering.sql` is applied and recorded in
+  Production; **Organizar vitrine** now has the database RPC required for
+  persistence. Keep future order changes inside the dedicated admin route.
 - Review and apply `20260801170000_add_checkout_banner.sql` after the catalog
   migrations before saving a dedicated checkout banner in the production
   panel. Existing thumbnails continue to work before it is applied.

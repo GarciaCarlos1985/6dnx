@@ -4,8 +4,10 @@
 > assinado chegou ao backend. HMAC e contrato passaram; a RPC retornou `422`
 > por ambiguidade SQL. A migration corretiva versionada foi aplicada em
 > 2026-08-03 e preservou o pedido `pending_payment`; a oferta está `suspended`
-> e Production continua com criação de cobranças desligada. Faltam somente o
-> replay original assinado e a confirmação `paid`/evento/Discord. As seções
+> e Production continua com criação de cobranças desligada. O suporte oficial
+> informou que não reenvia webhooks e recomendou polling pelo endpoint de
+> consulta. A reconciliação server-side foi implementada e validada localmente,
+> mas a nova migration não foi aplicada e o código não foi publicado. As seções
 > datadas abaixo preservam a cronologia da homologação.
 
 Este documento explica a integração real preparada em 2026-08-01 e o checkpoint
@@ -27,7 +29,9 @@ de teste já está suspensa e não pode gerar uma segunda cobrança.
 - o modal exibe QR Code, PIX copia e cola e confirmação progressiva;
 - o polling usa `POST` e um token HMAC, evitando colocar credenciais na URL;
 - um estado observado como `COMPLETO` no polling ainda aparece como
-  **confirmando**; somente o webhook assinado libera o sucesso;
+  **confirmando** na versão atualmente publicada; a branch de reconciliação
+  preparada permite que o servidor liquide o pedido após conferir ID da
+  cobrança, `externalId` e valor exatos no endpoint autenticado da StorM;
 - depois da confirmação, o cliente segue para o Discord pelo redirect oficial.
 
 O projeto não ganhou Framer Motion, Zod nem React Hook Form. React, TypeScript e
@@ -53,6 +57,7 @@ O campo depende da migration aditiva e ainda não aplicada
 | `POST /api/checkout` | valida origem/dados, busca oferta aprovada, cria pedido idempotente e solicita PIX à StorM |
 | `POST /api/checkout/status` | valida token do pedido e consulta a StorM com intervalo mínimo |
 | `POST /api/webhooks/storm-wallet` | lê corpo bruto limitado, verifica `X-Storm-Signature`, processa evento uma vez e notifica o Discord sem CPF |
+| `GET /api/cron/storm-reconciliation` | fallback diário protegido por `CRON_SECRET`; consulta somente cobranças existentes e pendentes |
 
 O cliente StorM aceita somente o host exato
 `https://wallet.stormapplications.com`, usa timeout, proíbe redirect e limita o
@@ -75,6 +80,8 @@ As tabelas novas são:
 - `commerce_orders`: fotografia imutável do que foi comprado;
 - `commerce_payment_attempts`: ID e estado observados na StorM;
 - `commerce_webhook_events`: deduplicação e trilha do evento assinado.
+- `commerce_reconciliation_events`: evidência separada da consulta autenticada
+  ao endpoint oficial, sem fingir que polling é webhook.
 
 O RPC `process_storm_payment_event` valida ID, valor e estado dentro de uma
 transação. RLS impede leitura pública e escrita pelo navegador.
@@ -196,18 +203,25 @@ atomicamente e registrada no histórico do Supabase em 2026-08-03. A aplicação
 preservou um pedido pendente, uma tentativa e zero eventos; a função corrigida
 permanece executável somente por `service_role`.
 
-O próximo passo é solicitar à StorM o reenvio do webhook original assinado. A
-documentação da Wallet não oferece endpoint de replay e não garante reenvio
-automático. O login do painel está bloqueado até a verificação de e-mail/telefone
-da conta Discord. A tentativa enviada em 2026-08-03 ao endereço publicado nos
-termos da StorM voltou como endereço inexistente. O proprietário autenticou a
-conta geral StorM com o código recebido e abriu um ticket privado no Discord
-oficial solicitando o reenvio do payload original assinado. A senha separada da
-Wallet não é necessária para esse atendimento e não deve ser compartilhada. O
-provedor ainda não respondeu nem confirmou o replay. Uma janela inicial de
-quatro consultas em 30 segundos observou o pedido
-`pending_payment`, uma tentativa e zero eventos. A oferta suspensa não impede o
-webhook de processar o pedido existente.
+O suporte oficial respondeu que não reenvia webhooks e que uma falha de entrega
+deve ser coberta por polling no endpoint de consulta documentado na Wallet. A
+senha separada da Wallet não é necessária e não deve ser compartilhada. Por
+autorização do proprietário, foi preparada uma reconciliação server-side que:
+
+- usa somente `GET /api/v1/payments/{providerPaymentId}`; nunca cria cobrança;
+- exige igualdade exata de `providerPaymentId`, `externalId` e centavos;
+- registra evidência distinta do webhook e muda pedido/tentativa em uma única
+  transação idempotente;
+- impede notificação duplicada se webhook e polling concorrerem;
+- roda imediatamente no status autenticado do cliente e, como fallback, em um
+  lote diário limitado e protegido por `CRON_SECRET`.
+
+A migration `20260803235717_storm_server_reconciliation.sql` e o código estão
+somente na branch local `codex/storm-server-reconciliation`. PostgreSQL 16 local
+validou primeira liquidação, repetição idempotente, valor divergente, RLS,
+grants e webhook tardio sem segunda transição. **Nada foi aplicado ao Supabase
+de Production e nada foi publicado na Vercel.** O pedido real permanece
+`pending_payment` até uma autorização posterior, após a apresentação dos gates.
 
 ## Verificação operacional de 2026-08-01
 
@@ -270,14 +284,16 @@ possui uma tela comercial própria para esse campo; isso é uma etapa separada.
 ```text
 pending_payment
   -> payment_creation_failed
-  -> paid                 somente por webhook HMAC válido
+  -> paid                 somente por prova server-to-server validada
   -> failed
-failed -> paid            se um evento COMPLETO assinado chegar depois
+failed -> paid            se uma prova COMPLETO válida chegar depois
 ```
 
-O polling pode observar `COMPLETO`, mas apenas grava
-`provider_complete_observed_at`. Isso evita que uma resposta manipulada no
-navegador ou uma consulta isolada libere atendimento.
+Na versão publicada, o polling ainda apenas grava
+`provider_complete_observed_at`. Na branch de reconciliação, uma consulta
+autenticada feita pelo servidor pode liquidar o pedido somente depois de
+conferir `providerPaymentId`, `externalId` e valor exatos dentro da RPC
+transacional. O navegador nunca fornece nem aprova essa prova.
 
 O webhook continua processando pedidos existentes mesmo quando o kill switch de
 novas cobranças está desligado. Ele depende somente do segredo HMAC e da conexão
@@ -287,13 +303,14 @@ baixa de um pagamento pendente. Portanto, em incidente:
 1. altere `STORM_WALLET_CHECKOUT_ENABLED=false`;
 2. não apague a URL do webhook enquanto houver pedidos pendentes;
 3. não entregue produto com base apenas em print ou mensagem do cliente;
-4. confira `commerce_orders.status = 'paid'` e o evento correspondente.
+4. confira `commerce_orders.status = 'paid'` e a evidência correspondente em
+   webhook ou reconciliação.
 
 ## O que falta antes de abrir vendas
 
-- documentação pública/assinada ou sandbox confirmado pela StorM;
-- concluir o teste ponta a ponta com um evento HMAC real aceito e persistido;
-- explicar e monitorar falhas de entrega/reenvio do webhook;
+- aplicar/publicar a reconciliação somente após autorização específica;
+- concluir o teste já pago com `paid`, evidência única e Discord sanitizado;
+- monitorar falhas de entrega do webhook e o fallback de consulta;
 - política de privacidade e regras de reembolso;
 - tela administrativa de pedidos/ofertas e monitoramento operacional;
 - aprovação humana para as flags de Production.

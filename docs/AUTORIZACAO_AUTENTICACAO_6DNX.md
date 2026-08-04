@@ -2,9 +2,10 @@
 
 > **Contexto de 2026-08-03:** autenticação administrativa e RLS já existem. Um
 > PIX real foi pago, mas ainda não existe autorização de entrega porque o pedido
-> permanece `pending_payment` após a RPC falhar. Somente o replay assinado,
-> processado após a migration corretiva, pode produzir `paid`; comprovante,
-> polling `COMPLETO` ou marcação manual não substituem essa autorização.
+> permanece `pending_payment`. A StorM não reenvia o callback. Somente prova
+> server-to-server — webhook HMAC válido ou consulta autenticada com ID externo,
+> ID da cobrança e valor exatos — pode produzir `paid`; comprovante, estado
+> enviado pelo navegador ou marcação manual não substituem essa autorização.
 
 Atualizado em 29 de julho de 2026.
 

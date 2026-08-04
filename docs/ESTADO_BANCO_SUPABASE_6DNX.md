@@ -13,13 +13,17 @@ aplicada e um pedido real de R$ 1,00 foi criado.
 | `commerce_orders` | existe; pedido do teste está `pending_payment` |
 | `commerce_payment_attempts` | existe; tentativa do provedor foi registrada |
 | `commerce_webhook_events` | existe; zero eventos persistidos após a falha da RPC |
-| `process_storm_payment_event` | acessível somente ao backend, mas a versão Production possui ambiguidade `ON CONFLICT (order_id)` |
+| `process_storm_payment_event` | correção da ambiguidade aplicada; executável somente por `service_role` |
+| `commerce_reconciliation_events` | definida na nova migration local; ainda não existe em Production |
+| `reconcile_storm_payment` | definida e testada localmente; ainda não existe em Production |
 | RLS `anon` | SELECT/INSERT/UPDATE/DELETE financeiros bloqueados em teste real de papel |
-| Pagamento StorM | PIX pago no provedor; falta replay assinado após correção para persistir `paid` |
+| Pagamento StorM | PIX pago no provedor; suporte não reenvia callback; aguarda migration/publicação da reconciliação autenticada |
 
-A correção proposta foi validada dentro de transação com rollback e preservou
-idempotência. Ela ainda não foi aplicada. Não usar o snapshot antigo abaixo
-para concluir que as tabelas comerciais não existem.
+A correção original da RPC foi aplicada e registrada. A nova reconciliação foi
+validada em PostgreSQL 16 temporário com rollback, cobrindo idempotência,
+divergência de valor, RLS/grants e webhook tardio; ela ainda não foi aplicada em
+Production. Não usar o snapshot antigo abaixo para concluir que as tabelas
+comerciais não existem.
 
 ## Snapshot histórico — 29 de julho de 2026
 

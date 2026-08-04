@@ -15,63 +15,9 @@ import {
   parseStormWebhookEvent,
 } from "../lib/checkout/storm-contract.ts";
 import {
-  LOCAL_PAYMENT_TEST_AMOUNT_BRL,
-  LOCAL_PAYMENT_TEST_PRODUCT_KEY,
-  LOCAL_PAYMENT_TEST_VARIANT_NAME,
-  withLocalPaymentTestProduct,
-} from "../lib/checkout/local-payment-test-product.ts";
-import {
   signStormPayload,
   verifyStormSignature,
 } from "../lib/checkout/storm-signature.ts";
-import type { Product } from "../lib/products.ts";
-
-const localPaymentTestCatalog: Product[] = [
-  {
-    slug: "other-product",
-    title: "Outro",
-    category: "Outro",
-    tagline: "Outro produto",
-    description: "",
-    image: "/products/other.webp",
-    status: "available",
-    variants: [{ name: "1 Dia", priceBRL: 20 }],
-  },
-  {
-    slug: LOCAL_PAYMENT_TEST_PRODUCT_KEY,
-    catalogKey: LOCAL_PAYMENT_TEST_PRODUCT_KEY,
-    title: "Rust1",
-    category: "Rust",
-    tagline: "Rust Acesso",
-    description: "",
-    image: "/products/rust.webp",
-    status: "available",
-    variants: [
-      { name: LOCAL_PAYMENT_TEST_VARIANT_NAME, priceBRL: 21.99 },
-      { name: "7 Dias", priceBRL: 67.99 },
-    ],
-  },
-];
-
-test("local PIX homologation changes only Rust1 presentation", () => {
-  const disabled = withLocalPaymentTestProduct(localPaymentTestCatalog, false);
-  assert.deepEqual(disabled, localPaymentTestCatalog);
-
-  const enabled = withLocalPaymentTestProduct(localPaymentTestCatalog, true);
-  assert.equal(enabled[0]?.slug, LOCAL_PAYMENT_TEST_PRODUCT_KEY);
-  assert.equal(enabled[0]?.catalogKey, LOCAL_PAYMENT_TEST_PRODUCT_KEY);
-  assert.equal(enabled[0]?.title, "Teste");
-  assert.deepEqual(enabled[0]?.variants, [
-    {
-      name: LOCAL_PAYMENT_TEST_VARIANT_NAME,
-      priceBRL: LOCAL_PAYMENT_TEST_AMOUNT_BRL,
-      badge: "TESTE",
-      note: "Oferta temporária para homologação",
-    },
-  ]);
-  assert.equal(localPaymentTestCatalog[1]?.title, "Rust1");
-  assert.equal(localPaymentTestCatalog[1]?.variants.length, 2);
-});
 
 test("CPF is normalized, formatted and validated with both check digits", () => {
   assert.equal(normalizeCpf("529.982.247-25"), "52998224725");

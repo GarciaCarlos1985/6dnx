@@ -6,9 +6,10 @@
 > rota responde `503` e a interface compra pelo Discord.
 > `STORM_WALLET_WEBHOOK_SECRET` e
 > `CHECKOUT_DATA_HASH_SECRET` estão no escopo Production. Não alterar valores,
-> escopos ou flags para corrigir o `422`: a causa é a RPC PostgreSQL e requer
-> migration separada. Passagens datadas de 2026-07-28 a 2026-08-01 são
-> snapshots históricos, não o estado atual.
+> escopos ou flags para corrigir o pedido pendente. A correção original da RPC
+> já foi aplicada; a reconciliação complementar está preparada localmente, mas
+> sua migration e seu código ainda não chegaram a Production. Passagens datadas
+> de 2026-07-28 a 2026-08-01 são snapshots históricos, não o estado atual.
 
 Auditoria local: 2026-07-28. Os valores nunca devem ser copiados para este
 arquivo, para o GitHub, para logs ou para capturas de tela.
@@ -21,7 +22,7 @@ Configure em **Project Settings > Environment Variables**.
 | --- | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | URL canônica HTTPS aprovada para o deployment; domínio atual servido em `https://www.6dnx.com.br` | URL HTTPS do Preview | Metadados e URLs absolutas. Nunca use localhost na Production. |
 | `DEVELOPER_CREDIT_URL` | link público HTTPS, quando fornecido | pode repetir | Destino clicável de “Developer Bicho” no rodapé. Quando ausente, o site reutiliza `DISCORD_INVITE_URL`; nunca use webhook. |
-| `CRON_SECRET` | obrigatório | segredo diferente | Protege `/api/cron/news`; use um segredo aleatório sem privilégios externos. |
+| `CRON_SECRET` | obrigatório | segredo diferente | Protege `/api/cron/news` e, depois de publicado, `/api/cron/storm-reconciliation`; use um segredo aleatório sem privilégios externos. |
 | `SITE_REVIEW_ENABLED` | `true` enquanto privado | `true` enquanto privado | Ativa a senha de revisão. Na Vercel, ausente também bloqueia por segurança; somente `false` explícito abre. |
 | `SITE_REVIEW_USER` | usuário privado | usuário diferente, se desejado | Usuário do desafio HTTP Basic; somente servidor. |
 | `SITE_REVIEW_PASSWORD` | senha aleatória de 16+ caracteres | senha diferente | Senha do ambiente de revisão; nunca use `NEXT_PUBLIC_`. |
@@ -66,7 +67,7 @@ https://www.6dnx.com.br/api/webhooks/storm-wallet
 ```
 
 Não configure simultaneamente outro callback e não mude o destino enquanto
-existir pedido pendente ou replay aguardado.
+existir pedido pendente ou reconciliação aguardando conclusão.
 
 O painel StorM nunca deve receber uma URL de webhook do Discord. O backend 6DNX
 primeiro verifica a assinatura, valida ID/valor/estado, grava o evento uma vez e
@@ -81,10 +82,10 @@ Se uma URL completa do Discord tiver aparecido em captura, log ou conversa,
 rotacione o webhook no Discord, porque o trecho depois do ID funciona como
 credencial de envio.
 
-O contrato técnico local agora cobre criação, consulta e webhook. Ainda faltam
-confirmação oficial de sandbox, expiração, cancelamento, reembolso, retenção de
-dados e comportamento de retry. Consulte `STORM_PIX_CHECKOUT.md`; nunca deduza
-essas regras a partir de uma chave live.
+O contrato técnico local agora cobre criação, consulta, webhook e reconciliação.
+A StorM informou que não garante reenvio automático; ainda faltam confirmação
+oficial de sandbox, expiração, cancelamento, reembolso e retenção de dados.
+Consulte `STORM_PIX_CHECKOUT.md`; nunca deduza regras a partir de uma chave live.
 
 ### Checkpoint atual de Production — 2026-08-03
 
@@ -94,8 +95,9 @@ essas regras a partir de uma chave live.
   cadastrar valores literais para obter o estado seguro.
 - O release Git-backed contém `/api/checkout` e
   `/api/webhooks/storm-wallet`. A primeira rota falha fechada com `503`; a
-  segunda continua independente das flags para aceitar o replay assinado do
-  pedido já pago.
+  segunda continua independente das flags para aceitar callbacks assinados.
+  A rota `/api/cron/storm-reconciliation` existe somente na branch local até
+  nova autorização de migration e publicação.
 - A vitrine mostra `Comprar pelo Discord` e não monta botão PIX, CPF ou QR Code
   enquanto o checkout estiver indisponível.
 
@@ -116,21 +118,12 @@ essas regras a partir de uma chave live.
   segredo HMAC estão no escopo Production. No release novo, `/api/checkout`
   existe, porém responde `503` sem alcançar a StorM enquanto as flags estiverem
   desligadas.
-- O segredo antigo da `.env.local` não corresponde ao segredo novo da Vercel;
-  não tente “corrigir” Production copiando o valor local antigo.
-- Revogue e gere outro `VERCEL_TOKEN`: a CLI 58.4.4 exibiu o token atual em uma
-  sugestão de paginação. Nunca reutilize o valor exposto.
-- A tentativa posterior de usar o token substituto retornou “token inválido”.
-  A inspeção local também detectou que `STORM_WALLET_WEBHOOK_SECRET` contém uma
-  URL em vez do secret HMAC e que `CHECKOUT_DATA_HASH_SECRET` tem 27 caracteres.
-  Corrija os três valores nos painéis corretos antes de redeploy, commit/push ou
-  ativação local; não copie nenhum deles para chat ou documentação.
-
-O secret HMAC e o hash local foram corrigidos e a homologação criptográfica
-passou. Depois disso, o teste real movimentou R$ 1,00 e confirmou a paridade do
-HMAC em Production. O `VERCEL_TOKEN`, porém, continua sendo rejeitado pela CLI
-e precisa de nova substituição. A branch segura foi publicada via autenticação
-GitHub independente; nenhuma flag Production foi criada.
+- Incidentes anteriores com valores locais incorretos e token de Vercel exposto
+  foram tratados antes do teste real. Não reutilize tokens antigos nem copie
+  segredos entre chat, documentação e painéis.
+- O HMAC e o hash corrigidos passaram na homologação criptográfica; o teste real
+  confirmou a paridade do HMAC em Production. A publicação Git usa autenticação
+  independente e nenhuma flag Production foi criada.
 
 Como registro histórico, em 2026-08-01 uma checagem autenticada e somente de leitura confirmou a API key
 (`GET /api/v1/account` retornou sucesso), mas a conta informou
@@ -224,29 +217,25 @@ salvo em `.env.local`, em Vercel ou em GitHub Actions.
 ## 6. Outros painéis
 
 - **StorM Wallet:** chave e secret ficam na Vercel/local; no painel StorM entra
-  apenas a URL HTTPS do webhook 6DNX, depois que a rota existir.
+  apenas a URL HTTPS já validada do webhook 6DNX.
 - **Discord:** o webhook é criado/rotacionado no Discord e seu valor completo
   fica apenas na Vercel e em `.env.local`.
 - **Supabase:** a migration
   `supabase/migrations/20260727010000_create_news_articles.sql` deve ser
   revisada e aplicada no projeto; não se “envia” chave para o painel.
 
-## Checklist antes de publicar
+## Checklist antes da próxima publicação financeira
 
-1. Manter `NEXT_PUBLIC_SITE_URL=https://6dnx.vercel.app` enquanto o domínio novo
-   não passar no checklist acima; depois promover `https://6dnx.com.br` e
-   redeployar.
-2. Manter `PAYMENT_TEST_MODE` ausente em Production.
-3. Retirar Preview do escopo das três variáveis StorM live.
-4. Publicar primeiro com as duas flags StorM em `false` e confirmar a trava.
-5. Conceder permissão de escrita no repositório GitHub à conta autenticada.
-6. Fazer o push da `main` e confirmar que a Vercel criou um deployment com o
-   novo SHA.
-7. Enquanto o site estiver em revisão, manter `SITE_REVIEW_ENABLED=true`,
-   cadastrar uma senha forte e confirmar `401` sem credenciais / `200` com
-   credenciais antes de divulgar qualquer URL.
-8. Aplicar a migration de commerce em ambiente isolado e confirmar que todas as
-   ofertas nasceram como `draft`.
-9. Gerar `CHECKOUT_DATA_HASH_SECRET` independente e marcar como Sensitive.
-10. Configurar o webhook 6DNX somente na homologação e validar assinatura,
-    idempotência e valor divergente antes de aprovar as flags de Production.
+1. Manter `NEXT_PUBLIC_SITE_URL=https://www.6dnx.com.br` em Production.
+2. Manter `PAYMENT_TEST_MODE` ausente e as duas flags StorM desligadas.
+3. Aplicar somente a migration de reconciliação revisada, após autorização.
+4. Confirmar tabela/RLS, grants `service_role` e as três RPCs financeiras.
+5. Só depois publicar a branch de reconciliação, pois o código novo chama a RPC
+   versionada `process_storm_payment_event_v2`.
+6. Confirmar no build publicado a rota `/api/cron/storm-reconciliation` e o
+   webhook já existente.
+7. Consultar/reconciliar apenas a cobrança real já criada; não gerar outro PIX.
+8. Verificar pedido `paid`, evidência única, tentativa e Discord sanitizado.
+9. Repetir a consulta e confirmar idempotência sem segunda notificação.
+10. Somente depois decidir separadamente sobre ofertas e as duas flags de novas
+    cobranças.

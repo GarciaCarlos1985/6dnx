@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
@@ -26,6 +27,7 @@ import {
   CATALOG_VISIBLE_ROWS,
 } from "@/lib/product-catalog-layout";
 import { PixCheckoutModal } from "@/components/pix-checkout-modal";
+import { DiscordMark } from "@/components/discord-mark";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -47,6 +49,109 @@ type Placement = {
   video: Box;
   card: Box;
 };
+
+function PurchaseFlowGuide() {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const closeWithEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", closeWithEscape, true);
+    return () => window.removeEventListener("keydown", closeWithEscape, true);
+  }, [open]);
+
+  const close = () => {
+    setOpen(false);
+    window.requestAnimationFrame(() =>
+      triggerRef.current?.focus({ preventScroll: true }),
+    );
+  };
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/15 bg-white/[0.055] px-3 text-[0.56rem] font-bold uppercase tracking-[0.1em] text-white/75 transition-colors hover:border-white/35 hover:bg-white/10 hover:text-white focus-visible:border-white/50 focus-visible:text-white"
+        aria-haspopup="dialog"
+      >
+        <span
+          className="grid h-4 w-4 place-items-center rounded-full border border-primary/60 text-[0.55rem] text-primary"
+          aria-hidden
+        >
+          i
+        </span>
+        Como funciona a compra
+      </button>
+
+      {open && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-[120] grid place-items-center bg-black/85 p-3 backdrop-blur-md"
+              role="presentation"
+              onMouseDown={(event) => {
+                if (event.currentTarget === event.target) close();
+              }}
+            >
+              <section
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="purchase-flow-title"
+                className="product-scrollbar max-h-[92vh] w-[min(64rem,96vw)] overflow-y-auto border border-primary/50 bg-[#080506] shadow-[0_0_70px_oklch(0.55_0.22_25_/_0.32)]"
+              >
+                <header className="flex items-start justify-between gap-4 border-b border-white/10 px-4 py-3 sm:px-5">
+                  <div>
+                    <p className="text-[0.58rem] font-black uppercase tracking-[0.2em] text-primary">
+                      Compra protegida 6DNX
+                    </p>
+                    <h3
+                      id="purchase-flow-title"
+                      className="mt-1 text-xl text-white sm:text-2xl"
+                    >
+                      Como funciona a compra
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={close}
+                    autoFocus
+                    aria-label="Fechar guia de compra"
+                    className="grid h-10 w-10 shrink-0 place-items-center border border-white/15 text-lg text-muted hover:border-primary hover:text-white"
+                  >
+                    ×
+                  </button>
+                </header>
+
+                <div className="bg-black p-2 sm:p-4">
+                  <div className="overflow-hidden border border-white/10 bg-[#050203]">
+                    <Image
+                      src="/guides/como-comprar-6dnx-pix.webp"
+                      alt="Guia em sete etapas: entrar no site, escolher o card, escolher a variação, gerar e pagar o PIX, aguardar a confirmação automática, abrir o Discord e receber entrega e suporte."
+                      width={1584}
+                      height={991}
+                      sizes="(max-width: 1024px) 96vw, 1024px"
+                      className="h-auto w-full"
+                      priority={false}
+                    />
+                  </div>
+                </div>
+                <p className="border-t border-white/10 px-4 py-4 text-sm leading-relaxed text-white/72 sm:px-5">
+                  A escolha e o pagamento acontecem no site. Depois da
+                  confirmação automática, o Discord é aberto para entrega e
+                  suporte.
+                </p>
+              </section>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
+  );
+}
 
 const clamp = (v: number, min: number, max: number) =>
   Math.max(min, Math.min(v, max));
@@ -102,8 +207,10 @@ function place(card: DOMRect): Placement {
   };
 }
 
-function useProductSelection() {
-  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+function useProductSelection(variants: Variant[]) {
+  const [selectedVariant, setSelectedVariant] = useState<string | null>(
+    () => (variants.length === 1 ? variants[0].name : null),
+  );
 
   const selectVariant = (name: string) => {
     setSelectedVariant(name);
@@ -214,6 +321,103 @@ function VariantRow({
   );
 }
 
+function DiscordSupportLink({ supportUrl }: { supportUrl: string }) {
+  return (
+    <a
+      href={supportUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="group flex min-h-11 items-center gap-2.5 rounded-md border border-white/20 bg-white/[0.09] px-3 text-left text-white shadow-[inset_0_1px_0_rgba(255,255,255,.08)] transition hover:border-white/40 hover:bg-white/[0.15] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5865f2]"
+      aria-label="Abrir o canal Welcome da 6DNX no Discord"
+    >
+      <span className="grid size-7 shrink-0 place-items-center rounded-md bg-[#5865f2] text-white shadow-[0_0_18px_rgba(88,101,242,.35)]">
+        <DiscordMark className="size-4" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[0.47rem] font-bold uppercase tracking-[0.14em] text-white/50">
+          Atendimento opcional
+        </span>
+        <span className="block text-[0.58rem] font-black uppercase tracking-[0.08em] text-white">
+          Canal Welcome
+        </span>
+      </span>
+    </a>
+  );
+}
+
+function ProductPurchasePanel({
+  product,
+  selectedVariant,
+  onPick,
+  checkoutAvailable,
+  checkoutTriggerRef,
+  onCheckout,
+  supportUrl,
+}: {
+  product: Product;
+  selectedVariant: string | null;
+  onPick: (name: string) => void;
+  checkoutAvailable: boolean;
+  checkoutTriggerRef: RefObject<HTMLButtonElement | null>;
+  onCheckout: (variantName: string) => void;
+  supportUrl: string;
+}) {
+  const requiresVariant = product.variants.length > 0;
+
+  return (
+    <div className="shrink-0 border-b border-primary/45 bg-[linear-gradient(180deg,rgba(20,5,8,.98),rgba(6,4,5,.98))] px-4 py-3">
+      {requiresVariant ? (
+        <>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <p className="text-[0.58rem] font-black uppercase tracking-[0.18em] text-white/72">
+              Escolha sua opção
+            </p>
+            {product.variants.length === 1 ? (
+              <span className="text-[0.5rem] uppercase tracking-[0.12em] text-green-300/75">
+                opção única selecionada
+              </span>
+            ) : null}
+          </div>
+          <ul className="product-scrollbar max-h-32 space-y-1.5 overflow-y-auto pr-0.5">
+            {product.variants.map((variant) => (
+              <VariantRow
+                key={variant.name}
+                variant={variant}
+                selected={selectedVariant === variant.name}
+                onPick={onPick}
+              />
+            ))}
+          </ul>
+          <button
+            ref={checkoutTriggerRef}
+            type="button"
+            disabled={!selectedVariant || !checkoutAvailable}
+            onClick={() => {
+              if (selectedVariant) onCheckout(selectedVariant);
+            }}
+            className="mt-2.5 flex min-h-12 w-full items-center justify-center bg-primary px-4 text-center text-[0.68rem] font-black uppercase tracking-[0.13em] text-white transition hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:bg-white/[0.07] disabled:text-white/38"
+          >
+            {!selectedVariant
+              ? "Escolha uma opção"
+              : checkoutAvailable
+                ? "Comprar com PIX"
+                : "PIX temporariamente indisponível"}
+          </button>
+        </>
+      ) : (
+        <p className="rounded border border-white/10 bg-black/30 px-3 py-3 text-xs leading-relaxed text-muted">
+          Este item precisa de confirmação direta com o atendimento.
+        </p>
+      )}
+
+      <div className="mt-2 grid grid-cols-[1.15fr_.85fr] gap-2">
+        <DiscordSupportLink supportUrl={supportUrl} />
+        <PurchaseFlowGuide />
+      </div>
+    </div>
+  );
+}
+
 function ProductMediaPreview({ product }: { product: Product }) {
   return (
     <div className="relative h-full min-h-52 overflow-hidden bg-black">
@@ -261,9 +465,8 @@ function Popups({
   paymentTestAvailable: boolean;
   onClose: () => void;
 }) {
-  const selection = useProductSelection();
+  const selection = useProductSelection(product.variants);
   const supportUrl = `/api/redirect?slug=${encodeURIComponent(product.slug)}`;
-  const requiresVariant = product.variants.length > 0;
   const [checkoutVariantName, setCheckoutVariantName] = useState<string | null>(
     null,
   );
@@ -315,6 +518,16 @@ function Popups({
               ✕
             </button>
           </header>
+
+          <ProductPurchasePanel
+            product={product}
+            selectedVariant={selection.selectedVariant}
+            onPick={selection.selectVariant}
+            checkoutAvailable={checkoutAvailable}
+            checkoutTriggerRef={checkoutTriggerRef}
+            onCheckout={setCheckoutVariantName}
+            supportUrl={supportUrl}
+          />
 
           <div className="product-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-3">
             {product.description && (
@@ -421,96 +634,7 @@ function Popups({
               </div>
             )}
 
-            <div className="mb-6">
-              <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
-                Atendimento 6DNX
-              </h4>
-              <div className="flex flex-col gap-2">
-                <a
-                  href={supportUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between rounded-md border border-primary/30 bg-primary/10 px-4 py-3 transition-colors hover:border-primary/70 hover:bg-primary/20"
-                >
-                  <span className="text-[0.65rem] font-black uppercase tracking-widest text-primary">
-                    Discord · Canal Welcome
-                  </span>
-                  <span className="text-primary text-xs">↗</span>
-                </a>
-                <p className="rounded-md border border-white/10 bg-black/30 px-4 py-3 text-[0.68rem] leading-relaxed text-muted">
-                  O PIX é gerado somente depois de escolher uma variação com
-                  preço aprovado. A entrega continua pelo atendimento 6DNX.
-                </p>
-              </div>
-            </div>
-
-            {requiresVariant ? (
-              <>
-                <p className="mb-2 text-[0.65rem] uppercase tracking-[0.2em] text-muted">
-                  Variações · escolha uma opção
-                </p>
-                <ul className="space-y-1.5">
-                  {product.variants.map((v) => (
-                    <VariantRow
-                      key={v.name}
-                      variant={v}
-                      selected={selection.selectedVariant === v.name}
-                      onPick={selection.selectVariant}
-                    />
-                  ))}
-                </ul>
-              </>
-            ) : null}
           </div>
-
-          <footer className="flex flex-col border-t border-primary">
-            {requiresVariant ? (
-              !selection.selectedVariant ? (
-                <button
-                  type="button"
-                  disabled
-                  className="min-h-[3.25rem] cursor-not-allowed bg-white/5 px-4 text-sm font-bold uppercase tracking-[0.12em] text-muted"
-                >
-                  Selecione uma variação
-                </button>
-              ) : checkoutAvailable ? (
-                <button
-                  ref={checkoutTriggerRef}
-                  type="button"
-                  onClick={() =>
-                    setCheckoutVariantName(selection.selectedVariant)
-                  }
-                  className="flex min-h-[3.25rem] items-center justify-center bg-primary px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-white hover:text-black"
-                >
-                  Comprar com PIX
-                </button>
-              ) : (
-                <a
-                  href={supportUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex min-h-[3.25rem] items-center justify-center bg-primary px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-white hover:text-black"
-                >
-                  Comprar pelo Discord
-                </a>
-              )
-            ) : (
-              <a
-                href={supportUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="flex min-h-[3.25rem] items-center justify-center bg-primary px-4 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-white hover:text-black"
-              >
-                Consultar no Discord
-              </a>
-            )}
-            <a
-              href={supportUrl}
-              className="flex min-h-10 items-center justify-center border-t border-primary/20 bg-black/40 px-4 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-muted transition-colors hover:text-white"
-            >
-              Dúvidas? Fale com o suporte
-            </a>
-          </footer>
         </section>
 
         <section
@@ -1621,9 +1745,8 @@ function MobileSheet({
   paymentTestAvailable: boolean;
   onClose: () => void;
 }) {
-  const selection = useProductSelection();
+  const selection = useProductSelection(product.variants);
   const supportUrl = `/api/redirect?slug=${encodeURIComponent(product.slug)}`;
-  const requiresVariant = product.variants.length > 0;
   const [checkoutVariantName, setCheckoutVariantName] = useState<string | null>(
     null,
   );
@@ -1668,6 +1791,16 @@ function MobileSheet({
           </button>
         </header>
 
+        <ProductPurchasePanel
+          product={product}
+          selectedVariant={selection.selectedVariant}
+          onPick={selection.selectVariant}
+          checkoutAvailable={checkoutAvailable}
+          checkoutTriggerRef={checkoutTriggerRef}
+          onCheckout={setCheckoutVariantName}
+          supportUrl={supportUrl}
+        />
+
         <div className="product-scrollbar min-h-0 flex-1 overflow-y-auto">
           <div className="aspect-video w-full bg-black">
             <ProductMediaPreview product={product} />
@@ -1677,73 +1810,8 @@ function MobileSheet({
             <p className="mb-4 text-sm leading-relaxed text-muted">
               {product.description}
             </p>
-            {requiresVariant ? (
-              <ul className="space-y-1.5">
-                {product.variants.map((v) => (
-                  <VariantRow
-                    key={v.name}
-                    variant={v}
-                    selected={selection.selectedVariant === v.name}
-                    onPick={selection.selectVariant}
-                  />
-                ))}
-              </ul>
-            ) : (
-              <p className="rounded border border-white/10 bg-black/30 px-3 py-3 text-xs leading-relaxed text-muted">
-                Este item precisa de confirmação direta com o atendimento.
-              </p>
-            )}
           </div>
         </div>
-
-        <footer className="grid border-t border-primary">
-          {requiresVariant ? (
-            !selection.selectedVariant ? (
-              <button
-                type="button"
-                disabled
-                className="min-h-12 cursor-not-allowed bg-white/10 px-4 text-sm font-bold uppercase tracking-[0.12em] text-muted"
-              >
-                Selecione uma variação
-              </button>
-            ) : checkoutAvailable ? (
-              <button
-                ref={checkoutTriggerRef}
-                type="button"
-                onClick={() =>
-                  setCheckoutVariantName(selection.selectedVariant)
-                }
-                className="inline-flex min-h-12 items-center justify-center bg-primary px-4 text-center text-sm font-bold uppercase tracking-[0.12em] text-ink"
-              >
-                Comprar com PIX
-              </button>
-            ) : (
-              <a
-                href={supportUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex min-h-12 items-center justify-center bg-primary px-4 text-center text-sm font-bold uppercase tracking-[0.12em] text-ink"
-              >
-                Comprar pelo Discord
-              </a>
-            )
-          ) : (
-            <a
-              href={supportUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex min-h-12 items-center justify-center bg-primary px-4 text-center text-sm font-bold uppercase tracking-[0.12em] text-ink"
-            >
-              Consultar no Discord
-            </a>
-          )}
-          <a
-            href={supportUrl}
-            className="inline-flex min-h-11 items-center justify-center border-t border-primary/40 text-[0.62rem] font-bold uppercase tracking-[0.13em] text-muted"
-          >
-            Suporte Discord
-          </a>
-        </footer>
       </section>
 
       {checkoutVariant ? (

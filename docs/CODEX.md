@@ -50,19 +50,24 @@ Todo novo chat deve ler integralmente:
 
 Em 2026-08-03, a retomada correta é:
 
-1. Production usa um snapshot manual com webhook StorM, vitrine antiga e sem a
-   rota pública de criação do checkout.
-2. A PR rascunho #2 contém a fundação server-only do webhook, mas sua migration
-   original ainda possui a ambiguidade SQL encontrada no teste real.
-3. O worktree local contém a vitrine nova, doze cards iniciais, rodapé, painel
-   ampliado e checkout; essas mudanças não estão na PR #2.
-4. O PIX real de R$ 1,00 foi pago e chegou ao backend. HMAC, firewall e chamada
-   ao Supabase passaram; somente a RPC falhou com `422`/PostgreSQL `42702`.
-5. A oferta de teste está suspensa e o pedido continua `pending_payment`.
-6. Faltam três passos para concluir a homologação: migration corretiva, replay
-   original assinado e confirmação `paid`/evento/Discord.
-7. Não aplicar migration, fazer replay, commit, push, merge, deploy ou ativar
-   flags de Production sem autorização humana específica para aquela ação.
+1. Production usa o release Git-backed atual com a vitrine de doze cards,
+   rodapé, painel administrativo, checkout fail-closed e webhook StorM.
+2. Novas cobranças estão desligadas: as duas flags de ativação permanecem
+   ausentes/`false`, e a vitrine direciona compras ao Discord.
+3. O PIX real de R$ 1,00 foi pago. O callback passou HMAC/firewall e chegou ao
+   Supabase, mas a versão anterior da RPC respondeu `422`/PostgreSQL `42702`;
+   por isso o pedido ainda está `pending_payment` e a oferta segue suspensa.
+4. A migration corretiva da ambiguidade já foi aplicada em Production sem
+   alterar o pedido. A StorM informou depois que não reenvia webhooks e orientou
+   usar consulta autenticada da cobrança como garantia complementar.
+5. A branch local `codex/storm-server-reconciliation` contém a reconciliação
+   server-side, a migration aditiva ainda não aplicada, o cron diário limitado
+   e os testes. Ela consulta somente a cobrança existente; não cria novo PIX.
+6. O gate local passou lint, tipos, 28 testes, build, PostgreSQL 16 com rollback,
+   audit sem vulnerabilidades e varredura de segredos.
+7. Não aplicar a nova migration, fazer commit, push, merge, deploy, executar a
+   reconciliação real ou ativar flags de Production sem autorização humana
+   específica para cada ação.
 
 Se a tarefa alterar Next.js, o agente também deve ler a documentação relevante
 da versão instalada em `node_modules/next/dist/docs/` antes de escrever código.

@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getPublicSupabaseConfig } from "@/lib/supabase/config";
 import { buildProductCatalogLayout } from "@/lib/product-catalog-layout";
 import {
@@ -21,6 +21,11 @@ import type {
 import { parseProduct } from "@/lib/catalog/validation";
 
 export const PRODUCT_CATALOG_CACHE_TAG = "product-catalog";
+
+function revalidatePublicCatalog() {
+  revalidateTag(PRODUCT_CATALOG_CACHE_TAG, { expire: 0 });
+  revalidatePath("/");
+}
 
 type CatalogRow = {
   id: string;
@@ -242,7 +247,7 @@ export async function reorderPublishedCatalog(
   );
   if (error) return { items: [], error };
 
-  revalidateTag(PRODUCT_CATALOG_CACHE_TAG, { expire: 0 });
+  revalidatePublicCatalog();
   const refreshed = await listAdminCatalog(supabase);
   if (refreshed.state !== "ready") {
     return {
@@ -299,7 +304,7 @@ export async function updateAdminProduct(
       conflict: true,
     };
   }
-  revalidateTag(PRODUCT_CATALOG_CACHE_TAG, { expire: 0 });
+  revalidatePublicCatalog();
   return {
     item: catalogRowToAdminItem(data as CatalogRow),
     error: null,
@@ -397,7 +402,7 @@ export async function bootstrapAdminCatalog(supabase: SupabaseClient) {
       return item ? [item] : [];
     })
     .sort((a, b) => a.catalogOrder - b.catalogOrder);
-  revalidateTag(PRODUCT_CATALOG_CACHE_TAG, { expire: 0 });
+  revalidatePublicCatalog();
   return { items, error: null };
 }
 
@@ -503,7 +508,7 @@ export async function ensureRustCatalogClones(
   const nextCloneCount = refreshed.items.filter((item) =>
     isRustCloneCatalogKey(item.sourceKey),
   ).length;
-  revalidateTag(PRODUCT_CATALOG_CACHE_TAG, { expire: 0 });
+  revalidatePublicCatalog();
   return {
     items: refreshed.items,
     createdCount: Math.max(0, nextCloneCount - previousCloneCount),

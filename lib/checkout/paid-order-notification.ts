@@ -5,6 +5,7 @@ type PaidOrderNotification = {
   productTitle: string;
   variantName: string;
   amountCents: number;
+  confirmationSource: "signed_webhook" | "provider_api";
 };
 
 function ticketWebhook() {
@@ -50,6 +51,19 @@ export async function notifyDiscordPaidOrder(order: PaidOrderNotification) {
   const webhook = ticketWebhook();
   if (!webhook) return;
 
+  const confirmation =
+    order.confirmationSource === "signed_webhook"
+      ? {
+          headline: "✅ **PAGAMENTO PIX CONFIRMADO PELA STORM WALLET**",
+          description:
+            "A confirmação veio pelo webhook assinado. Confira o pedido no painel antes da entrega.",
+        }
+      : {
+          headline: "✅ **PAGAMENTO PIX RECONCILIADO PELA STORM WALLET**",
+          description:
+            "A confirmação veio por consulta autenticada entre servidores. Confira o pedido no painel antes da entrega.",
+        };
+
   try {
     const response = await fetch(webhook, {
       method: "POST",
@@ -57,12 +71,11 @@ export async function notifyDiscordPaidOrder(order: PaidOrderNotification) {
       body: JSON.stringify({
         username: "6DNX Pedidos",
         allowed_mentions: { parse: [] },
-        content: "✅ **PAGAMENTO PIX CONFIRMADO PELA STORM WALLET**",
+        content: confirmation.headline,
         embeds: [
           {
             title: "Pedido pronto para atendimento",
-            description:
-              "A confirmação veio pelo webhook assinado. Confira o pedido no painel antes da entrega.",
+            description: confirmation.description,
             color: 0xdc2626,
             fields: [
               {

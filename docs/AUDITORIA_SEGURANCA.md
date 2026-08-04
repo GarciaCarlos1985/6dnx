@@ -9,31 +9,33 @@
   ou documentação versionável; o único webhook literal é fixture falsa de teste.
 - Rotas administrativas novas exigem sessão admin e origem exata; checkout usa
   preço server-side, entrada limitada e chaves somente no servidor.
-- Lint, Next typegen + TypeScript estrito, 22 testes e build de Production
+- Lint, Next typegen + TypeScript estrito, 28 testes e build de Production
   passaram. Browser desktop e mobile não apresentaram erro, warning, overflow,
   botão PIX ou CPF com as flags desligadas.
 - Veredito deste gate: a vitrine pode ser publicada com atendimento pelo
-  Discord. Pagamento automático permanece bloqueado até replay e homologação
-  final; este gate não autoriza ligar as duas flags.
+  Discord. Pagamento automático permanece bloqueado até a reconciliação do
+  pedido existente e a homologação final; este gate não autoriza ligar as duas
+  flags.
 
 A auditoria atual separa **conclusão da homologação financeira** de
 **endurecimento antes de escala pública**:
 
-- Para concluir o PIX real já pago faltam três ações: migration corretiva da
-  RPC, replay original assinado da StorM e confirmação de `paid`, evento único e
+- A migration corretiva original da RPC já foi aplicada. Como a StorM informou
+  que não reenvia callbacks, a conclusão agora depende da migration aditiva de
+  reconciliação, publicação do código e confirmação de `paid`, evidência única e
   Discord sanitizado.
 - O teste real comprovou criação da cobrança, pagamento no provedor, chegada do
   webhook, HMAC sobre corpo bruto e chamada ao Supabase. O único erro foi
   PostgreSQL `42702` em `ON CONFLICT (order_id)`; Production permanece intacta
   e o pedido segue `pending_payment`.
 - A correção por `ON CONFLICT ON CONSTRAINT
-  commerce_payment_attempts_pkey` passou em transação com rollback e replay
-  idempotente, mas ainda depende de autorização específica para aplicação.
+  commerce_payment_attempts_pkey` foi aplicada. A reconciliação complementar
+  passou em PostgreSQL 16 local com rollback e continua sem aplicação/deploy.
 - Nenhum segredo de alta confiança foi encontrado no histórico Git ou bundle
   client-side; as tabelas comerciais bloquearam leitura e escrita por `anon`;
   CPF completo não é persistido nem enviado ao Discord.
 - Antes de divulgação em escala, priorizar MFA/AAL2 do admin, janela temporal e
-  rate limit do webhook, reconciliação, CSP completa, ferramentas de segurança
+  rate limit do webhook, CSP completa, ferramentas de segurança
   do GitHub e política de retenção. Esses itens são backlog de hardening, não
   dez novos passos para reparar o teste de R$ 1,00.
 

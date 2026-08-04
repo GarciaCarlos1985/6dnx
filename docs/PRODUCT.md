@@ -1,10 +1,10 @@
 # Product
 
 > **Contexto de execução — 2026-08-03:** o objetivo de produto permanece
-> válido, mas Production ainda usa a vitrine antiga. A nova vitrine, o rodapé e
-> o checkout estão no worktree local. Um PIX real controlado foi pago; a
-> liberação de atendimento continua proibida até o backend persistir `paid`
-> após a correção/replay documentados em `PROJECT_STATE.md`.
+> válido e Production já usa a vitrine Git-backed com doze cards, rodapé e
+> atendimento pelo Discord. Novas cobranças StorM permanecem desligadas. Um PIX
+> real controlado foi pago, mas sua entrega continua proibida até o backend
+> persistir `paid` pela reconciliação documentada em `PROJECT_STATE.md`.
 
 ## Register
 
