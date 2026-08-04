@@ -17,6 +17,7 @@ import {
   normalizePayerName,
 } from "@/lib/checkout/customer-validation";
 import type { Product, Variant } from "@/lib/products";
+import { DiscordMark } from "@/components/discord-mark";
 
 type CheckoutSession = {
   orderId: string;
@@ -382,7 +383,7 @@ export function PixCheckoutModal({
               {product.title}
             </h2>
             <p id={descriptionId} className="mt-1 text-xs text-white/62">
-              {variant.name} · o valor final vem do cadastro comercial aprovado.
+              {variant.name} · pagamento PIX seguro
             </p>
           </div>
           <button
@@ -622,29 +623,42 @@ export function PixCheckoutModal({
             {phase === "failed" && (
               <div className="text-center" aria-live="assertive">
                 <p className="text-[0.62rem] font-black uppercase tracking-[0.22em] text-primary">
-                  Pedido não concluído
+                  PIX não gerado
                 </p>
-                <h3 className="mt-3 text-2xl text-white">Nada foi liberado.</h3>
+                <h3 className="mt-3 text-2xl text-white">
+                  {errorCode === "offer-unavailable"
+                    ? "Esta opção está sendo atualizada."
+                    : "Não foi possível gerar o PIX."}
+                </h3>
                 <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/68">
                   {error || "Não foi possível continuar com esta cobrança."}
                 </p>
                 <div className="mt-7 grid gap-3 sm:grid-cols-2">
                   <button
                     type="button"
-                    onClick={errorCode === "request-conflict" ? resetRequest : () => setPhase("form")}
+                    onClick={
+                      errorCode === "offer-unavailable"
+                        ? onClose
+                        : errorCode === "request-conflict"
+                          ? resetRequest
+                          : () => setPhase("form")
+                    }
                     className="min-h-12 border border-primary bg-primary px-4 text-xs font-black uppercase tracking-[0.12em] text-white"
                   >
-                    {errorCode === "request-conflict"
-                      ? "Reiniciar pedido"
-                      : "Tentar novamente"}
+                    {errorCode === "offer-unavailable"
+                      ? "Voltar às opções"
+                      : errorCode === "request-conflict"
+                        ? "Reiniciar pedido"
+                        : "Tentar novamente"}
                   </button>
                   <a
                     href={supportUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex min-h-12 items-center justify-center border border-white/15 px-4 text-xs font-black uppercase tracking-[0.12em] text-white/72 transition hover:border-primary hover:text-primary"
+                    className="inline-flex min-h-12 items-center justify-center gap-2 border border-white/25 bg-white/[0.08] px-4 text-xs font-black uppercase tracking-[0.12em] text-white transition hover:border-white/45 hover:bg-white/[0.14]"
                   >
-                    Falar com suporte
+                    <DiscordMark className="size-5 text-[#5865f2]" />
+                    Canal Welcome
                   </a>
                 </div>
               </div>

@@ -48,7 +48,7 @@ function domainError(error: CheckoutDomainError) {
       return noStore(
         {
           error:
-            "A venda PIX desta variação ainda aguarda aprovação comercial.",
+            "O PIX desta opção está temporariamente indisponível. Nenhuma cobrança foi criada.",
           code: error.code,
         },
         409,

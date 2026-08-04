@@ -1,6 +1,32 @@
 # 6DNX project state
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
+
+## Checkout UX checkpoint — 2026-08-04
+
+- A local, uncommitted checkout-conversion pass moved the variation selector
+  and primary PIX action into a fixed purchase block immediately below the
+  product-dialog header on desktop and mobile. Customers no longer need to
+  scroll through descriptions, requirements or tutorials to reach the
+  variation. A product with exactly one variation selects it automatically;
+  products with multiple variations still require an explicit choice so the
+  wrong option cannot be charged.
+- Discord is now a clearly secondary, optional action beside the purchase
+  guide: a translucent light control with the Discord mark and `CANAL WELCOME`.
+  The previous internal copy about an "approved commercial price" was removed
+  from the product and checkout UI. An unavailable offer now says that PIX is
+  temporarily unavailable and explicitly confirms that no charge was created.
+- Read-only Production Supabase evidence confirmed why the local Moonwalk
+  checkout still refuses payment: `dayz-moonwalk / Lifetime` exists at `2200`
+  cents but is `draft`, not `approved`. Browser QA exercised that exact path
+  with synthetic customer data; the request stopped before order/provider
+  creation and showed the customer-safe failure state. No offer, order,
+  payment, migration or Production environment value was changed.
+- The conversion pass was verified in the local browser at the normal desktop
+  viewport and at 390x844: variation, price, PIX CTA, optional Discord control
+  and purchase guide are visible together without scrolling. Production
+  activation remains a separate gate because the reconciliation migration/code
+  below is still unpublished and both Production checkout flags remain false.
 
 ## Resume here — authoritative checkpoint for a new chat
 
