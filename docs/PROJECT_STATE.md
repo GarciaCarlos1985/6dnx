@@ -40,8 +40,17 @@ Last updated: 2026-08-04
   price snapshots and the browser still cannot provide a charge amount.
 - The synchronization passed 32/32 Node tests and a PostgreSQL 16 integration
   transaction covering initial approval, price change, new/removed variants,
-  archive/restore and direct-function privilege denial. It is versioned but has
-  not yet been applied to Production in this checkpoint.
+  archive/restore and direct-function privilege denial. Migrations
+  `20260801170000`, `20260803235717` and `20260804030000` were then applied by
+  the official Supabase CLI. Production verification found 154 approved offers
+  matching the current published priced variants, three stale/unpriced offers
+  suspended, Rust1 restored from the R$ 1.00 test value to R$ 21.99, and no new
+  order, payment attempt, webhook or reconciliation event.
+- `STORM_WALLET_CHECKOUT_ENABLED` and
+  `STORM_WALLET_PRODUCTION_APPROVED` now exist as sensitive Production-only
+  Vercel variables with value `true`. Vercel applies environment changes only
+  to a new deployment, so the prior Production deployment remained disabled
+  while the database and Git release gates were completed.
 
 ## Resume here — authoritative checkpoint for a new chat
 
