@@ -25,10 +25,23 @@ Last updated: 2026-08-04
   gate, not a Banco do Brasil or StorM Wallet refusal. Browser QA exercised the
   exact path with synthetic customer data; it stopped before order/provider
   creation and explicitly confirmed that no charge was created.
-- The current pass is green on ESLint, strict TypeScript, all 30 tests and the
+- The current pass is green on ESLint, strict TypeScript, all 32 tests and the
   Production build. Browser QA confirmed the new guide in the live local
   product dialog. No offer, order, payment, migration, deployment or Production
   environment value was changed; both Production checkout flags remain false.
+- The remaining `offer-unavailable` failure was traced to duplicated commercial
+  state: Production has 59 published products and 154 currently priced
+  variants, while `commerce_offers` still had 156 `draft` rows and one
+  suspended R$ 1.00 test row. Migration
+  `20260804030000_sync_published_catalog_offers.sql` now makes publication the
+  owner-facing sales switch: valid positive prices on published products are
+  synchronized as approved server-side offers; removed/unpriced variants and
+  draft/archived products are suspended. Existing orders keep their immutable
+  price snapshots and the browser still cannot provide a charge amount.
+- The synchronization passed 32/32 Node tests and a PostgreSQL 16 integration
+  transaction covering initial approval, price change, new/removed variants,
+  archive/restore and direct-function privilege denial. It is versioned but has
+  not yet been applied to Production in this checkpoint.
 
 ## Resume here — authoritative checkpoint for a new chat
 
