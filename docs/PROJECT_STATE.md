@@ -2,6 +2,40 @@
 
 Last updated: 2026-08-04
 
+## Live Production checkout — authoritative checkpoint for a new chat
+
+- Real StorM PIX checkout is active on `https://www.6dnx.com.br` as of
+  2026-08-04. Both Production activation flags are `true`, and the corrected
+  `CHECKOUT_DATA_HASH_SECRET` is present in the active deployment. An
+  origin-valid empty request to `/api/checkout` now reaches payload validation
+  and returns `400 Dados do pedido inválidos` instead of the former readiness
+  `503`; this smoke test creates no charge.
+- GitHub PRs #9 and #10 are merged into `main`. Production deployment
+  `dpl_FtiQBJLxr8z4twrS3iEo2LQr8RWg` serves merge SHA
+  `d9b0c8149a404468dd11656d112cb163a85ac720` on `6dnx.com.br`,
+  `www.6dnx.com.br` and `6dnx.vercel.app`.
+- Supabase migrations `20260801170000`, `20260803235717` and
+  `20260804030000` are applied. The published catalog currently resolves to
+  154 approved server-side offers; three stale or unpriced offers are
+  suspended. The browser never supplies the amount charged.
+- The historical paid R$ 1.00 order
+  `6DNX-c7c6ae0f-3744-4d4a-9ef2-030929ce46d7` was reconciled through the
+  official StorM payment-status endpoint, without a new charge. Production now
+  records the order as `paid`, the provider attempt as `COMPLETO`, and exactly
+  one reconciliation event. A second reconciliation returned `paid: 0` and
+  the event count remained one, proving idempotency.
+- One separate `DayZ Moonwalk / Lifetime` order for R$ 22.00 remains
+  `pending_payment`; it was not converted to paid by the reconciliation job.
+- Production browser QA selected `DayZ Private / 1 Dia`, confirmed the
+  `Comprar com PIX` control enabled, and opened the real name/CPF checkout
+  form. QA stopped before submitting customer data, so it created no charge.
+- Protected cron diagnostics may return a `CheckoutReadinessCode` only after
+  valid `CRON_SECRET` authentication. Public checkout errors still expose no
+  environment values or secret names.
+- Statements below describing checkout flags, reconciliation migrations or
+  offer synchronization as absent/unpublished are historical checkpoints and
+  are superseded by this section.
+
 ## Checkout UX checkpoint — 2026-08-04
 
 - The checkout-conversion pass moved the variation selector and primary PIX
@@ -52,7 +86,7 @@ Last updated: 2026-08-04
   to a new deployment, so the prior Production deployment remained disabled
   while the database and Git release gates were completed.
 
-## Resume here — authoritative checkpoint for a new chat
+## Prior handoff details — historical context
 
 - The owner explicitly approved publication of the social-sharing release on
   2026-08-03. `app/opengraph-image.png` is a static 1.9:1 key art using the
