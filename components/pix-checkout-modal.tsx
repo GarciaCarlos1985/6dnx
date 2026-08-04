@@ -627,7 +627,7 @@ export function PixCheckoutModal({
                 </p>
                 <h3 className="mt-3 text-2xl text-white">
                   {errorCode === "offer-unavailable"
-                    ? "Esta opção está sendo atualizada."
+                    ? "PIX ainda não liberado para esta opção."
                     : "Não foi possível gerar o PIX."}
                 </h3>
                 <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/68">

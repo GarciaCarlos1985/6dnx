@@ -50,7 +50,7 @@ type Placement = {
   card: Box;
 };
 
-function PurchaseFlowGuide({ checkoutAvailable }: { checkoutAvailable: boolean }) {
+function PurchaseFlowGuide() {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -108,8 +108,11 @@ function PurchaseFlowGuide({ checkoutAvailable }: { checkoutAvailable: boolean }
                     <p className="text-[0.58rem] font-black uppercase tracking-[0.2em] text-primary">
                       Compra protegida 6DNX
                     </p>
-                    <h3 id="purchase-flow-title" className="mt-1 text-xl text-white sm:text-2xl">
-                      Como seu pedido avança
+                    <h3
+                      id="purchase-flow-title"
+                      className="mt-1 text-xl text-white sm:text-2xl"
+                    >
+                      Como funciona a compra
                     </h3>
                   </div>
                   <button
@@ -123,45 +126,24 @@ function PurchaseFlowGuide({ checkoutAvailable }: { checkoutAvailable: boolean }
                   </button>
                 </header>
 
-                {!checkoutAvailable ? (
-                  <>
-                    <div className="relative aspect-[8/5] w-full bg-black">
-                      <Image
-                        src="/guides/como-comprar-6dnx.webp"
-                        alt="Guia em sete etapas: entrar no site, escolher o card, selecionar a variação, abrir o Discord, confirmar produto e valor, ter o pagamento verificado e receber entrega e suporte."
-                        fill
-                        sizes="(max-width: 1024px) 96vw, 1024px"
-                        className="object-contain"
-                        priority={false}
-                      />
-                    </div>
-                    <div className="grid gap-3 border-t border-white/10 px-4 py-4 text-sm leading-relaxed text-muted sm:grid-cols-[1fr_auto] sm:items-center sm:px-5">
-                      <p>
-                        Hoje a compra é concluída com atendimento humano pelo
-                        Discord. O atendente confirma o produto, a variação e o
-                        valor antes de orientar o pagamento e liberar a entrega.
-                      </p>
-                      <span className="border border-amber-400/30 bg-amber-300/5 px-3 py-2 text-[0.62rem] font-bold uppercase tracking-[0.12em] text-amber-200">
-                        PIX automático em homologação
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="grid gap-3 p-4 sm:grid-cols-5 sm:p-5">
-                    {[
-                      "Escolha o card e a variação",
-                      "Informe os dados do titular",
-                      "Gere e pague o PIX",
-                      "A confirmação acontece no servidor",
-                      "Entrega e suporte seguem pelo Discord",
-                    ].map((step, index) => (
-                      <article key={step} className="border border-white/10 bg-black/40 p-3">
-                        <span className="text-xs font-black text-primary">0{index + 1}</span>
-                        <p className="mt-3 text-xs leading-relaxed text-white/80">{step}</p>
-                      </article>
-                    ))}
+                <div className="bg-black p-2 sm:p-4">
+                  <div className="overflow-hidden border border-white/10 bg-[#050203]">
+                    <Image
+                      src="/guides/como-comprar-6dnx-pix.webp"
+                      alt="Guia em sete etapas: entrar no site, escolher o card, escolher a variação, gerar e pagar o PIX, aguardar a confirmação automática, abrir o Discord e receber entrega e suporte."
+                      width={1584}
+                      height={991}
+                      sizes="(max-width: 1024px) 96vw, 1024px"
+                      className="h-auto w-full"
+                      priority={false}
+                    />
                   </div>
-                )}
+                </div>
+                <p className="border-t border-white/10 px-4 py-4 text-sm leading-relaxed text-white/72 sm:px-5">
+                  A escolha e o pagamento acontecem no site. Depois da
+                  confirmação automática, o Discord é aberto para entrega e
+                  suporte.
+                </p>
               </section>
             </div>,
             document.body,
@@ -430,7 +412,7 @@ function ProductPurchasePanel({
 
       <div className="mt-2 grid grid-cols-[1.15fr_.85fr] gap-2">
         <DiscordSupportLink supportUrl={supportUrl} />
-        <PurchaseFlowGuide checkoutAvailable={checkoutAvailable} />
+        <PurchaseFlowGuide />
       </div>
     </div>
   );
