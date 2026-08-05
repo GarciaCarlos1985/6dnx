@@ -72,6 +72,46 @@ begin
     raise exception 'restored product did not restore its valid offer';
   end if;
 
+  update public.product_catalog
+  set variants = '[
+    {"name":"Semanal","priceBRL":7,"availability":"sold-out"}
+  ]'::jsonb
+  where source_key = 'storm-reconciliation-test';
+
+  select * into v_offer
+  from public.commerce_offers
+  where product_source_key = 'storm-reconciliation-test'
+    and variant_name = 'Semanal';
+  if v_offer.status <> 'suspended' then
+    raise exception 'sold-out variant remained buyable';
+  end if;
+
+  update public.product_catalog
+  set
+    status = 'sold-out',
+    variants = '[{"name":"Semanal","priceBRL":7}]'::jsonb
+  where source_key = 'storm-reconciliation-test';
+
+  select * into v_offer
+  from public.commerce_offers
+  where product_source_key = 'storm-reconciliation-test'
+    and variant_name = 'Semanal';
+  if v_offer.status <> 'suspended' then
+    raise exception 'sold-out product remained buyable';
+  end if;
+
+  update public.product_catalog
+  set status = 'available'
+  where source_key = 'storm-reconciliation-test';
+
+  select * into v_offer
+  from public.commerce_offers
+  where product_source_key = 'storm-reconciliation-test'
+    and variant_name = 'Semanal';
+  if v_offer.status <> 'approved' or v_offer.amount_cents <> 700 then
+    raise exception 'available product did not restore its valid offer';
+  end if;
+
   if has_function_privilege(
     'authenticated',
     'public.sync_catalog_commerce_offers(text)',

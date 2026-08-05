@@ -2,7 +2,7 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import { getPublishedCatalog } from "@/lib/catalog/repository";
-import { formatBRL } from "@/lib/products";
+import { formatBRL, isVariantPurchasable } from "@/lib/products";
 import { shouldEnablePaymentTestMode } from "@/lib/security/payment-test-mode";
 
 const SESSION_TTL_MS = 20 * 60 * 1_000;
@@ -95,7 +95,14 @@ export async function createTestCheckout(
   const products = await getPublishedCatalog();
   const product = products.find((item) => item.slug === productSlug);
   const variant = product?.variants.find((item) => item.name === variantName);
-  if (!product || !variant) return null;
+  if (
+    !product ||
+    !variant ||
+    product.status === "sold-out" ||
+    !isVariantPurchasable(variant)
+  ) {
+    return null;
+  }
 
   const now = Date.now();
   const session: TestCheckoutSession = {

@@ -15,10 +15,12 @@ import { protectedCatalogUpdateErrors } from "../lib/catalog/admin-safety.ts";
 import {
   buildRustCloneProducts,
   isRustCloneCatalogKey,
+  purchasableProductVariants,
   products,
   RUST_CLONE_COUNT,
   RUST_SOURCE_CATALOG_KEY,
   selectMissingRustCloneProducts,
+  visibleProductVariants,
 } from "../lib/products.ts";
 import {
   buildProductCatalogLayout,
@@ -169,7 +171,16 @@ test("owner-safe catalog updates cannot change structural fields", () => {
     product: {
       ...current.product,
       title: "DayZ Private atualizado",
-      variants: [{ name: "30 dias", priceBRL: 120 }],
+      variants: [
+        { name: "30 dias", priceBRL: 120 },
+        {
+          name: "Lifetime",
+          priceBRL: 299,
+          availability: "sold-out",
+          highlighted: true,
+          accentColor: "#ff3355",
+        },
+      ],
     },
     publicationState: current.publicationState,
     catalogOrder: current.catalogOrder,
@@ -196,7 +207,37 @@ test("owner-safe catalog updates cannot change structural fields", () => {
 
   assert.equal(
     protectedCatalogUpdateErrors(current, unsafeMutation).length,
-    5,
+    4,
+  );
+});
+
+test("archived and sold-out variants fail closed without losing catalog data", () => {
+  const product = {
+    slug: "stock-test",
+    title: "Stock test",
+    category: "Test",
+    tagline: "Test",
+    description: "",
+    image: "/test.webp",
+    status: "available" as const,
+    variants: [
+      { name: "Disponível", priceBRL: 10 },
+      { name: "Esgotada", priceBRL: 20, availability: "sold-out" as const },
+      { name: "Arquivada", priceBRL: 30, availability: "archived" as const },
+    ],
+  };
+
+  assert.deepEqual(
+    visibleProductVariants(product).map((variant) => variant.name),
+    ["Disponível", "Esgotada"],
+  );
+  assert.deepEqual(
+    purchasableProductVariants(product).map((variant) => variant.name),
+    ["Disponível"],
+  );
+  assert.deepEqual(
+    purchasableProductVariants({ ...product, status: "sold-out" }),
+    [],
   );
 });
 

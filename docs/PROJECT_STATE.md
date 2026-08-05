@@ -36,6 +36,32 @@ Last updated: 2026-08-04
   offer synchronization as absent/unpublished are historical checkpoints and
   are superseded by this section.
 
+## Local admin-productivity checkpoint — pending owner review
+
+- A local, uncommitted admin pass adds a complete variation workflow: create,
+  duplicate, edit, reorder, highlight one option, choose an option color, mark
+  an option sold out, archive/reactivate it, or remove it with confirmation.
+  Cards can also be marked globally `sold-out` without deleting prices or
+  configuration. The limit remains 40 uniquely named options per product.
+- Public rendering now hides archived variants, keeps sold-out variants visible
+  and disabled, and blocks every option when the whole card is sold out. The
+  server repository and the isolated checkout laboratory repeat these checks;
+  this is not a client-only visual restriction.
+- **Organizar vitrine** no longer preselects position 1. Search selection can be
+  cleared; minimap houses select and deselect; dragging one minimap card over
+  another swaps the two in the local draft. Three-dot move, exact swap,
+  reversible archive, direct position, top/end shortcuts and the final review
+  checkbox remain available.
+- Additive migration
+  `20260804120000_add_catalog_availability_controls.sql` makes commercial offer
+  synchronization suspend product-level and variant-level sold-out/archived
+  states. It is versioned locally but **has not been applied**. No commit, push,
+  deploy or Production mutation belongs to this checkpoint before owner QA.
+- Local gates completed at this checkpoint: ESLint, Next route type generation,
+  strict TypeScript, production build and 33/33 Node tests. Desktop and mobile
+  browser QA passed without horizontal overflow or console warnings; the
+  owner still needs to review the workflow before any publication.
+
 ## Checkout UX checkpoint — 2026-08-04
 
 - The checkout-conversion pass moved the variation selector and primary PIX

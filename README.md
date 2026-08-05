@@ -38,10 +38,12 @@ O painel administrativo e sua ativação segura estão documentados em
   separado **Organizar vitrine** permite buscar qualquer card e enviá-lo
   diretamente para uma posição, para o topo ou para o fim. Cada card também
   possui um menu de três pontos com tabuleiro visual para mover, trocar ou
-  arquivar; arraste e setas continuam disponíveis para ajustes curtos. A ordem
-  completa é salva de forma
-  atômica sem editar o conteúdo. Criação genérica, rota, paleta e estrutura de variações
-  continuam protegidas pela API. A expansão `Rust1`–`Rust20` usa uma
+  arquivar; as casas podem ser selecionadas, desselecionadas ou arrastadas uma
+  sobre a outra para uma troca direta. A ordem completa é salva de forma
+  atômica sem editar o conteúdo. O editor de variações permite criar, duplicar,
+  reordenar, destacar, colorir, esgotar, arquivar e remover opções. Rota,
+  identidade, publicação, ordem e paleta estrutural continuam protegidas pela
+  API. A expansão `Rust1`–`Rust20` usa uma
   ação idempotente com quantidade explícita e padrão seguro de um card por vez;
   ela desaparece quando o lote está completo.
 - O checkout aceita uma arte vertical própria por produto em **4:5** (1200 x

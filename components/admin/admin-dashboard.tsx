@@ -13,8 +13,12 @@ import type {
 } from "@/lib/catalog/types";
 import {
   isRustCloneCatalogKey,
+  MAX_PRODUCT_VARIANTS,
+  priceFrom,
+  productStatusLabel,
   RUST_CLONE_COUNT,
   RUST_SOURCE_CATALOG_KEY,
+  visibleProductVariants,
   type Product,
   type ProductFeature,
   type Variant,
@@ -89,10 +93,8 @@ function ProductPreview({ item }: { item: CatalogAdminItem }) {
   const accent = product.theme?.accentColor ?? defaultTheme.accentColor;
   const text = product.theme?.textColor ?? defaultTheme.textColor;
   const surface = product.theme?.surfaceColor ?? defaultTheme.surfaceColor;
-  const prices = product.variants
-    .map((variant) => variant.priceBRL)
-    .filter((value): value is number => typeof value === "number");
-  const from = prices.length ? Math.min(...prices) : null;
+  const visibleVariants = visibleProductVariants(product);
+  const from = priceFrom(product);
 
   return (
     <article
@@ -113,11 +115,11 @@ function ProductPreview({ item }: { item: CatalogAdminItem }) {
       >
         <span className="admin-product-preview__scan" aria-hidden />
         <span className="admin-product-preview__status">
-          {product.status === "available" ? "Disponível" : "Sob medida"}
+          {productStatusLabel(product.status)}
         </span>
         <span className="admin-product-preview__count">
-          {product.variants.length}{" "}
-          {product.variants.length === 1 ? "variação" : "variações"}
+          {visibleVariants.length}{" "}
+          {visibleVariants.length === 1 ? "variação" : "variações"}
         </span>
         <strong>{product.category || "Categoria"}</strong>
       </div>
@@ -128,13 +130,21 @@ function ProductPreview({ item }: { item: CatalogAdminItem }) {
         <h3>{product.title || "Título do produto"}</h3>
         <p>{product.tagline || "Uma frase curta aparecerá aqui."}</p>
         <div className="admin-product-preview__tags">
-          {product.variants.slice(0, 4).map((variant, index) => (
-            <span key={`${variant.name}-${index}`}>
+          {visibleVariants.slice(0, 4).map((variant, index) => (
+            <span
+              key={`${variant.name}-${index}`}
+              style={
+                variant.accentColor
+                  ? { borderColor: variant.accentColor, color: variant.accentColor }
+                  : undefined
+              }
+            >
               {variant.name || "Sem nome"}
+              {variant.availability === "sold-out" ? " · Esgotado" : ""}
             </span>
           ))}
-          {product.variants.length > 4 ? (
-            <span>+{product.variants.length - 4}</span>
+          {visibleVariants.length > 4 ? (
+            <span>+{visibleVariants.length - 4}</span>
           ) : null}
         </div>
         <p className="admin-product-preview__price">
@@ -234,17 +244,87 @@ function FeatureEditor({
   );
 }
 
+function uniqueVariantName(variants: Variant[], seed = "Nova opção") {
+  const existing = new Set(
+    variants.map((variant) => variant.name.trim().toLocaleLowerCase("pt-BR")),
+  );
+  if (!existing.has(seed.toLocaleLowerCase("pt-BR"))) return seed;
+  for (let suffix = 2; suffix <= MAX_PRODUCT_VARIANTS + 1; suffix += 1) {
+    const candidate = `${seed} ${suffix}`;
+    if (!existing.has(candidate.toLocaleLowerCase("pt-BR"))) return candidate;
+  }
+  return `${seed} ${Date.now()}`;
+}
+
 function VariantEditor({
   variants,
+  productStatus,
   onChange,
+  onProductStatusChange,
 }: {
   variants: Variant[];
+  productStatus: Product["status"];
   onChange: (variants: Variant[]) => void;
+  onProductStatusChange: (status: Product["status"]) => void;
 }) {
+  const lastActiveStatus = useRef<"available" | "custom">(
+    productStatus === "custom" ? "custom" : "available",
+  );
+
+  useEffect(() => {
+    if (productStatus !== "sold-out") lastActiveStatus.current = productStatus;
+  }, [productStatus]);
+
   const update = (index: number, patch: Partial<Variant>) => {
     const next = [...variants];
     next[index] = { ...next[index], ...patch };
     onChange(next);
+  };
+
+  const add = (source?: Variant) => {
+    if (variants.length >= MAX_PRODUCT_VARIANTS) return;
+    const seed = source ? `${source.name} cópia` : "Nova opção";
+    const next: Variant = source
+      ? {
+          ...structuredClone(source),
+          name: uniqueVariantName(variants, seed),
+          highlighted: undefined,
+        }
+      : {
+          name: uniqueVariantName(variants),
+          availability: "available",
+        };
+    onChange([...variants, next]);
+  };
+
+  const move = (index: number, offset: -1 | 1) => {
+    const destination = index + offset;
+    if (destination < 0 || destination >= variants.length) return;
+    const next = [...variants];
+    [next[index], next[destination]] = [next[destination], next[index]];
+    onChange(next);
+  };
+
+  const remove = (index: number) => {
+    const variant = variants[index];
+    if (
+      !window.confirm(
+        `Remover a variação “${variant.name}” deste card? A alteração só será efetivada depois de revisar e salvar.`,
+      )
+    ) {
+      return;
+    }
+    onChange(variants.filter((_, itemIndex) => itemIndex !== index));
+  };
+
+  const toggleHighlight = (index: number) => {
+    const shouldHighlight = !variants[index].highlighted;
+    onChange(
+      variants.map((variant, itemIndex) => ({
+        ...variant,
+        highlighted: shouldHighlight && itemIndex === index ? true : undefined,
+      })),
+    );
   };
 
   return (
@@ -254,18 +334,64 @@ function VariantEditor({
           <span className="admin-kicker">Planos comerciais</span>
           <h2>Variações e preços</h2>
           <p>
-            Edite somente os planos que já existem. A quantidade de opções é
-            protegida para evitar que um clique apague uma oferta do card.
+            Crie e organize opções sem código. Arquivar preserva a configuração;
+            esgotar mantém a opção visível, mas bloqueia novas cobranças.
           </p>
         </div>
-        <span className="admin-help-pill">Estrutura protegida</span>
+        <div className="admin-variant-editor__header-actions">
+          <button
+            type="button"
+            className="admin-stock-toggle"
+            data-active={productStatus === "sold-out" ? "true" : undefined}
+            aria-pressed={productStatus === "sold-out"}
+            onClick={() =>
+              onProductStatusChange(
+                productStatus === "sold-out"
+                  ? lastActiveStatus.current
+                  : "sold-out",
+              )
+            }
+          >
+            {productStatus === "sold-out"
+              ? "Esgotado ativado"
+              : "Marcar card esgotado"}
+          </button>
+          <button
+            type="button"
+            className="admin-primary-button"
+            onClick={() => add()}
+            disabled={variants.length >= MAX_PRODUCT_VARIANTS}
+          >
+            + Nova variação
+          </button>
+        </div>
+      </div>
+
+      <div className="admin-variant-summary" role="note">
+        <strong>{variants.length}/{MAX_PRODUCT_VARIANTS} opções cadastradas</strong>
+        <span>
+          {variants.filter((variant) => variant.availability !== "archived").length}{" "}
+          aparecem no card ·{" "}
+          {variants.filter((variant) => variant.availability === "sold-out").length}{" "}
+          esgotadas ·{" "}
+          {variants.filter((variant) => variant.availability === "archived").length}{" "}
+          arquivadas
+        </span>
       </div>
 
       {variants.length ? (
         <div className="admin-variant-editor__rows">
           {variants.map((variant, index) => (
-            <fieldset key={`variant-${index}`}>
-              <legend>Opção {String(index + 1).padStart(2, "0")}</legend>
+            <fieldset
+              key={`variant-${index}`}
+              data-availability={variant.availability ?? "available"}
+              data-highlighted={variant.highlighted ? "true" : undefined}
+            >
+              <legend>
+                Opção {String(index + 1).padStart(2, "0")}
+                {variant.highlighted ? " · destaque" : ""}
+                {variant.availability === "archived" ? " · arquivada" : ""}
+              </legend>
               <label className="admin-field">
                 <span>Nome da opção</span>
                 <input
@@ -315,13 +441,108 @@ function VariantEditor({
                   placeholder="Ex.: Mais vendido"
                 />
               </label>
+              <label className="admin-field">
+                <span>Disponibilidade</span>
+                <select
+                  value={variant.availability ?? "available"}
+                  onChange={(event) =>
+                    update(index, {
+                      availability: event.target.value as NonNullable<
+                        Variant["availability"]
+                      >,
+                    })
+                  }
+                >
+                  <option value="available">Disponível para compra</option>
+                  <option value="sold-out">Esgotada, mas visível</option>
+                  <option value="archived">Arquivada e oculta</option>
+                </select>
+              </label>
+              <label className="admin-field admin-variant-color">
+                <span>Cor da variação</span>
+                <span>
+                  <input
+                    type="color"
+                    value={variant.accentColor ?? "#e3062c"}
+                    onChange={(event) =>
+                      update(index, { accentColor: event.target.value })
+                    }
+                    aria-label={`Cor da variação ${variant.name}`}
+                  />
+                  <input
+                    value={variant.accentColor ?? ""}
+                    maxLength={7}
+                    onChange={(event) =>
+                      update(index, {
+                        accentColor: event.target.value || undefined,
+                      })
+                    }
+                    placeholder="#e3062c"
+                    aria-label={`Código da cor da variação ${variant.name}`}
+                  />
+                </span>
+              </label>
+
+              <div className="admin-variant-actions">
+                <button
+                  type="button"
+                  data-active={variant.highlighted ? "true" : undefined}
+                  aria-pressed={Boolean(variant.highlighted)}
+                  onClick={() => toggleHighlight(index)}
+                >
+                  {variant.highlighted ? "Destaque ativo" : "Destacar"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    update(index, {
+                      availability:
+                        variant.availability === "archived"
+                          ? "available"
+                          : "archived",
+                    })
+                  }
+                >
+                  {variant.availability === "archived" ? "Reativar" : "Arquivar"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => add(variant)}
+                  disabled={variants.length >= MAX_PRODUCT_VARIANTS}
+                >
+                  Duplicar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(index, -1)}
+                  disabled={index === 0}
+                  aria-label={`Mover ${variant.name} para cima`}
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(index, 1)}
+                  disabled={index === variants.length - 1}
+                  aria-label={`Mover ${variant.name} para baixo`}
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  className="admin-variant-actions__remove"
+                  onClick={() => remove(index)}
+                >
+                  Remover
+                </button>
+              </div>
             </fieldset>
           ))}
         </div>
       ) : (
         <div className="admin-empty-state admin-empty-state--compact">
           <strong>Este produto está sem variações.</strong>
-          <p>Peça assistência para criar a estrutura comercial correta.</p>
+          <p>Use “Nova variação” para criar a primeira opção comercial.</p>
         </div>
       )}
     </div>
@@ -1268,6 +1489,7 @@ export function AdminDashboard({
                       >
                         <option value="available">Disponível</option>
                         <option value="custom">Sob medida</option>
+                        <option value="sold-out">Esgotado</option>
                       </select>
                     </label>
                     <label className="admin-field admin-field--wide">
@@ -1530,7 +1752,11 @@ export function AdminDashboard({
               {tab === "variants" ? (
                 <VariantEditor
                   variants={draft.product.variants}
+                  productStatus={draft.product.status}
                   onChange={(value) => updateProduct("variants", value)}
+                  onProductStatusChange={(status) =>
+                    updateProduct("status", status)
+                  }
                 />
               ) : null}
 
@@ -1541,12 +1767,12 @@ export function AdminDashboard({
                       <span className="admin-kicker">Última conferência</span>
                       <h2>Revisar antes de salvar</h2>
                       <p>
-                        O painel salva apenas conteúdo cotidiano. Rota, posição,
-                        publicação, paleta e quantidade de planos permanecem
+                        O painel salva conteúdo e opções comerciais. Rota,
+                        posição, publicação e paleta estrutural permanecem
                         exatamente como estavam.
                       </p>
                     </div>
-                    <span className="admin-help-pill">Sem ações estruturais</span>
+                    <span className="admin-help-pill">Estrutura controlada</span>
                   </div>
                   <div className="admin-protection-grid">
                     <article>

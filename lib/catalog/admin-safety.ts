@@ -34,11 +34,5 @@ export function protectedCatalogUpdateErrors(
   if (requested.catalogOrder !== current.catalogOrder) {
     errors.push("A posição do produto no catálogo é protegida.");
   }
-  if (requested.product.variants.length !== current.product.variants.length) {
-    errors.push(
-      "A quantidade de variações é protegida; edite apenas os dados das opções existentes.",
-    );
-  }
-
   return errors;
 }

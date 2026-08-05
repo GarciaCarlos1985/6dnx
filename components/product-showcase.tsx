@@ -16,8 +16,11 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   formatBRL,
+  isVariantSoldOut,
   priceFrom,
   productStatusLabel,
+  purchasableProductVariants,
+  visibleProductVariants,
   type Product,
   type Variant,
 } from "@/lib/products";
@@ -207,13 +210,17 @@ function place(card: DOMRect): Placement {
   };
 }
 
-function useProductSelection(variants: Variant[]) {
+function useProductSelection(product: Product) {
+  const purchasableVariants = purchasableProductVariants(product);
   const [selectedVariant, setSelectedVariant] = useState<string | null>(
-    () => (variants.length === 1 ? variants[0].name : null),
+    () =>
+      purchasableVariants.length === 1 ? purchasableVariants[0].name : null,
   );
 
   const selectVariant = (name: string) => {
-    setSelectedVariant(name);
+    if (purchasableVariants.some((variant) => variant.name === name)) {
+      setSelectedVariant(name);
+    }
   };
 
   return { selectedVariant, selectVariant };
@@ -271,21 +278,30 @@ function Cords({ p }: { p: Placement }) {
 function VariantRow({
   variant,
   selected,
+  disabled,
   onPick,
 }: {
   variant: Variant;
   selected: boolean;
+  disabled: boolean;
   onPick: (name: string) => void;
 }) {
+  const soldOut = isVariantSoldOut(variant) || disabled;
   return (
     <li>
       <button
         type="button"
         onClick={() => onPick(variant.name)}
         aria-pressed={selected}
+        disabled={soldOut}
+        style={variant.accentColor ? { borderColor: variant.accentColor } : undefined}
         className={`flex w-full items-center justify-between gap-3 border px-3 py-2 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary ${
           selected
             ? "border-primary bg-primary/15 shadow-[inset_3px_0_0_var(--primary)]"
+            : soldOut
+              ? "cursor-not-allowed border-white/8 bg-white/[0.025] opacity-55"
+              : variant.highlighted
+                ? "border-primary/65 bg-primary/10 shadow-[inset_3px_0_0_var(--primary)] hover:bg-primary/15"
             : "border-white/5 bg-black/40 hover:border-primary/60 hover:bg-primary/10"
         }`}
       >
@@ -295,6 +311,16 @@ function VariantRow({
             {variant.badge ? (
               <span className="bg-primary px-1.5 py-0.5 text-[0.6rem] font-black tracking-wider text-ink">
                 {variant.badge}
+              </span>
+            ) : null}
+            {variant.highlighted && !variant.badge ? (
+              <span className="bg-primary px-1.5 py-0.5 text-[0.6rem] font-black tracking-wider text-ink">
+                Destaque
+              </span>
+            ) : null}
+            {soldOut ? (
+              <span className="border border-white/20 px-1.5 py-0.5 text-[0.58rem] font-black uppercase tracking-wider text-white/65">
+                Esgotado
               </span>
             ) : null}
           </span>
@@ -362,7 +388,13 @@ function ProductPurchasePanel({
   onCheckout: (variantName: string) => void;
   supportUrl: string;
 }) {
-  const requiresVariant = product.variants.length > 0;
+  const visibleVariants = visibleProductVariants(product);
+  const purchasableVariants = purchasableProductVariants(product);
+  const requiresVariant = visibleVariants.length > 0;
+  const productSoldOut = product.status === "sold-out";
+  const selectedIsPurchasable = purchasableVariants.some(
+    (variant) => variant.name === selectedVariant,
+  );
 
   return (
     <div className="shrink-0 border-b border-primary/45 bg-[linear-gradient(180deg,rgba(20,5,8,.98),rgba(6,4,5,.98))] px-4 py-3">
@@ -372,18 +404,19 @@ function ProductPurchasePanel({
             <p className="text-[0.58rem] font-black uppercase tracking-[0.18em] text-white/72">
               Escolha sua opção
             </p>
-            {product.variants.length === 1 ? (
+            {purchasableVariants.length === 1 ? (
               <span className="text-[0.5rem] uppercase tracking-[0.12em] text-green-300/75">
                 opção única selecionada
               </span>
             ) : null}
           </div>
           <ul className="product-scrollbar max-h-32 space-y-1.5 overflow-y-auto pr-0.5">
-            {product.variants.map((variant) => (
+            {visibleVariants.map((variant) => (
               <VariantRow
                 key={variant.name}
                 variant={variant}
                 selected={selectedVariant === variant.name}
+                disabled={productSoldOut}
                 onPick={onPick}
               />
             ))}
@@ -391,16 +424,25 @@ function ProductPurchasePanel({
           <button
             ref={checkoutTriggerRef}
             type="button"
-            disabled={!selectedVariant || !checkoutAvailable}
+            disabled={
+              !selectedVariant ||
+              !selectedIsPurchasable ||
+              productSoldOut ||
+              !checkoutAvailable
+            }
             onClick={() => {
               if (selectedVariant) onCheckout(selectedVariant);
             }}
             className="mt-2.5 flex min-h-12 w-full items-center justify-center bg-primary px-4 text-center text-[0.68rem] font-black uppercase tracking-[0.13em] text-white transition hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:bg-white/[0.07] disabled:text-white/38"
           >
-            {!selectedVariant
+            {productSoldOut
+              ? "Produto esgotado"
+              : !selectedVariant
               ? "Escolha uma opção"
-              : checkoutAvailable
+              : selectedIsPurchasable && checkoutAvailable
                 ? "Comprar com PIX"
+                : !selectedIsPurchasable
+                  ? "Opção esgotada"
                 : "PIX temporariamente indisponível"}
           </button>
         </>
@@ -465,7 +507,7 @@ function Popups({
   paymentTestAvailable: boolean;
   onClose: () => void;
 }) {
-  const selection = useProductSelection(product.variants);
+  const selection = useProductSelection(product);
   const supportUrl = `/api/redirect?slug=${encodeURIComponent(product.slug)}`;
   const [checkoutVariantName, setCheckoutVariantName] = useState<string | null>(
     null,
@@ -676,6 +718,7 @@ function Card({
   modalClone?: boolean;
 }) {
   const from = priceFrom(product);
+  const visibleVariants = visibleProductVariants(product);
   const productTheme = product.theme ?? {
     accentColor: "#e3062c",
     textColor: "#f7f3f4",
@@ -728,13 +771,9 @@ function Card({
           />
         </div>
 
-        <div className="absolute inset-x-4 top-4 z-[4] flex flex-wrap items-center justify-between gap-2">
+        <div className="absolute inset-x-4 top-4 z-[4] flex flex-wrap items-center gap-2">
           <span className="border border-accent/40 bg-black/70 px-2 py-1 text-[0.6rem] font-bold uppercase tracking-wider text-accent backdrop-blur-sm">
             {productStatusLabel(product.status)}
-          </span>
-          <span className="border border-white/15 bg-black/70 px-2 py-1 text-[0.6rem] font-bold uppercase tracking-wider text-muted backdrop-blur-sm">
-            {product.variants.length}{" "}
-            {product.variants.length === 1 ? "variação" : "variações"}
           </span>
         </div>
 
@@ -757,17 +796,19 @@ function Card({
         <p className="mb-5 text-sm text-muted">{product.tagline}</p>
 
         <ul className="mb-6 flex flex-1 flex-wrap content-start gap-1.5">
-          {product.variants.slice(0, 5).map((v) => (
+          {visibleVariants.slice(0, 5).map((v) => (
             <li
               key={v.name}
               className="border border-white/10 bg-black/20 px-2 py-0.5 text-[0.7rem] text-muted"
+              style={v.accentColor ? { borderColor: v.accentColor } : undefined}
             >
               {v.name}
+              {v.availability === "sold-out" ? " · esgotado" : ""}
             </li>
           ))}
-          {product.variants.length > 5 ? (
+          {visibleVariants.length > 5 ? (
             <li className="product-card__more px-2 py-0.5 text-[0.7rem] text-primary">
-              +{product.variants.length - 5}
+              +{visibleVariants.length - 5}
             </li>
           ) : null}
         </ul>
@@ -1745,7 +1786,7 @@ function MobileSheet({
   paymentTestAvailable: boolean;
   onClose: () => void;
 }) {
-  const selection = useProductSelection(product.variants);
+  const selection = useProductSelection(product);
   const supportUrl = `/api/redirect?slug=${encodeURIComponent(product.slug)}`;
   const [checkoutVariantName, setCheckoutVariantName] = useState<string | null>(
     null,
