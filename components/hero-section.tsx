@@ -4,6 +4,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
+import { HeroAuth } from "@/components/hero-auth";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -785,6 +786,9 @@ export function HeroSection() {
       className="hero-apocalypse relative flex w-full items-center justify-center overflow-hidden bg-transparent"
       aria-label="6DNX"
     >
+      <div className="hero-auth-anchor absolute right-5 top-5 z-[var(--z-hero-copy)]">
+        <HeroAuth />
+      </div>
       <div
         ref={backdropRef}
         className="hero-apocalypse-stage pointer-events-none absolute inset-0"

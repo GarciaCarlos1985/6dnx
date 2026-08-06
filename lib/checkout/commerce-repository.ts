@@ -32,6 +32,7 @@ export type CommerceOrder = {
   amountCents: number;
   payerName: string;
   payerDocumentHash: string;
+  user_id?: string | null;
   status: string;
 };
 
@@ -75,6 +76,9 @@ function databaseError(operation: string, error: { code?: string } | null) {
   return new CommerceDatabaseError(operation, error?.code);
 }
 
+const ORDER_SELECT =
+  "id, client_request_id, external_id, offer_id, product_slug, product_title, variant_name, amount_cents, payer_name, payer_document_hash, user_id, status";
+
 function mapOrder(row: Record<string, unknown>): CommerceOrder {
   return {
     id: String(row.id),
@@ -87,6 +91,7 @@ function mapOrder(row: Record<string, unknown>): CommerceOrder {
     amountCents: Number(row.amount_cents),
     payerName: String(row.payer_name),
     payerDocumentHash: String(row.payer_document_hash),
+    user_id: typeof row.user_id === "string" ? row.user_id : null,
     status: String(row.status),
   };
 }
@@ -202,9 +207,7 @@ export class CommerceRepository {
   async findOrderByClientRequestId(clientRequestId: string) {
     const result = await this.client
       .from("commerce_orders")
-      .select(
-        "id, client_request_id, external_id, offer_id, product_slug, product_title, variant_name, amount_cents, payer_name, payer_document_hash, status",
-      )
+      .select(ORDER_SELECT)
       .eq("client_request_id", clientRequestId)
       .maybeSingle();
     if (result.error) throw databaseError("find-order", result.error);
@@ -230,6 +233,7 @@ export class CommerceRepository {
     payerDocumentHash: string;
     payerDocumentLast4: string;
     requestFingerprintHash: string;
+    userId?: string | null;
   }) {
     const result = await this.client
       .from("commerce_orders")
@@ -247,11 +251,10 @@ export class CommerceRepository {
         payer_document_hash: input.payerDocumentHash,
         payer_document_last4: input.payerDocumentLast4,
         request_fingerprint_hash: input.requestFingerprintHash,
+        user_id: input.userId ?? null,
         status: "pending_payment",
       })
-      .select(
-        "id, client_request_id, external_id, offer_id, product_slug, product_title, variant_name, amount_cents, payer_name, payer_document_hash, status",
-      )
+      .select(ORDER_SELECT)
       .single();
 
     if (!result.error && result.data) return mapOrder(result.data);
@@ -267,9 +270,7 @@ export class CommerceRepository {
   async getOrder(orderId: string) {
     const result = await this.client
       .from("commerce_orders")
-      .select(
-        "id, client_request_id, external_id, offer_id, product_slug, product_title, variant_name, amount_cents, payer_name, payer_document_hash, status",
-      )
+      .select(ORDER_SELECT)
       .eq("id", orderId)
       .maybeSingle();
     if (result.error) throw databaseError("get-order", result.error);

@@ -9,6 +9,7 @@ import {
 } from "@/lib/checkout/config";
 import { CommerceDatabaseError } from "@/lib/checkout/commerce-repository";
 import { StormProviderError } from "@/lib/checkout/storm-client";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   BoundedJsonError,
   readBoundedJson,
@@ -75,6 +76,21 @@ function domainError(error: CheckoutDomainError) {
   }
 }
 
+async function currentSessionUserId(): Promise<string | null> {
+  // Best-effort: se o comprador está logado via Google/Discord, captura o
+  // user_id para ligar o pedido à conta (fidelidade). Sem sessão -> null
+  // (compra anônima, comportamento atual inalterado).
+  try {
+    const supabase = await createSupabaseServerClient();
+    if (!supabase) return null;
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) return null;
+    return data.user.id;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   if (
     !isTrustedMutationOrigin(
@@ -134,6 +150,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const userId = await currentSessionUserId();
     const result = await createCommerceCheckout({
       config,
       productSlug: payload.productSlug,
@@ -142,6 +159,7 @@ export async function POST(request: NextRequest) {
       payerDocument: payload.payerDocument,
       clientRequestId: payload.requestId,
       requestFingerprint: requestFingerprint(request),
+      userId,
     });
     return noStore(result, 201);
   } catch (error) {

@@ -91,6 +91,7 @@ export async function createCommerceCheckout(input: {
   payerDocument: string;
   clientRequestId: string;
   requestFingerprint: string;
+  userId?: string | null;
 }) {
   const payerName = normalizePayerName(input.payerName);
   const payerDocument = normalizeCpf(input.payerDocument);
@@ -141,6 +142,7 @@ export async function createCommerceCheckout(input: {
       payerDocumentHash,
       payerDocumentLast4: payerDocument.slice(-4),
       requestFingerprintHash,
+      userId: input.userId ?? null,
     });
     if (!orderMatches(order, offer.id, payerName, payerDocumentHash)) {
       throw new CheckoutDomainError("request-conflict");
