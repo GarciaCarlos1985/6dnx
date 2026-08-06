@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { DiscordMark } from "@/components/discord-mark";
 
@@ -117,6 +118,9 @@ export function HeroAuth() {
         <span className="hero-auth__welcome">
           Olá, <strong>{state.name}</strong>
         </span>
+        <Link href="/conta" className="hero-auth__account">
+          Minha Conta
+        </Link>
         <button
           type="button"
           className="hero-auth__ghost"

@@ -1990,6 +1990,42 @@ p {
   color: oklch(0.96 0.02 25);
 }
 
+.hero-auth__account {
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  background: linear-gradient(
+    180deg,
+    oklch(0.3 0.13 25 / 0.9),
+    oklch(0.18 0.08 25 / 0.95)
+  );
+  border: 1px solid oklch(0.5 0.2 25 / 0.9);
+  color: oklch(0.95 0.01 25);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    border-color 130ms ease,
+    background 130ms ease,
+    transform 130ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hero-auth__account:hover {
+  border-color: oklch(0.68 0.23 25 / 0.98);
+  background: linear-gradient(
+    180deg,
+    oklch(0.36 0.15 25 / 0.95),
+    oklch(0.22 0.1 25 / 0.98)
+  );
+  transform: translateY(-0.08rem);
+}
+
+.hero-auth__account:focus-visible {
+  outline: 2px solid oklch(0.72 0.24 25);
+  outline-offset: 2px;
+}
+
 .hero-auth__ghost:focus-visible {
   outline: 2px solid oklch(0.72 0.24 25);
   outline-offset: 2px;

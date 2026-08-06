@@ -1,0 +1,330 @@
+/* ============================================================================
+   6DNX — Minha Conta (area do usuario logado: saldo + pedidos).
+   Mesma linguagem visual carmesim / vidraco escuro do restante do site.
+   ========================================================================== */
+
+.account-page {
+  position: relative;
+  min-height: 100svh;
+  overflow-x: hidden;
+  padding: 1.5rem clamp(1rem, 4vw, 2.5rem) 4rem;
+  background:
+    radial-gradient(ellipse at 18% 8%, oklch(0.34 0.16 25 / 0.5), transparent 42%),
+    radial-gradient(ellipse at 85% 16%, oklch(0.36 0.18 25 / 0.42), transparent 40%),
+    #000;
+  color: oklch(0.97 0.008 25);
+}
+
+.account-page__ambient {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 3px);
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
+
+.account-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: min(62rem, 100%);
+  margin: 0 auto 2rem;
+}
+
+.account-header__brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  color: oklch(0.95 0.01 25);
+  text-decoration: none;
+}
+
+.account-header__brand strong {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  letter-spacing: 0.08em;
+  color: oklch(0.88 0.2 25);
+}
+
+.account-header__brand span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: oklch(0.85 0.01 25);
+  opacity: 0.85;
+}
+
+.account-header__home {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: oklch(0.9 0.01 25);
+  text-decoration: none;
+  transition: color 130ms ease;
+}
+
+.account-header__home:hover {
+  color: oklch(0.88 0.2 25);
+}
+
+.account-stage {
+  position: relative;
+  z-index: 1;
+  width: min(62rem, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.account-card {
+  border: 1px solid oklch(0.32 0.14 25 / 0.9);
+  border-radius: 0.9rem;
+  background: linear-gradient(
+    180deg,
+    oklch(0.13 0.06 25 / 0.82),
+    oklch(0.06 0.02 25 / 0.92)
+  );
+  box-shadow:
+    0 0.5rem 2rem oklch(0 0 0 / 0.5),
+    inset 0 1px 0 oklch(1 0 0 / 0.1);
+  padding: 1.5rem;
+}
+
+.account-card--center {
+  text-align: center;
+  max-width: 30rem;
+  margin: 3rem auto;
+}
+
+.account-card--center h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin: 0.4rem 0 0.75rem;
+}
+
+.account-card__muted {
+  color: oklch(0.86 0.01 25);
+  opacity: 0.85;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.account-card h2 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: oklch(0.94 0.01 25);
+  margin: 0 0 1rem;
+}
+
+.account-card__label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: oklch(0.85 0.01 25);
+  opacity: 0.8;
+}
+
+.account-card__value {
+  display: block;
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: oklch(0.9 0.2 25);
+  margin: 0.35rem 0;
+  text-shadow: 0 0 1rem oklch(0.55 0.22 25 / 0.5);
+}
+
+.account-card__hint {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: oklch(0.82 0.01 25);
+  opacity: 0.8;
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.25rem;
+}
+
+.account-welcome {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.account-welcome h1 {
+  font-size: 1.9rem;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  margin: 0.35rem 0 0.2rem;
+}
+
+.account-ghost-button,
+.account-primary-button {
+  border-radius: 0.55rem;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid oklch(0.46 0.19 25 / 0.9);
+  background: linear-gradient(
+    180deg,
+    oklch(0.32 0.14 25 / 0.9),
+    oklch(0.18 0.08 25 / 0.95)
+  );
+  color: oklch(0.96 0.01 25);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition:
+    border-color 130ms ease,
+    transform 130ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.account-ghost-button:hover,
+.account-primary-button:hover {
+  border-color: oklch(0.66 0.23 25 / 0.98);
+  transform: translateY(-0.1rem);
+}
+
+.account-primary-button {
+  margin-top: 0.75rem;
+}
+
+/* Pedidos */
+.account-empty {
+  padding: 0.5rem 0;
+}
+
+.account-orders {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid oklch(0.28 0.12 25 / 0.8);
+  border-radius: 0.6rem;
+  overflow: hidden;
+}
+
+.account-orders__row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.85rem;
+  border-bottom: 1px solid oklch(0.24 0.1 25 / 0.8);
+}
+
+.account-orders__row:last-child {
+  border-bottom: 0;
+}
+
+.account-orders__row--head {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: oklch(0.82 0.01 25);
+  opacity: 0.75;
+  background: oklch(0.3 0.13 25 / 0.35);
+}
+
+.account-orders__product {
+  display: flex;
+  flex-direction: column;
+}
+
+.account-orders__product small {
+  font-size: 0.72rem;
+  color: oklch(0.8 0.01 25);
+  opacity: 0.75;
+}
+
+.account-orders__date {
+  color: oklch(0.82 0.01 25);
+  opacity: 0.85;
+}
+
+.account-status {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.22rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid oklch(0.35 0.14 25 / 0.9);
+  color: oklch(0.9 0.01 25);
+  background: oklch(0.22 0.1 25 / 0.7);
+  white-space: nowrap;
+}
+
+.account-status--paid,
+.account-status--delivered_manually {
+  border-color: oklch(0.55 0.18 140 / 0.7);
+  background: oklch(0.28 0.12 140 / 0.4);
+  color: oklch(0.92 0.1 140);
+}
+
+.account-status--awaiting_discord_fulfillment {
+  border-color: oklch(0.6 0.18 60 / 0.7);
+  color: oklch(0.94 0.1 60);
+}
+
+.account-status--failed,
+.account-status--cancelled,
+.account-status--expired,
+.account-status--payment_creation_failed {
+  border-color: oklch(0.5 0.2 25 / 0.8);
+  color: oklch(0.8 0.2 25);
+}
+
+/* Loading */
+.account-card--loading {
+  min-height: 10rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.account-card--loading.account-card--center {
+  margin: 3rem auto;
+}
+
+.account-loading__dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: oklch(0.72 0.24 25);
+  animation: hero-auth-pulse 1.2s ease-in-out infinite;
+}
+
+.account-loading__dot:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.account-loading__dot:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@media (max-width: 640px) {
+  .account-orders__row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .account-orders__row--head {
+    display: none;
+  }
+  .account-welcome {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

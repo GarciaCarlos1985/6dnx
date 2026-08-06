@@ -174,6 +174,20 @@ CREATE POLICY "Log próprio" ON public.loyalty_balance_log FOR SELECT USING (aut
 DROP POLICY IF EXISTS "Perfil próprio" ON public.user_profiles;
 CREATE POLICY "Perfil próprio" ON public.user_profiles FOR SELECT USING (auth.uid() = user_id);
 
+-- ----------------------------------------------------------------------------
+-- 4b. RLS em commerce_orders: além do admin (is_catalog_admin, já existente),
+--      o usuário autenticado lê SOMENTE os próprios pedidos. Essential para a
+--      área "Minha Conta / Meus Pedidos" e proteção de dados (ninguém enxerga
+--      pedido de outrem). O browser acessa via publishable key + esta policy;
+--      a rota /api/account também filtra por user_id no servidor.
+-- ----------------------------------------------------------------------------
+DROP POLICY IF EXISTS "Usuário lê os próprios pedidos" ON public.commerce_orders;
+CREATE POLICY "Usuário lê os próprios pedidos"
+  ON public.commerce_orders
+  FOR SELECT
+  TO authenticated
+  USING (user_id = auth.uid());
+
 -- Nenhuma policy de INSERT/UPDATE/DELETE para anon/authenticated nas tabelas
 -- acima. Toda escrita passa por RPC SECURITY DEFINER.
 
