@@ -123,8 +123,8 @@ export function HeroSection() {
         }
 
         gsap.to(auraRef.current, {
-          opacity: 0.65,
-          scale: 1.12,
+          opacity: 0,
+          scale: 1,
           duration: 5,
           repeat: -1,
           yoyo: true,
@@ -197,7 +197,7 @@ export function HeroSection() {
           )
           .to(
             auraRef.current,
-            { scale: 1.3, opacity: 0.78, ease: "none", duration: 0.28 },
+            { scale: 1, opacity: 0, ease: "none", duration: 0.28 },
             "push",
           )
           .to(cueRef.current, { opacity: 0, y: 16, duration: 0.1 }, "push")
@@ -240,7 +240,6 @@ export function HeroSection() {
             titleRef.current,
             {
               opacity: 0,
-              filter: "blur(10px)",
               ease: "power2.in",
               duration: 0.22,
             },
@@ -251,7 +250,6 @@ export function HeroSection() {
             {
               opacity: 0,
               yPercent: 8,
-              filter: "blur(8px)",
               ease: "power2.in",
               duration: 0.22,
             },
@@ -264,7 +262,7 @@ export function HeroSection() {
         tl.to(
           eyeVisibility,
           {
-            scroll: wide ? 0.46 : 0.3,
+            scroll: wide ? 0.22 : 0.14,
             ease: "power2.out",
             duration: 0.28,
             onUpdate: renderEyeOpacity,
@@ -285,7 +283,7 @@ export function HeroSection() {
             transformationFlashRef.current,
             { opacity: 0, scale: 0.96 },
             {
-              opacity: 0.3,
+              opacity: 0,
               scale: 1.025,
               ease: "sine.out",
               duration: 0.1,
@@ -299,11 +297,10 @@ export function HeroSection() {
           )
           .fromTo(
             revealRef.current,
-            { opacity: 0, y: 36, filter: "blur(10px)" },
+            { opacity: 0, y: 36 },
             {
               opacity: 1,
               y: 0,
-              filter: "blur(0px)",
               ease: "power2.out",
               duration: 0.2,
             },
@@ -311,7 +308,7 @@ export function HeroSection() {
           )
           .to(
             auraRef.current,
-            { opacity: 0.25, scale: 1, ease: "none", duration: 0.22 },
+            { opacity: 0, scale: 1, ease: "none", duration: 0.22 },
             "payoff",
           )
           .to(
@@ -319,7 +316,6 @@ export function HeroSection() {
             {
               opacity: 0,
               y: -40,
-              filter: "blur(10px)",
               ease: "power2.in",
               duration: 0.18,
             },
@@ -808,7 +804,7 @@ export function HeroSection() {
       <>
         <div
           ref={auraRef}
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[130svh] w-[130svh] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-45 will-change-transform"
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[130svh] w-[130svh] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-0 will-change-transform"
           style={{
             background:
               "radial-gradient(circle, oklch(0.55 0.22 25 / 0.5) 0%, oklch(0.55 0.22 25 / 0.12) 42%, transparent 68%)",

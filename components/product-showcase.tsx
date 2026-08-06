@@ -748,15 +748,14 @@ function Card({
               : "reveal-up border-white/10 hover:-translate-y-1 hover:border-primary/60 hover:shadow-[0_0_38px_var(--primary-glow)]"
       } ${modalClone ? "select-none" : ""}`}
     >
-      <div className="product-card__visual relative aspect-[16/9] overflow-hidden border-b border-white/10 bg-black">
+      <div className="product-card__visual relative aspect-[16/9] overflow-hidden border-b border-white/10 bg-transparent">
         <Image
           src={product.image}
           alt=""
           fill
           sizes="(max-width: 639px) 92vw, (max-width: 1023px) 46vw, 31vw"
-          className="product-card__art object-cover opacity-[0.82] saturate-[0.82] transition duration-700 group-hover:scale-[1.055] group-hover:opacity-100 group-hover:saturate-100"
+          className="product-card__art object-cover transition duration-700 group-hover:scale-[1.055]"
         />
-        <div className="absolute inset-0 z-[1] bg-[linear-gradient(180deg,oklch(0.04_0_0_/_0.2)_0%,transparent_34%,oklch(0.055_0.02_25_/_0.35)_65%,var(--surface)_100%)]" />
 
         <div
           aria-hidden
