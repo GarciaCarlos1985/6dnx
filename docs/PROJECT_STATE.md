@@ -1,6 +1,65 @@
 # 6DNX project state
 
-Last updated: 2026-08-04
+Last updated: 2026-08-06
+
+## Handoff 2026-08-06 — estado real para qualquer agente que assumir
+
+> Leia também `docs/CONSTITUICAO_TECNICA_6DNX.md` (fonte de verdade de regras
+> e roadmap) e `docs/README.md`. Este arquivo é o estado operacional.
+
+### O que JÁ está em `main` (publicado)
+- Social OAuth login Google/Discord no hero (`HeroAuth`), rota `/auth/callback`,
+  sessão via Supabase Auth (browser+server clients existentes). Commit `3c63770`.
+- Área de usuário `/conta` (Minha Conta): saldo de moedas + Meus Pedidos,
+  rota `/api/account` protegida por sessão, `lib/account` (service-role).
+  Commit `0924c94`.
+- Link "Minha Conta" no hero quando logado.
+- Docs: `CONSTITUICAO_TECNICA_6DNX.md`, `CONTA_USUARIO_FIDELIDADE_6DNX.md`,
+  `SLOT_DA_SORTE_6DNX.md`; scripts `confirm-test-payment.mjs` e
+  `investigate-order-083f6810.mjs` (somente leitura).
+
+### Migration de fidelidade — NÃO APLICADA (decisão do dono)
+- `supabase/migrations/20260806100000_add_user_fidelity.sql` está versionada
+  **mas NÃO foi aplicada em nenhum banco**. Sem ela: `/conta` mostra nome logado
+  mas saldo 0 e pedidos vazios (coluna `user_id` não existe em produção).
+- Aplicar exige autorização explícita + teste em transação com ROLLBACK primeiro.
+
+### Branches e PRs abertas
+- `feature/constituicao-tecnica` → **PR #12 aberta** (checklist de PR + proibições
+  na Constituição). NÃO mergeada.
+- `feature/seo-unblock-public-routes` → trabalho SEO em andamento (ver abaixo),
+  NÃO commitada ainda.
+- `codex/*` → branches antigas de trabalho anterior (histórico).
+
+### SEO — desbloqueio em andamento (última tarefa)
+- Confirmado ao vivo: produção aplica `X-Robots-Tag: noindex, nofollow,
+  noarchive, nosnippet` em TODAS as páginas públicas; `robots.txt` tinha
+  `disallow: "/"`; não existia `sitemap.xml`; layout raiz tinha metadata
+  `robots: {index:false}` global. Site invisível ao Google.
+- Branch `feature/seo-unblock-public-routes` implementa (LOCAL, sem commit):
+  1. `proxy.ts` — `X-Robots-Tag` noindex apenas em rotas privadas
+     (/admin, /conta, /api, /checkout); públicas (/, /noticias, /produtos)
+     ficam indexáveis.
+  2. `app/robots.ts` — Allow: / ; Disallow admin/api/conta/checkout.
+  3. `app/sitemap.ts` (novo) — sitemap com `/` e `/noticias`.
+  4. `app/layout.tsx` — removido robots global do metadata raiz.
+- Aguardando revisão/aprovação do dono antes de commit/PR. NÃO está em main.
+
+### Webhook e pagamento — confirmados
+- Webhook StorM ativo em produção (GET → 405, rota existe).
+- Pedido de teste R$1,00 (`c7c6ae0f…`) = `paid` com `paid_at` preenchido,
+  via reconciliação (0 webhook_events). Pedido `083f6810…` = paid via webhook
+  assinado (prova do caminho padrão funcional).
+
+### Regras para quem assumir (resumo)
+- NUNCA push/merge direto em `main` (push dispara deploy automático em
+  produção — já ocorreu por acidente).
+- Trabalhar sempre em `feature/<nome>` e aguardar revisão.
+- Não aplicar migrations sem autorização explícita.
+- Não tocar no painel admin (será feito por outro agente).
+- Antes de qualquer coisa: ler a Constituição Técnica por inteiro.
+
+---
 
 ## Live Production checkout — authoritative checkpoint for a new chat
 

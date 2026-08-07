@@ -35,23 +35,28 @@ Você é responsável pela saúde técnica do projeto, daqui a cinco anos.
 
 ## BLOCO 1 — ESTADO REAL DO PROJETO (ancorado, não redescoberto)
 
-### Pagamento de teste (R$ 1,00) — verificado em 2026-08-06
+> Estado operacional completo e atualizado: ver `docs/PROJECT_STATE.md` (handoff
+> 2026-08-06). Resumo do que mudou desde o último handoff:
 
-| Confirmação | Resultado |
-|---|---|
-| Pedido `c7c6ae0f-3744-4d4a-9ef2-030929ce46d7` está `paid` com `paid_at` preenchido? | ✅ **SIM** — `status='paid'`, `amount_cents=100`, `paid_at=2026-08-04T06:24:42Z` |
-| Existe linha em `commerce_webhook_events` para esse pedido? | ❌ **NÃO** — 0 eventos. O pedido virou `paid` via **reconciliação autenticada** (`reconcile_storm_payment`), não via webhook assinado. |
-| Qual webhook do Discord disparou? | Pelo código: `DISCORD_TICKET_WEBHOOK_URL` tem prioridade sobre `DISCORD_WEBHOOK_URL` (ver `lib/checkout/paid-order-notification.ts` e `lib/discord-notifications.ts`). Ambos configurados localmente → runtime usou o **TICKET**. A entrega em si não deixa rastro no DB. |
+### Publicado em `main` (2026-08-06)
+- **Login social Google/Discord no hero** (commit `3c63770`): rota `/auth/callback`,
+  sessão via Supabase Auth. Google/Discord exigem Redirect URL do Supabase
+  (`https://<ref>.supabase.co/auth/v1/callback`) nos painéis dos providers.
+- **Área de usuário `/conta`** (commit `0924c94`): saldo de moedas + Meus Pedidos,
+  rota `/api/account` protegida por sessão, `lib/account` service-role.
+- Migration de fidelidade (`20260806100000_add_user_fidelity.sql`) **versionada,
+  NÃO aplicada** — `/conta` opera com saldo 0/pedidos vazios até aplicar.
 
-> Observação: o evento de webhook mais recente na tabela pertence a **outro**
-> pedido (`083f6810-…`, `payment.completed` COMPLETO em 2026-08-06). Ou seja,
-> há um segundo pagamento registrado via webhook. Validar esse pedido é tarefa
-> do roadmap (não bloqueia o Bloco 1 do R$1,00).
+### SEO — em andamento na branch `feature/seo-unblock-public-routes`
+- Bloqueador crítico confirmado ao vivo: `X-Robots-Tag: noindex` global +
+  `robots.txt` `disallow: "/"` + sem sitemap + metadata raiz `robots:false`.
+- Implementação local (sem commit): proxy.ts seletivo, robots.ts (allow público
+  / disallow privado), `app/sitemap.ts` novo, layout raiz sem robots global.
+- Aguardando revisão do dono. NÃO está em main.
 
-### Deploy
-- Production roda em **cadeia manual** de deploys, desconectada de `main`.
-- O último merge/publicação confirmado precisa ser reconciliado com o que está
-  efetivamente no ar antes de qualquer "deploy novo".
+### Confirmado (dados do banco, 2026-08-06)
+- Pagamento de teste R$1,00 = `paid` + `paid_at`, via reconciliação (0 webhook_events).
+- Pedido `083f6810…` = paid via webhook assinado (caminho padrão funciona).
 
 ### Auditoria de segurança — bloqueadores abertos (NO-GO)
 1. Validade temporal ausente no payload do webhook StorM.
@@ -314,13 +319,15 @@ Classificação: BACKLOG · EM DESENVOLVIMENTO · BLOQUEADO · EM TESTES · CONC
 
 Estado inicial:
 - Pagamento de teste R$1,00 → CONCLUÍDO (paid confirmado; veio por reconciliação).
-- Investigar o segundo pagamento (083f6810…, payment.completed 2026-08-06) → BACKLOG.
-- Merge/publicação reconciliada com o deploy manual → BLOQUEADO até checagem do estado.
+- Pedido 083f6810… (payment.completed via webhook assinado) → CONCLUÍDO (prova do caminho padrão).
+- Login social Google/Discord + área /conta → PUBLICADO EM MAIN (commits 3c63770, 0924c94).
+- noindex global → EM DESENVOLVIMENTO na branch feature/seo-unblock-public-routes
+  (proxy seletivo + robots + sitemap + layout; aguardando revisão do dono).
+- PR #12 (checklist de PR + proibições na Constituição) → ABERTA, aguardando aprovação.
+- Migration de fidelidade → AGUARDANDO validação do dono (versionada, não aplicada).
 - 10 itens da auditoria → BACKLOG, priorizados por risco (financeiro/MFA antes de headers).
-- noindex global → BLOQUEADOR CRÍTICO de lançamento (decisão do dono).
+- Merge/publicação reconciliada com o deploy manual → EM CHECAGEM (webhook confirmado no ar).
 - Vitrine/páginas de produto → BLOQUEADO até drift de catálogo (59 vs 12) resolvido.
-- Aplicar migration de fidelidade (destrava saldo + pedidos na conta) → AGUARDANDO validação do dono.
-- Commit da área de usuário (/conta) → EM DESENVOLVIMENTO.
 - Domínios Loyalty, Perfil avançado, Admin expandido → BACKLOG longo prazo.
 
 Para cada item, informe: prioridade, dependências, risco, esforço. Sempre proponha
