@@ -8,6 +8,20 @@ import { refreshSupabaseSession } from "@/lib/supabase/proxy";
 const MIN_REVIEW_PASSWORD_LENGTH = 16;
 const ROBOTS_POLICY = "noindex, nofollow, noarchive, nosnippet";
 
+/**
+ * Public, indexable routes. Everything else keeps X-Robots-Tag: noindex so the
+ * private/admin/account/checkout surfaces never leak into search engines.
+ * Extend this list as new public landing pages (e.g. /produtos/[slug]) are
+ * released; do not widen it to private routes.
+ */
+function isPublicIndexablePath(pathname: string) {
+  return (
+    pathname === "/" ||
+    pathname.startsWith("/noticias") ||
+    pathname.startsWith("/produtos")
+  );
+}
+
 function applySecurityHeaders(
   response: NextResponse,
   request: NextRequest,
@@ -17,7 +31,10 @@ function applySecurityHeaders(
     request.nextUrl.pathname,
   );
 
-  if (socialPreviewImage) {
+  const indexable = socialPreviewImage || isPublicIndexablePath(
+    request.nextUrl.pathname,
+  );
+  if (indexable) {
     response.headers.delete("X-Robots-Tag");
   } else {
     response.headers.set("X-Robots-Tag", ROBOTS_POLICY);

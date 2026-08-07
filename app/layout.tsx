@@ -62,16 +62,6 @@ export const metadata: Metadata = {
     description:
       "Conheça o catálogo premium 6DNX, com soluções para diferentes jogos e atendimento direto pelo Discord.",
   },
-  robots: {
-    index: false,
-    follow: false,
-    nocache: true,
-    googleBot: {
-      index: false,
-      follow: false,
-      noimageindex: true,
-    },
-  },
 };
 
 export default function RootLayout({
