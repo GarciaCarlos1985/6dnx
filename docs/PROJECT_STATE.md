@@ -1,6 +1,40 @@
 # 6DNX project state
 
-Last updated: 2026-08-04
+Last updated: 2026-08-08
+
+## Emergency checkout/account checkpoint — 2026-08-08
+
+- Production received the targeted compatibility migration
+  `20260808103000_add_commerce_orders_user_id_compat.sql`: optional
+  `commerce_orders.user_id`, foreign key to `auth.users`, index and an
+  authenticated read-own-orders policy. Anonymous checkout remains valid.
+  The migration is versioned on `codex/checkout-user-id-compat`; it has not
+  been merged into `main`.
+- A real authenticated `FiveM / 1 Dia` purchase for R$ 10.99 completed after
+  the migration. Supabase records one `paid` order, one `COMPLETO` payment
+  attempt, one `payment.completed` webhook event and one reconciliation event;
+  Discord received the sanitized order notification. No duplicate was found.
+- `/api/account` still failed independently because `loyalty_balances` is not
+  present and PostgREST reports `PGRST205`. The route used `Promise.all`, so
+  this optional balance failure discarded an otherwise valid orders result.
+  The owner authorized the application-resilience path: orders remain
+  authoritative, while an unavailable loyalty query returns `balance: null`
+  and `loyaltyAvailable: false`. The UI displays `Em breve` instead of claiming
+  that rewards are active. This application change is validated on the branch
+  but is not deployed.
+- StorM Wallet remains the only owner-approved provider and is PIX-only. The
+  repository contains no runtime Mercado Pago integration; its environment
+  names are historical placeholders and the card UI in the local payment lab
+  is explicitly simulated. No credit/debit option is being enabled.
+- PIX creation sends `Idempotency-Key: externalId`, but a retry of a non-paid
+  order can call the provider create endpoint again. The public StorM material
+  inspected does not document the idempotency guarantee, so this remains a
+  separate hardening/contract-verification item; one successful purchase with
+  one attempt does not by itself close that risk.
+- Current isolated gates: ESLint, generated Next.js route types, strict
+  TypeScript, 39/39 Node tests and the Production build. Anonymous desktop and
+  mobile `/conta` states were also checked locally. No deployment or direct
+  push to `main` belongs to this checkpoint.
 
 ## Live Production checkout — authoritative checkpoint for a new chat
 

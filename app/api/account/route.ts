@@ -5,6 +5,18 @@ import {
   AccountRepository,
 } from "@/lib/account/repository";
 import { getAccountDatabaseConfig } from "@/lib/account/config";
+import { loadOptionalLoyaltyBalance } from "@/lib/account/optional-loyalty";
+
+function reportOptionalLoyaltyFailure(error: unknown) {
+  if (error instanceof AccountDatabaseError) {
+    console.warn("[account] Optional loyalty balance unavailable.", {
+      operation: error.operation,
+      databaseCode: error.databaseCode,
+    });
+    return;
+  }
+  console.warn("[account] Optional loyalty balance unavailable.");
+}
 
 export async function GET() {
   const supabase = await createSupabaseServerClient();
@@ -42,15 +54,19 @@ export async function GET() {
 
   try {
     const repository = new AccountRepository(config);
-    const [orders, balance] = await Promise.all([
+    const [orders, loyalty] = await Promise.all([
       repository.listOrdersByUser(user.id),
-      repository.getLoyaltyBalance(user.id),
+      loadOptionalLoyaltyBalance(
+        () => repository.getLoyaltyBalance(user.id),
+        reportOptionalLoyaltyFailure,
+      ),
     ]);
 
     return NextResponse.json(
       {
         user: { id: user.id, email: user.email, name },
-        balance,
+        balance: loyalty.balance,
+        loyaltyAvailable: loyalty.available,
         orders,
       },
       { headers: { "cache-control": "no-store" } },

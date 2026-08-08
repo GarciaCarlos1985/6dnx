@@ -7,7 +7,8 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type AccountData = {
   user: { id: string; email: string | null; name: string };
-  balance: number;
+  balance: number | null;
+  loyaltyAvailable: boolean;
   orders: Array<{
     id: string;
     externalId: string;
@@ -167,6 +168,7 @@ function AccountHome({
 }) {
   const paidOrders = data.orders.filter((o) => o.status === "paid");
   const balance = data.balance;
+  const loyaltyAvailable = data.loyaltyAvailable && balance !== null;
 
   return (
     <>
@@ -188,10 +190,14 @@ function AccountHome({
 
       <div className="account-grid">
         <div className="account-card account-card--stat account-card--coins">
-          <span className="account-card__label">Suas moedas</span>
-          <strong className="account-card__value">{balance}</strong>
+          <span className="account-card__label">Moedas 6DNX</span>
+          <strong className="account-card__value">
+            {loyaltyAvailable ? balance : "Em breve"}
+          </strong>
           <span className="account-card__hint">
-            Ganhe moedas a cada compra e use na Slot da Sorte.
+            {loyaltyAvailable
+              ? "Seu saldo atual no programa de fidelidade."
+              : "Seus pedidos continuam disponíveis enquanto preparamos o programa de moedas."}
           </span>
         </div>
         <div className="account-card account-card--stat">
@@ -208,8 +214,8 @@ function AccountHome({
         {data.orders.length === 0 ? (
           <p className="account-card__muted account-empty">
             Você ainda não tem pedidos ligados a esta conta. Compras feitas sem
-            login ficam anônimas — entre antes de comprar para acumular
-            moedas e acompanhar aqui.
+            login ficam anônimas — entre antes de comprar para vincular seus
+            próximos pedidos. O programa de moedas será ativado separadamente.
           </p>
         ) : (
           <div className="account-orders">

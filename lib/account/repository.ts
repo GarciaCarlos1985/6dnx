@@ -17,10 +17,6 @@ export type AccountOrder = {
   createdAt: string;
 };
 
-export type LoyaltyBalance = {
-  balance: number;
-};
-
 export class AccountDatabaseError extends Error {
   constructor(
     readonly operation: string,
@@ -67,11 +63,7 @@ export class AccountRepository {
     }));
   }
 
-  /**
-   * Saldo de moedas de fidelidade. Como a coluna/tabela pode ainda não existir
-   * (migration versionada, não aplicada) ou o usuário não ter linha, tratamos
-   * ausência como saldo 0 em vez de falhar a tela toda.
-   */
+  /** Saldo opcional. A camada de aplicação decide como degradar se indisponível. */
   async getLoyaltyBalance(userId: string): Promise<number> {
     const result = await this.client
       .from("loyalty_balances")
@@ -79,10 +71,6 @@ export class AccountRepository {
       .eq("user_id", userId)
       .maybeSingle();
 
-    if (result.error && result.error.code === "42P01") {
-      // relation does not exist -> migration not applied yet; fail-soft to 0
-      return 0;
-    }
     if (result.error) throw databaseError("get-balance", result.error);
     return Number(result.data?.balance ?? 0);
   }
