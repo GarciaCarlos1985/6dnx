@@ -1,5 +1,17 @@
 # Checkout PIX 6DNX — StorM Wallet
 
+> **Checkpoint de 2026-08-08:** Maycon escolheu manter a operação somente em
+> PIX pela StorM. A branch isolada `codex/storm-pix-create-claim` prepara uma
+> trava atômica antes da criação: uma única requisição ganha o direito de chamar
+> a StorM, concorrentes aguardam e reutilizam a mesma cobrança, e timeout
+> ambíguo nunca dispara um segundo POST automático. A migration
+> `20260808160000_add_storm_payment_creation_claim.sql` passou em PostgreSQL 16
+> com `ROLLBACK`, mas não foi aplicada; o código não foi publicado. A confirmação
+> oficial da StorM sobre deduplicação de `Idempotency-Key` continua pendente. O
+> rollout deve auditar o histórico remoto e aplicar o lote aprovado de forma
+> direcionada; não executar `supabase db push` genérico enquanto migrations
+> anteriores documentadas como pendentes continuarem no repositório.
+
 > **Checkpoint de 2026-08-03:** o PIX real de R$ 1,00 foi pago e o webhook
 > assinado chegou ao backend. HMAC e contrato passaram; a RPC retornou `422`
 > por ambiguidade SQL. A migration corretiva versionada foi aplicada em

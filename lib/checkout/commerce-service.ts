@@ -12,6 +12,11 @@ import {
   CommerceRepository,
   type CommerceOrder,
 } from "@/lib/checkout/commerce-repository";
+import {
+  coordinatePaymentCreation,
+  PaymentCreationCoordinationError,
+  type CoordinatedProviderPayment,
+} from "@/lib/checkout/payment-creation-coordinator";
 import { amountToCents } from "@/lib/checkout/storm-contract";
 import {
   createStormPayment,
@@ -57,10 +62,67 @@ export class CheckoutDomainError extends Error {
       | "rate-limited"
       | "order-not-found"
       | "invalid-status-token"
-      | "provider-mismatch",
+      | "provider-mismatch"
+      | "payment-creation-in-progress"
+      | "payment-creation-ambiguous"
+      | "payment-recovery-unavailable"
+      | "payment-terminal"
+      | "payment-creation-retryable",
   ) {
     super(code);
     this.name = "CheckoutDomainError";
+  }
+}
+
+function validateProviderPayment(
+  payment: CoordinatedProviderPayment,
+  order: CommerceOrder,
+) {
+  if (
+    payment.externalId !== order.externalId ||
+    amountToCents(payment.amount) !== order.amountCents
+  ) {
+    throw new CheckoutDomainError("provider-mismatch");
+  }
+}
+
+function classifyPaymentCreationFailure(error: unknown) {
+  if (
+    error instanceof StormProviderError &&
+    error.reason === "rejected" &&
+    error.upstreamStatus !== undefined &&
+    [400, 401, 403, 404, 422].includes(error.upstreamStatus)
+  ) {
+    return {
+      outcome: "failed" as const,
+      errorCode: `storm-rejected-${error.upstreamStatus}`,
+    };
+  }
+
+  const reason =
+    error instanceof StormProviderError
+      ? error.reason
+      : error instanceof CheckoutDomainError
+        ? error.code
+        : "unexpected";
+  return {
+    outcome: "ambiguous" as const,
+    errorCode: `storm-ambiguous-${reason}`.slice(0, 80),
+  };
+}
+
+function coordinationDomainError(error: PaymentCreationCoordinationError) {
+  switch (error.code) {
+    case "in-progress":
+      return new CheckoutDomainError("payment-creation-in-progress");
+    case "ambiguous":
+      return new CheckoutDomainError("payment-creation-ambiguous");
+    case "recovery-unavailable":
+      return new CheckoutDomainError("payment-recovery-unavailable");
+    case "terminal":
+      return new CheckoutDomainError("payment-terminal");
+    case "retryable":
+      return new CheckoutDomainError("payment-creation-retryable");
   }
 }
 function orderMatches(
@@ -163,63 +225,105 @@ export async function createCommerceCheckout(input: {
     };
   }
 
+  let coordinated;
   try {
-    const payment = await createStormPayment(input.config, {
-      amountCents: order.amountCents,
-      payerName,
-      payerDocument,
-      description: `6DNX | ${order.productTitle} | ${order.variantName}`,
-      externalId: order.externalId,
+    coordinated = await coordinatePaymentCreation<CoordinatedProviderPayment>({
+      claim: () =>
+        repository.claimPaymentCreation({
+          orderId: order.id,
+          externalId: order.externalId,
+          claimToken: randomUUID(),
+        }),
+      read: () => repository.getPaymentAttempt(order.id),
+      create: () =>
+        createStormPayment(input.config, {
+          amountCents: order.amountCents,
+          payerName,
+          payerDocument,
+          description: `6DNX | ${order.productTitle} | ${order.variantName}`,
+          externalId: order.externalId,
+        }),
+      lookup: (providerPaymentId) =>
+        getStormPayment(input.config, providerPaymentId),
+      validate: (payment) => validateProviderPayment(payment, order),
+      complete: async (claimToken, payment) => {
+        if (!payment.pixCode || !payment.qrCode) {
+          throw new StormProviderError("invalid-response");
+        }
+        await repository.completePaymentCreation({
+          orderId: order.id,
+          claimToken,
+          providerPaymentId: payment.id,
+          providerStatus: payment.status,
+          pixCode: payment.pixCode,
+          qrCode: payment.qrCode,
+        });
+      },
+      finishFailure: (claimToken, outcome, errorCode) =>
+        repository.finishPaymentCreationFailure({
+          orderId: order.id,
+          claimToken,
+          outcome,
+          errorCode,
+        }),
+      classifyFailure: classifyPaymentCreationFailure,
     });
-    if (
-      payment.externalId !== order.externalId ||
-      amountToCents(payment.amount) !== order.amountCents
-    ) {
-      await repository.markPaymentCreationFailed(
-        order.id,
-        "provider-response-mismatch",
-      );
-      throw new CheckoutDomainError("provider-mismatch");
+  } catch (error) {
+    if (error instanceof PaymentCreationCoordinationError) {
+      throw coordinationDomainError(error);
     }
-    if (payment.status === "FALHA") {
-      await repository.markPaymentCreationFailed(order.id, "provider-failed");
-      throw new StormProviderError("rejected");
-    }
+    throw error;
+  }
 
-    await repository.savePaymentCreation({
-      orderId: order.id,
-      providerPaymentId: payment.id,
-      externalId: order.externalId,
-      providerStatus: payment.status,
-    });
-
+  if (coordinated.kind === "paid") {
     return {
       orderId: order.id,
       statusToken: createCheckoutStatusToken(
         order.id,
         input.config.checkoutHashSecret,
       ),
-      status: payment.status === "COMPLETO" ? ("confirming" as const) : ("pending" as const),
+      status: "paid" as const,
       amountLabel: formatAmountFromCents(order.amountCents),
-      pixCode: payment.pixCode,
-      qrCode: payment.qrCode,
+      pixCode: null,
+      qrCode: null,
     };
-  } catch (error) {
-    if (
-      error instanceof StormProviderError ||
-      error instanceof CheckoutDomainError
-    ) {
-      if (!(error instanceof CheckoutDomainError)) {
-        await repository.markPaymentCreationFailed(
-          order.id,
-          `storm-${error.reason}`,
-        );
-      }
-      throw error;
-    }
-    await repository.markPaymentCreationFailed(order.id, "unexpected-error");
-    throw error;
   }
+
+  const payment = coordinated.payment;
+  if (payment.status === "FALHA") {
+    await observeStormCandidate({
+      config: input.config,
+      repository,
+      candidate: {
+        orderId: order.id,
+        externalId: order.externalId,
+        amountCents: order.amountCents,
+        productSlug: order.productSlug,
+        productTitle: order.productTitle,
+        variantName: order.variantName,
+        providerPaymentId: payment.id,
+      },
+    });
+    throw new StormProviderError("rejected");
+  }
+  if (!payment.pixCode || !payment.qrCode) {
+    throw new CheckoutDomainError("payment-recovery-unavailable");
+  }
+
+  return {
+    orderId: order.id,
+    statusToken: createCheckoutStatusToken(
+      order.id,
+      input.config.checkoutHashSecret,
+    ),
+    status:
+      payment.status === "COMPLETO"
+        ? ("confirming" as const)
+        : ("pending" as const),
+    amountLabel: formatAmountFromCents(order.amountCents),
+    pixCode: payment.pixCode,
+    qrCode: payment.qrCode,
+  };
 }
 
 export async function getCommerceCheckoutStatus(input: {
