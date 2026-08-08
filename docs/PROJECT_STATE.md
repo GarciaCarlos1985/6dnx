@@ -1,6 +1,37 @@
 # 6DNX project state
 
-Last updated: 2026-08-04
+Last updated: 2026-08-08
+
+## PIX creation retry hardening — isolated review branch
+
+- Maycon confirmed the business decision to accept only PIX through StorM for
+  now. No card gateway or Mercado Pago activation belongs to this scope.
+- Branch `codex/storm-pix-create-claim` adds an atomic, database-backed claim
+  before `POST /api/v1/payments/create`. Two requests for the same order can no
+  longer both call the provider: the winner creates, while the loser waits and
+  then reuses the same persisted PIX.
+- Existing attempts are checked through the authenticated StorM status endpoint
+  before reuse. `providerPaymentId`, `externalId` and amount remain exact-match
+  requirements. PIX copia-e-cola and QR data are protected by existing RLS and
+  are cleared when an order becomes paid, failed or cancelled.
+- Network timeout, invalid provider response, database failure after the POST,
+  or an expired creation lease are treated as **ambiguous**. That order remains
+  fail-closed and cannot automatically create another PIX. Only explicit 400,
+  401, 403, 404 or 422 provider rejections release a deterministic retry.
+- Migration `20260808160000_add_storm_payment_creation_claim.sql` is versioned
+  but **not applied**. The application change is also not deployed. Rollout must
+  apply this backward-compatible migration before deploying the matching code.
+  Do not use an unreviewed generic `supabase db push`: first inspect the live
+  migration history because older repository migrations remain documented as
+  pending, then apply only the explicitly approved, audited rollout set.
+- Local validation covers the mandatory concurrent test (one provider call for
+  two simultaneous requests), ambiguous-timeout lockout, existing PIX reuse and
+  a PostgreSQL 16 transaction ending in `ROLLBACK`. ESLint, Next route type
+  generation, strict TypeScript, all 38 Node tests and the Production build are
+  green. PR review remains required before any merge or Production change.
+- StorM support still needs to confirm in writing whether `Idempotency-Key` is
+  guaranteed server-side. The 6DNX claim is intentionally the primary barrier
+  and does not depend on that undocumented behavior.
 
 ## Live Production checkout — authoritative checkpoint for a new chat
 

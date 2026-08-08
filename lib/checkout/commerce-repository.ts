@@ -1,6 +1,10 @@
 import "server-only";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type {
+  PaymentCreationClaim,
+  PaymentCreationState,
+} from "@/lib/checkout/payment-creation-coordinator";
 import type { StormReconciliationCandidate } from "@/lib/checkout/storm-reconciliation";
 
 type DatabaseConfig = {
@@ -40,6 +44,9 @@ export type PaymentAttempt = {
   orderId: string;
   providerPaymentId: string | null;
   providerStatus: string | null;
+  pixCode: string | null;
+  qrCode: string | null;
+  creationState: PaymentCreationState;
   providerCompleteObservedAt: string | null;
   lastPolledAt: string | null;
 };
@@ -97,6 +104,16 @@ function mapOrder(row: Record<string, unknown>): CommerceOrder {
 }
 
 function mapAttempt(row: Record<string, unknown>): PaymentAttempt {
+  const creationState = row.creation_state;
+  if (
+    creationState !== "creating" &&
+    creationState !== "created" &&
+    creationState !== "ambiguous" &&
+    creationState !== "failed"
+  ) {
+    throw new CommerceDatabaseError("invalid-payment-creation-state");
+  }
+
   return {
     orderId: String(row.order_id),
     providerPaymentId:
@@ -105,6 +122,9 @@ function mapAttempt(row: Record<string, unknown>): PaymentAttempt {
         : null,
     providerStatus:
       typeof row.provider_status === "string" ? row.provider_status : null,
+    pixCode: typeof row.pix_code === "string" ? row.pix_code : null,
+    qrCode: typeof row.qr_code === "string" ? row.qr_code : null,
+    creationState,
     providerCompleteObservedAt:
       typeof row.provider_complete_observed_at === "string"
         ? row.provider_complete_observed_at
@@ -281,7 +301,7 @@ export class CommerceRepository {
     const result = await this.client
       .from("commerce_payment_attempts")
       .select(
-        "order_id, provider_payment_id, provider_status, provider_complete_observed_at, last_polled_at",
+        "order_id, provider_payment_id, provider_status, pix_code, qr_code, creation_state, provider_complete_observed_at, last_polled_at",
       )
       .eq("order_id", orderId)
       .maybeSingle();
@@ -289,64 +309,110 @@ export class CommerceRepository {
     return result.data ? mapAttempt(result.data) : null;
   }
 
-  async savePaymentCreation(input: {
+  async claimPaymentCreation(input: {
     orderId: string;
-    providerPaymentId: string;
     externalId: string;
-    providerStatus: string;
+    claimToken: string;
   }) {
-    const attemptResult = await this.client
-      .from("commerce_payment_attempts")
-      .upsert(
-        {
-          order_id: input.orderId,
-          provider: "storm_wallet",
-          provider_payment_id: input.providerPaymentId,
-          idempotency_key: input.externalId,
-          provider_status: input.providerStatus,
-          last_error_code: null,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "order_id" },
-      );
-    if (attemptResult.error) {
-      throw databaseError("save-payment-attempt", attemptResult.error);
+    const result = await this.client.rpc("claim_storm_payment_creation", {
+      p_order_id: input.orderId,
+      p_external_id: input.externalId,
+      p_claim_token: input.claimToken,
+    });
+    if (result.error) {
+      throw databaseError("claim-payment-creation", result.error);
     }
 
-    const orderResult = await this.client
-      .from("commerce_orders")
-      .update({ status: "pending_payment", updated_at: new Date().toISOString() })
-      .eq("id", input.orderId)
-      .in("status", ["pending_payment", "payment_creation_failed"]);
-    if (orderResult.error) {
-      throw databaseError("save-payment-order", orderResult.error);
+    const row = Array.isArray(result.data) ? result.data[0] : result.data;
+    if (!row || typeof row !== "object") {
+      throw new CommerceDatabaseError("claim-payment-creation-empty");
+    }
+    const record = row as Record<string, unknown>;
+    const action = record.result_action;
+    const creationState = record.result_creation_state;
+    if (
+      action !== "claimed" &&
+      action !== "existing" &&
+      action !== "waiting" &&
+      action !== "ambiguous" &&
+      action !== "paid" &&
+      action !== "terminal"
+    ) {
+      throw new CommerceDatabaseError("claim-payment-creation-invalid");
+    }
+    if (
+      creationState !== "creating" &&
+      creationState !== "created" &&
+      creationState !== "ambiguous" &&
+      creationState !== "failed"
+    ) {
+      throw new CommerceDatabaseError("claim-payment-creation-state");
+    }
+
+    return {
+      action,
+      claimToken:
+        typeof record.result_claim_token === "string"
+          ? record.result_claim_token
+          : null,
+      providerPaymentId:
+        typeof record.result_provider_payment_id === "string"
+          ? record.result_provider_payment_id
+          : null,
+      providerStatus:
+        typeof record.result_provider_status === "string"
+          ? record.result_provider_status
+          : null,
+      pixCode:
+        typeof record.result_pix_code === "string"
+          ? record.result_pix_code
+          : null,
+      qrCode:
+        typeof record.result_qr_code === "string"
+          ? record.result_qr_code
+          : null,
+      creationState,
+    } satisfies PaymentCreationClaim;
+  }
+
+  async completePaymentCreation(input: {
+    orderId: string;
+    claimToken: string;
+    providerPaymentId: string;
+    providerStatus: string;
+    pixCode: string;
+    qrCode: string;
+  }) {
+    const result = await this.client.rpc("complete_storm_payment_creation", {
+      p_order_id: input.orderId,
+      p_claim_token: input.claimToken,
+      p_provider_payment_id: input.providerPaymentId,
+      p_provider_status: input.providerStatus,
+      p_pix_code: input.pixCode,
+      p_qr_code: input.qrCode,
+    });
+    if (result.error) {
+      throw databaseError("complete-payment-creation", result.error);
     }
   }
 
-  async markPaymentCreationFailed(orderId: string, errorCode: string) {
-    const now = new Date().toISOString();
-    const attemptResult = await this.client
-      .from("commerce_payment_attempts")
-      .upsert(
-        {
-          order_id: orderId,
-          provider: "storm_wallet",
-          last_error_code: errorCode.slice(0, 80),
-          updated_at: now,
-        },
-        { onConflict: "order_id" },
-      );
-    if (attemptResult.error) {
-      throw databaseError("save-payment-error", attemptResult.error);
-    }
-
-    const orderResult = await this.client
-      .from("commerce_orders")
-      .update({ status: "payment_creation_failed", updated_at: now })
-      .eq("id", orderId)
-      .in("status", ["pending_payment", "payment_creation_failed"]);
-    if (orderResult.error) {
-      throw databaseError("mark-order-failed", orderResult.error);
+  async finishPaymentCreationFailure(input: {
+    orderId: string;
+    claimToken: string;
+    outcome: "failed" | "ambiguous";
+    errorCode: string;
+  }) {
+    const result = await this.client.rpc(
+      "finish_storm_payment_creation_failure",
+      {
+        p_order_id: input.orderId,
+        p_claim_token: input.claimToken,
+        p_outcome: input.outcome,
+        p_error_code: input.errorCode.slice(0, 80),
+      },
+    );
+    if (result.error) {
+      throw databaseError("finish-payment-creation", result.error);
     }
   }
 

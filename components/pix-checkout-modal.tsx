@@ -182,6 +182,7 @@ export function PixCheckoutModal({
         }
         if (response.ok && payload.status === "failed") {
           setError("A carteira informou que esta cobrança falhou.");
+          setErrorCode("payment-terminal");
           setPhase("failed");
           return;
         }
@@ -318,6 +319,24 @@ export function PixCheckoutModal({
     setPhase("form");
     window.requestAnimationFrame(() => firstInputRef.current?.focus());
   };
+
+  const failedPrimaryAction =
+    errorCode === "offer-unavailable" ||
+    errorCode === "payment-creation-ambiguous"
+      ? onClose
+      : errorCode === "payment-terminal" || errorCode === "request-conflict"
+        ? resetRequest
+        : () => setPhase("form");
+  const failedPrimaryLabel =
+    errorCode === "offer-unavailable"
+      ? "Voltar às opções"
+      : errorCode === "payment-creation-ambiguous"
+        ? "Fechar checkout"
+        : errorCode === "payment-terminal"
+          ? "Iniciar novo pedido"
+          : errorCode === "request-conflict"
+            ? "Reiniciar pedido"
+            : "Tentar novamente";
 
   const openTestCheckout = async () => {
     if (!paymentTestAvailable || testLaunching) return;
@@ -623,12 +642,23 @@ export function PixCheckoutModal({
             {phase === "failed" && (
               <div className="text-center" aria-live="assertive">
                 <p className="text-[0.62rem] font-black uppercase tracking-[0.22em] text-primary">
-                  PIX não gerado
+                  {errorCode === "payment-creation-ambiguous"
+                    ? "Pedido em verificação"
+                    : errorCode === "payment-creation-in-progress" ||
+                        errorCode === "payment-recovery-unavailable"
+                      ? "Cobrança já iniciada"
+                      : "PIX não gerado"}
                 </p>
                 <h3 className="mt-3 text-2xl text-white">
                   {errorCode === "offer-unavailable"
                     ? "PIX ainda não liberado para esta opção."
-                    : "Não foi possível gerar o PIX."}
+                    : errorCode === "payment-creation-ambiguous"
+                      ? "Não gere outro PIX."
+                      : errorCode === "payment-creation-in-progress"
+                        ? "Seu PIX está sendo gerado."
+                        : errorCode === "payment-recovery-unavailable"
+                          ? "Já existe uma cobrança para este pedido."
+                          : "Não foi possível gerar o PIX."}
                 </h3>
                 <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/68">
                   {error || "Não foi possível continuar com esta cobrança."}
@@ -636,20 +666,10 @@ export function PixCheckoutModal({
                 <div className="mt-7 grid gap-3 sm:grid-cols-2">
                   <button
                     type="button"
-                    onClick={
-                      errorCode === "offer-unavailable"
-                        ? onClose
-                        : errorCode === "request-conflict"
-                          ? resetRequest
-                          : () => setPhase("form")
-                    }
+                    onClick={failedPrimaryAction}
                     className="min-h-12 border border-primary bg-primary px-4 text-xs font-black uppercase tracking-[0.12em] text-white"
                   >
-                    {errorCode === "offer-unavailable"
-                      ? "Voltar às opções"
-                      : errorCode === "request-conflict"
-                        ? "Reiniciar pedido"
-                        : "Tentar novamente"}
+                    {failedPrimaryLabel}
                   </button>
                   <a
                     href={supportUrl}
