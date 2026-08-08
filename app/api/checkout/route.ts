@@ -71,6 +71,51 @@ function domainError(error: CheckoutDomainError) {
         },
         429,
       );
+    case "payment-creation-in-progress":
+      return noStore(
+        {
+          error:
+            "Este PIX já está sendo gerado. Aguarde alguns segundos e tente consultar o mesmo pedido novamente.",
+          code: error.code,
+        },
+        409,
+      );
+    case "payment-creation-ambiguous":
+      return noStore(
+        {
+          error:
+            "A StorM pode ter recebido este pedido, mas não confirmou a resposta. Por segurança, não criaremos outro PIX automaticamente. Fale com o suporte.",
+          code: error.code,
+        },
+        409,
+      );
+    case "payment-recovery-unavailable":
+      return noStore(
+        {
+          error:
+            "Já existe uma cobrança para este pedido, mas a consulta à StorM está temporariamente indisponível. Não gere outro pedido; tente novamente em instantes.",
+          code: error.code,
+        },
+        503,
+      );
+    case "payment-terminal":
+      return noStore(
+        {
+          error:
+            "Esta cobrança foi encerrada. Feche o checkout e inicie um novo pedido se ainda quiser comprar.",
+          code: error.code,
+        },
+        409,
+      );
+    case "payment-creation-retryable":
+      return noStore(
+        {
+          error:
+            "A StorM recusou esta tentativa sem criar uma cobrança. Você pode tentar novamente com o mesmo pedido.",
+          code: error.code,
+        },
+        502,
+      );
     default:
       return noStore({ error: "Não foi possível iniciar o pedido." }, 400);
   }
