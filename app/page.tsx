@@ -9,13 +9,15 @@ import { getPublishedCatalog } from "@/lib/catalog/repository";
 import { checkoutReadiness } from "@/lib/checkout/config";
 import { shouldEnablePaymentTestMode } from "@/lib/security/payment-test-mode";
 import { resolvePublicHttpsLink } from "@/lib/security/public-link";
-import { getStorefrontContent } from "@/lib/storefront-content/repository";
+import { experienceThemeStyle } from "@/lib/site-experience/presentation";
+import { getSiteExperience } from "@/lib/site-experience/repository";
 
 export default async function HomePage() {
-  const [catalogProducts, storefrontContent] = await Promise.all([
+  const [catalogProducts, experience] = await Promise.all([
     getPublishedCatalog(),
-    getStorefrontContent(),
+    getSiteExperience(),
   ]);
+  const storefrontContent = experience.home.content;
   const checkoutAvailable = checkoutReadiness().ready;
   const paymentTestAvailable = shouldEnablePaymentTestMode(process.env);
   const developerCreditUrl =
@@ -26,8 +28,8 @@ export default async function HomePage() {
     "https://discord.gg/5k9tvSerW";
 
   return (
-    <main className="site-flow">
-      <SiteAtmosphere />
+    <main className="site-flow" style={experienceThemeStyle(experience.home.theme)}>
+      <SiteAtmosphere effects={experience.home.effects} />
       <SiteNavigation announcementsUrl={announcementsUrl} />
       <HeroSection content={storefrontContent} />
       <CinematicCompanions scene="products" />

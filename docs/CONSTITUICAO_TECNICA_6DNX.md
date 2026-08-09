@@ -274,6 +274,13 @@ caminho estrutural de conversão para BRL (a moeda é fechada).
 Futuras experiências (raspadinha, baú, calendário, missões) compartilham a mesma
 infra de ledger e auditoria — nunca um backend novo por experiência.
 
+O domínio possui carteiras explicitamente separadas: `slot` para as
+experiências lúdicas e `community` para os 6DNX Coins administrados em missões,
+feedbacks e trocas assistidas. Compartilhar a infraestrutura não significa
+compartilhar saldo. Não existe transferência entre carteiras, saque ou
+conversão para BRL. Ajustes administrativos são atômicos, idempotentes e deixam
+trilha imutável com ator, motivo e saldo antes/depois.
+
 RTP < 100% protege o dono matematicamente (ver docs/SLOT_DA_SORTE_6DNX.md).
 ```
 

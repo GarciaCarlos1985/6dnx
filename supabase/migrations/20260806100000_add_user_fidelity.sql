@@ -12,7 +12,8 @@
 --      loyalty_balances (cache), loyalty_balance_log (auditoria antes/depois),
 --      user_profiles (dados extras do usuário, ex. Discord).
 --   3. Função credit_loyalty_coins (SECURITY DEFINER, idempotente por
---      reason + source_ref) — migra a compra paga em moedas de fidelidade.
+--      reason + source_ref) para emissões futuras EXPLICITAMENTE autorizadas.
+--      Nenhum gatilho comercial é criado nesta fase.
 --   4. RLS: usuário vê só o próprio; escritas só via RPC.
 --
 -- Referência de decisões: docs/CONTA_USUARIO_FIDELIDADE_6DNX.md
@@ -22,10 +23,69 @@
 -- 1. Ligar pedido ao usuário (retrocompatível: NULL para compras antigas/anônimas)
 -- ----------------------------------------------------------------------------
 ALTER TABLE public.commerce_orders
-  ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id);
+  ADD COLUMN IF NOT EXISTS user_id uuid;
+
+-- Production recebeu a coluna numa correção emergencial anterior. Reconciliar
+-- a FK de forma explícita evita que um banco limpo use NO ACTION enquanto o
+-- banco real preserva pedidos históricos com ON DELETE SET NULL.
+DO $$
+DECLARE
+  v_constraint record;
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint AS c
+    WHERE c.conrelid = 'public.commerce_orders'::regclass
+      AND c.conname = 'commerce_orders_user_id_fkey'
+      AND c.contype = 'f'
+      AND c.confrelid = 'auth.users'::regclass
+      AND c.confdeltype = 'n'
+      AND c.conkey = ARRAY[(
+        SELECT a.attnum
+        FROM pg_attribute AS a
+        WHERE a.attrelid = 'public.commerce_orders'::regclass
+          AND a.attname = 'user_id'
+      )]::smallint[]
+  ) THEN
+    FOR v_constraint IN
+      SELECT c.conname
+      FROM pg_constraint AS c
+      WHERE c.conrelid = 'public.commerce_orders'::regclass
+        AND c.contype = 'f'
+        AND c.conkey = ARRAY[(
+          SELECT a.attnum
+          FROM pg_attribute AS a
+          WHERE a.attrelid = 'public.commerce_orders'::regclass
+            AND a.attname = 'user_id'
+        )]::smallint[]
+    LOOP
+      EXECUTE format(
+        'ALTER TABLE public.commerce_orders DROP CONSTRAINT %I',
+        v_constraint.conname
+      );
+    END LOOP;
+
+    ALTER TABLE public.commerce_orders
+      ADD CONSTRAINT commerce_orders_user_id_fkey
+      FOREIGN KEY (user_id) REFERENCES auth.users(id)
+      ON DELETE SET NULL
+      NOT VALID;
+    ALTER TABLE public.commerce_orders
+      VALIDATE CONSTRAINT commerce_orders_user_id_fkey;
+  END IF;
+END;
+$$;
 
 CREATE INDEX IF NOT EXISTS idx_orders_user
   ON public.commerce_orders(user_id);
+
+-- Fail-closed em bancos que tenham recebido protótipos antigos: a migration
+-- base nunca pode deixar crédito automático de compra ativo, nem mesmo se a
+-- migration de duas carteiras ainda não tiver sido executada.
+DROP TRIGGER IF EXISTS trg_credit_loyalty_on_order_paid
+  ON public.commerce_orders;
+DROP FUNCTION IF EXISTS public.credit_loyalty_on_order_paid();
+DROP FUNCTION IF EXISTS public.credit_purchase_loyalty_coins(uuid, integer);
 
 -- ----------------------------------------------------------------------------
 -- 2a. loyalty_ledger — ledger imutável (fonte da verdade das moedas)
@@ -114,6 +174,15 @@ BEGIN
     RAISE EXCEPTION 'reason required' USING ERRCODE = '22023';
   END IF;
 
+  INSERT INTO public.loyalty_balances (user_id, balance)
+  VALUES (p_user_id, 0)
+  ON CONFLICT (user_id) DO NOTHING;
+
+  SELECT b.balance INTO v_prev
+  FROM public.loyalty_balances AS b
+  WHERE b.user_id = p_user_id
+  FOR UPDATE;
+
   -- Idempotência: reexecuções (webhook/reconciliação) não duplicam o crédito
   IF p_source_ref IS NOT NULL
      AND EXISTS (
@@ -122,7 +191,10 @@ BEGIN
          AND l.reason = p_reason
          AND l.source_ref = p_source_ref
      ) THEN
-    RETURN (SELECT b.* FROM public.loyalty_balances AS b WHERE b.user_id = p_user_id);
+    SELECT b.* INTO v_new
+    FROM public.loyalty_balances AS b
+    WHERE b.user_id = p_user_id;
+    RETURN v_new;
   END IF;
 
   -- Ledger (imutável, fonte da verdade)
@@ -135,10 +207,6 @@ BEGIN
   ON CONFLICT (user_id) DO NOTHING;
 
   -- Saldo atual (antes do crédito)
-  SELECT balance INTO v_prev
-  FROM public.loyalty_balances
-  WHERE user_id = p_user_id;
-
   -- Aplica o crédito e devolve o novo saldo
   UPDATE public.loyalty_balances AS b
   SET balance = b.balance + p_delta, updated_at = clock_timestamp()
@@ -163,13 +231,11 @@ ALTER TABLE public.loyalty_balance_log ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Ledger próprio" ON public.loyalty_ledger;
-CREATE POLICY "Ledger próprio" ON public.loyalty_ledger FOR SELECT USING (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Saldo próprio" ON public.loyalty_balances;
 CREATE POLICY "Saldo próprio" ON public.loyalty_balances FOR SELECT USING (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Log próprio" ON public.loyalty_balance_log;
-CREATE POLICY "Log próprio" ON public.loyalty_balance_log FOR SELECT USING (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Perfil próprio" ON public.user_profiles;
 CREATE POLICY "Perfil próprio" ON public.user_profiles FOR SELECT USING (auth.uid() = user_id);
@@ -191,98 +257,25 @@ CREATE POLICY "Usuário lê os próprios pedidos"
 -- Nenhuma policy de INSERT/UPDATE/DELETE para anon/authenticated nas tabelas
 -- acima. Toda escrita passa por RPC SECURITY DEFINER.
 
+-- O navegador não recebe as tabelas brutas de ledger/auditoria. Elas podem
+-- conter metadados operacionais adicionados por migrations posteriores.
+REVOKE SELECT ON public.loyalty_ledger, public.loyalty_balance_log
+  FROM anon, authenticated;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
+  ON public.loyalty_ledger, public.loyalty_balances, public.loyalty_balance_log
+  FROM anon, authenticated, service_role;
+
+-- Grants e RLS são camadas independentes. O usuário autenticado continua
+-- limitado à própria linha pela policy; o backend server-only recebe o
+-- privilégio de tabela explicitamente, sem depender de defaults do projeto.
+GRANT SELECT ON public.loyalty_balances TO authenticated, service_role;
+
 -- Fronteira de privilégio da função de crédito
 REVOKE ALL ON FUNCTION public.credit_loyalty_coins(uuid, bigint, text, text)
   FROM public, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.credit_loyalty_coins(uuid, bigint, text, text)
   TO service_role;
 
--- ----------------------------------------------------------------------------
--- 3b. credit_purchase_loyalty_coins — credita moedas por UMA compra paga.
---      Só age quando: pedido está paid E tem user_id (compra cadastrada).
---      Compra anônima (user_id NULL) não gera moeda. Idempotente por
---      source_ref = order_id.
---      Conversão padrão: 1 BRL = 1 moeda, arredondando para baixo
---      (R$ 21,99 -> 21 moedas). Taxa configurável via parâmetro.
--- ----------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.credit_purchase_loyalty_coins(
-  p_order_id uuid,
-  p_brl_to_coins int default 1
-)
-RETURNS TABLE (
-  applied boolean,
-  coins bigint,
-  balance bigint
-)
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = ''
-AS $$
-DECLARE
-  v_order public.commerce_orders%rowtype;
-  v_coins bigint;
-  v_balance public.loyalty_balances;
-BEGIN
-  IF p_brl_to_coins <= 0 THEN
-    RAISE EXCEPTION 'invalid conversion rate' USING ERRCODE = '22023';
-  END IF;
-
-  SELECT o.* INTO v_order
-  FROM public.commerce_orders AS o
-  WHERE o.id = p_order_id;
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'order not found' USING ERRCODE = 'P0002';
-  END IF;
-
-  -- Moedas só para compra paga E cadastrada
-  IF v_order.user_id IS NULL OR v_order.status <> 'paid' THEN
-    RETURN QUERY SELECT false, 0::bigint, 0::bigint;
-    RETURN;
-  END IF;
-
-  v_coins := floor(v_order.amount_cents::numeric / 100)::bigint * p_brl_to_coins;
-  IF v_coins <= 0 THEN
-    RETURN QUERY SELECT false, 0::bigint, 0::bigint;
-    RETURN;
-  END IF;
-
-  v_balance := public.credit_loyalty_coins(
-    v_order.user_id,
-    v_coins,
-    'purchase',
-    v_order.id::text
-  );
-
-  RETURN QUERY SELECT true, v_coins, v_balance.balance;
-END;
-$$;
-
-REVOKE ALL ON FUNCTION public.credit_purchase_loyalty_coins(uuid, int)
-  FROM public, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.credit_purchase_loyalty_coins(uuid, int)
-  TO service_role;
-
--- ----------------------------------------------------------------------------
--- 3c. Trigger de integração automática: quando commerce_orders.status passa a
---     'paid' E o pedido tem user_id, credita automaticamente as moedas da
---     compra. Idempotente (credit_loyalty_coins usa source_ref = order_id).
---     Não exige mudança nenhuma no fluxo de pagamento/cobrança existente.
--- ----------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.credit_loyalty_on_order_paid()
-RETURNS TRIGGER AS $$
-BEGIN
-  -- Só na transição para paid e só para pedido cadastrado
-  IF NEW.status = 'paid'
-     AND (OLD.status IS DISTINCT FROM 'paid')
-     AND NEW.user_id IS NOT NULL THEN
-    PERFORM public.credit_purchase_loyalty_coins(NEW.id, 1);
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
-
-DROP TRIGGER IF EXISTS trg_credit_loyalty_on_order_paid
-  ON public.commerce_orders;
-CREATE TRIGGER trg_credit_loyalty_on_order_paid
-  AFTER UPDATE OF status ON public.commerce_orders
-  FOR EACH ROW EXECUTE FUNCTION public.credit_loyalty_on_order_paid();
+-- Não criar credit_purchase_loyalty_coins nem trigger de pedido pago nesta
+-- fase. Compra, feedback e campanhas terão regras explícitas e homologadas em
+-- migrations futuras; aplicar este schema jamais deve emitir moedas sozinho.

@@ -46,8 +46,18 @@ html {
   position: relative;
   isolation: isolate;
   min-height: 100vh;
-  background-color: #000000;
+  background-color: var(--experience-bg, #000000);
   background-image: none;
+  color: var(--experience-body, #d7d7db);
+  font-family: var(--experience-body-font, var(--font-body)), sans-serif;
+}
+
+.site-flow h1,
+.site-flow h2,
+.site-flow h3,
+.site-flow h4 {
+  color: var(--experience-heading, #ffffff);
+  font-family: var(--experience-display-font, var(--font-display)), sans-serif;
 }
 
 /* The static apocalypse artwork replaces the former hero video without
@@ -252,17 +262,49 @@ html {
   animation-iteration-count: infinite;
 }
 
-.site-atmosphere__particle--soot {
-  background: oklch(0.74 0.018 35 / 0.52);
-  box-shadow: 0 0 0.25rem oklch(0.36 0.025 35 / 0.26);
+.site-atmosphere__particle--feathers {
+  width: calc(var(--atmosphere-size) * 2.8);
+  height: calc(var(--atmosphere-size) * 0.85);
+  border-radius: 90% 15% 90% 15%;
+  background: rgb(255 248 235 / 66%);
+  box-shadow: 0 0 0.42rem rgb(255 244 227 / 18%);
 }
 
-.site-atmosphere__particle--spark {
+.site-atmosphere__particle--ammo {
+  width: calc(var(--atmosphere-size) * 0.72);
+  height: calc(var(--atmosphere-size) * 2.3);
+  border-radius: 30% 30% 55% 55%;
+  background: linear-gradient(#ffe9a4, #9d5519);
+  box-shadow: 0 0 0.32rem rgb(223 139 45 / 24%);
+}
+
+.site-atmosphere__particle--embers,
+.site-atmosphere__particle--sparks {
   background: oklch(0.78 0.2 38 / 0.92);
   box-shadow:
     0 -0.18rem 0.32rem oklch(0.72 0.22 32 / 0.66),
     0 0 0.5rem oklch(0.58 0.24 25 / 0.58);
   mix-blend-mode: screen;
+}
+
+.site-atmosphere__particle--sparks {
+  width: calc(var(--atmosphere-size) * 0.55);
+  height: calc(var(--atmosphere-size) * 2.2);
+}
+
+.site-atmosphere__particle--lightning {
+  width: 1px;
+  height: calc(var(--atmosphere-size) * 4);
+  border-radius: 0;
+  background: #fff3f5;
+  box-shadow: 0 0 0.5rem var(--experience-accent, #f00836);
+  mix-blend-mode: screen;
+}
+
+@media (max-width: 767px) {
+  .site-atmosphere__particle:nth-child(n + 11) {
+    display: none;
+  }
 }
 
 .hero-copy-headline {

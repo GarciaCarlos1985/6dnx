@@ -100,21 +100,30 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
 );
 ```
 
-## Regra de moedas por compra (a decisão central)
+## Duas carteiras fechadas (decisão vigente em 2026-08-09)
 
-**Decisão sugerida (V1 – simples):** moedas só se o comprador estava **logado
-no momento da compra**. Compras anônimas não geram moedas e não há reivindicação
-retroativa (evita fraude e complexidade).
+O programa possui **duas moedas independentes**. Elas compartilham a mesma
+infraestrutura auditável, mas nunca o mesmo saldo:
 
-- Taxa: ex. **R$ 1,00 = 1 moeda** (configurável). Pedido de R$ 21,99 → 21 moedas
-  (arredondamento definido, ex. `floor`).
-- Disparo: **somente quando o pedido transiciona para `paid`** (via
-  webhook/reconciliação — nunca antes do pagamento confirmar).
-- Idempotente: o crédito usa `source_ref = order_id` e não duplica se o
-  webhook/reconciliação reexecutar.
+- `wallet='community'`: **6DNX Coins**, administrados por Maycon para missões,
+  compra + feedback validado e trocas assistidas pelo ticket do Discord.
+- `wallet='slot'`: **Moedas da Slot**, consumíveis apenas pelas experiências
+  futuras da Slot 6DNX. Não são usadas nas trocas da comunidade.
 
-**V2 (futura, não no escopo agora):** pedido anônimo guarda um link de
-reivindicação; ao logar, o usuário anexa o pedido e recebe as moedas.
+Ambas são moedas internas, sem saque, transferência entre carteiras ou
+conversão em BRL. O saldo é um cache; a fonte da verdade continua sendo o
+ledger imutável, agora identificado por `(user_id, wallet)`.
+
+### Compra + feedback
+
+A regra informada por Maycon é `+10` **6DNX Coins** depois de uma compra seguida
+de feedback. Como ainda não existe uma prova técnica homologada do feedback,
+esse crédito não é automático. O admin oferece um atalho `+10 · Compra +
+feedback`, usado somente depois da conferência humana. O pedido PIX, webhook e
+reconciliação não chamam o ledger de recompensas nesta fase.
+
+Compras anônimas continuam permitidas e não recebem nenhuma das carteiras. A
+associação de uma compra ao usuário permanece separada da concessão de moedas.
 
 ## Slot engine (integração)
 
@@ -124,8 +133,11 @@ apenas estabelece a ponte:
 
 - Toda tabela do slot referencia `user_id` (que é o `auth.uid()` de um usuário
   cadastrado). **Não há slot anônimo.**
-- O crédito de moedas de compra (`reason='purchase'`) e o jogo (`spin_slot`)
-  operam **no mesmo `loyalty_ledger`** — moeda única, compartilhada.
+- A Slot lê e consome exclusivamente entradas `wallet='slot'`.
+- Missões, feedback e trocas do Discord usam exclusivamente
+  `wallet='community'`.
+- As duas carteiras usam o mesmo domínio de ledger/auditoria, sem compartilhar
+  saldo e sem permitir transferência entre elas.
 - O `site_id` do slot para o 6DNX é uma constante (ex. `'6dnx'`); a fidelidade
   deste documento pode assumir o mesmo `site_id` quando o slot for integrado,
   mantendo o ledger único por usuário.
@@ -134,15 +146,15 @@ apenas estabelece a ponte:
 
 ### Segregação de "moedas"
 - **Ledger de vendas = `commerce_orders`** (R$ reais) — receita, balanço.
-- **Ledger de fidelidade = `loyalty_ledger`** (moeda fechada) — valor interno,
+- **Ledger de recompensas = `loyalty_ledger`** (duas carteiras fechadas) — valor interno,
   **sem qualquer caminho de saque para R$**. Essa separação estrutural sustenta
   o argumento de "moeda fechada, não é aposta".
 
 ### Relatórios de vendas / balanço
 - Base: `commerce_orders` (pedidos pagos, valores, produtos) somado ao
   `user_id` para repartição por cliente quando disponível.
-- Moedas emitidas: `SUM(delta) WHERE reason='purchase'` no ledger = total de
-  moedas distribuídas (custo do programa de fidelidade).
+- Moedas emitidas: `SUM(delta) GROUP BY wallet, reason` no ledger = custo de
+  cada programa sem misturar Slot e comunidade.
 - Sugestão de views SQL (`v_sales_summary`, `v_loyalty_issuance`) para os
   relatórios — documentadas aqui, materializadas em migration posterior.
 
@@ -178,23 +190,26 @@ INSERT/UPDATE/DELETE** para `anon`/`authenticated` direto.
 
 ## Pontos em aberto (decisão do dono)
 
-1. **Taxa de conversão de moedas por compra** (ex. R$ 1 = 1 moeda; ajustável).
-2. **Arredondamento** (floor / arredondar / teto).
-3. **Reivindicação retroativa v1 vs v2** (sugerida: não na v1).
-4. **Regra do Discord** (tempo conectado → moedas): ainda não parametrizada;
+1. **Fontes das Moedas da Slot:** ainda não homologadas; não existe crédito
+   automático por compra.
+2. **Prova do feedback:** necessária antes de automatizar o `+10` de 6DNX Coins.
+3. **Reivindicação retroativa:** não existe na v1.
+4. **Regra do Discord** (missões/tempo conectado → 6DNX Coins): ainda não automatizada;
    requer integração com o bot no servidor.
 5. **Regulatório do slot** — fora deste doc (já apontado no
    `slot-engine-arquitetura-2.md`): confirmar enquadramento com advogado.
 
 ## Fases de implementação
 
-1. **Base (este trabalho):** migration versionada (não aplicada), coluna
-   `user_id` em `commerce_orders`, tabelas de fidelidade, função de crédito
-   idempotente, e captura do `user_id` no checkout.
-2. **Crédito de moedas na compra paga:** disparar `credit_loyalty_coins` quando
-   o pedido virar `paid` (source_ref = order_id), idempotente.
-3. **UI de saldo:** mostrar saldo de moedas no hero quando logado.
-4. **Discord activity** e **slot engine:** camadas futuras.
+1. **Compatibilidade da conta:** `commerce_orders.user_id` sem exigir login na compra.
+2. **Duas carteiras:** aplicar, em ordem e numa janela controlada,
+   `20260806100000_add_user_fidelity.sql` e
+   `20260809210000_add_dual_loyalty_wallets.sql`. A segunda desliga o trigger
+   automático legado antes da operação normal.
+3. **Admin:** busca de usuário e ajustes atômicos/idempotentes, sempre com
+   ator, motivo, observação e antes/depois.
+4. **Automação futura:** somente depois de existir prova confiável da missão ou
+   feedback; Slot real continua um projeto separado.
 
 ## Validações deste documento
 

@@ -1,8 +1,8 @@
 .account-page {
-  --account-red: #f00836;
+  --account-red: var(--experience-accent, #f00836);
   --account-red-deep: #720019;
   --account-gold: #ffbf47;
-  --account-surface: rgb(11 7 9 / 82%);
+  --account-surface: color-mix(in srgb, var(--experience-surface, #0b0709) 82%, transparent);
   position: relative;
   min-height: 100svh;
   overflow: hidden;
@@ -10,9 +10,15 @@
   background:
     radial-gradient(circle at 76% 4%, rgb(240 8 54 / 20%), transparent 29rem),
     radial-gradient(circle at 4% 34%, rgb(132 0 30 / 24%), transparent 31rem),
-    linear-gradient(150deg, #050507 0%, #090507 47%, #020203 100%);
-  color: #fff;
+    linear-gradient(150deg, var(--experience-bg, #050507) 0%, var(--experience-surface, #090507) 47%, #020203 100%);
+  color: var(--experience-body, #fff);
+  font-family: var(--experience-body-font, var(--font-body)), sans-serif;
 }
+
+.account-page h1,
+.account-page h2,
+.account-page h3 { color: var(--experience-heading, #fff); font-family: var(--experience-display-font, var(--font-display)), sans-serif; }
+.account-page > .site-atmosphere { z-index: 0; }
 
 .account-page__ambient {
   position: fixed;
@@ -369,7 +375,7 @@
 
 .account-metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -384,6 +390,7 @@
 }
 
 .account-metric--gold { border-color: rgb(255 191 71 / 26%); background: linear-gradient(145deg, rgb(255 191 71 / 12%), transparent 55%), var(--account-surface); }
+.account-metric--community { border-color: rgb(240 8 54 / 32%); background: linear-gradient(145deg, rgb(240 8 54 / 16%), transparent 58%), var(--account-surface); }
 .account-metric__icon {
   display: grid;
   width: 2.7rem;
@@ -394,10 +401,12 @@
   color: #ff315d;
 }
 .account-metric--gold .account-metric__icon { color: var(--account-gold); }
+.account-metric--community .account-metric__icon { color: #ff315d; }
 .account-metric__icon svg { width: 1.4rem; fill: none; stroke: currentColor; stroke-width: 1.5; }
 .account-metric__label { display: block; color: rgb(255 255 255 / 48%); font-size: 0.61rem; font-weight: 900; letter-spacing: 0.16em; text-transform: uppercase; }
 .account-metric strong { display: block; margin: 0.25rem 0; color: #fff; font-size: clamp(1.35rem, 3vw, 2.25rem); line-height: 1.05; }
 .account-metric--gold strong { color: #ffe0a4; }
+.account-metric--community strong { color: #ff8ca5; }
 .account-metric p { margin: 0; color: rgb(255 255 255 / 48%); font-size: 0.72rem; line-height: 1.45; }
 
 .account-content-grid {

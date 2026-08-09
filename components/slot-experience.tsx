@@ -5,6 +5,9 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DiscordMark } from "@/components/discord-mark";
+import { SiteAtmosphere } from "@/components/site-atmosphere";
+import type { ExperienceStyle } from "@/lib/site-experience/presentation";
+import type { ExperienceEffects, SlotExperienceContent } from "@/lib/site-experience/types";
 import {
   SLOT_PREVIEW_DURATION_MS,
   SLOT_PREVIEW_REDUCED_DURATION_MS,
@@ -65,7 +68,15 @@ const SLOT_PREVIEW_SOUNDS = {
   celebration: "/slot/sons/celebration-chime.mp3",
 } as const;
 
-export function SlotExperience() {
+export function SlotExperience({
+  content,
+  effects,
+  themeStyle,
+}: {
+  content: SlotExperienceContent;
+  effects: ExperienceEffects;
+  themeStyle: ExperienceStyle;
+}) {
   const [accountState, setAccountState] = useState<AccountState>({
     status: "checking",
   });
@@ -237,7 +248,8 @@ export function SlotExperience() {
       : null;
 
   return (
-    <main className="slot-page">
+    <main className="slot-page" style={themeStyle}>
+      <SiteAtmosphere effects={effects} />
       <div className="slot-page__noise" aria-hidden />
       <div className="slot-page__flare slot-page__flare--one" aria-hidden />
       <div className="slot-page__flare slot-page__flare--two" aria-hidden />
@@ -253,7 +265,7 @@ export function SlotExperience() {
             Cabine
           </button>
           <button type="button" onClick={() => openPanel("rules")}>
-            Regras claras
+            {content.secondaryAction}
           </button>
           <Link href="/conta">Minha conta</Link>
           <Link className="slot-header__back" href="/">
@@ -273,16 +285,12 @@ export function SlotExperience() {
 
       <section className="slot-hero" aria-labelledby="slot-title">
         <div className="slot-hero__copy">
-          <span className="slot-kicker">A próxima experiência 6DNX</span>
+          <span className="slot-kicker">{content.heroEyebrow}</span>
           <h1 id="slot-title">
-            Slot da Sorte
-            <em>6DNX</em>
+            {content.heroTitle}
+            <em>{content.heroAccent}</em>
           </h1>
-          <p>
-            Uma experiência cinematográfica de fidelidade. Conheça a cabine,
-            veja o mascote reagir e entenda as regras — sem gastar moedas e sem
-            ativar um prêmio real nesta demonstração.
-          </p>
+          <p>{content.heroSupport}</p>
           <div className="slot-hero__chips" aria-label="Características planejadas">
             <span>Resultado no servidor</span>
             <span>Histórico verificável</span>
@@ -294,14 +302,14 @@ export function SlotExperience() {
               type="button"
               onClick={() => openPanel("machine")}
             >
-              Conhecer a experiência
+              {content.primaryAction}
             </button>
             <button
               className="slot-secondary-button"
               type="button"
               onClick={() => openPanel("rules")}
             >
-              Ver regras claras
+              {content.secondaryAction}
             </button>
           </div>
           <p className="slot-hero__account-status">
@@ -320,7 +328,7 @@ export function SlotExperience() {
             preload
             sizes="(max-width: 820px) 92vw, 560px"
           />
-          <span className="slot-hero__mascot-label">O guardião da cabine</span>
+          <span className="slot-hero__mascot-label">{content.mascotLabel}</span>
         </div>
 
         <p className="slot-hero__legal">
@@ -348,8 +356,8 @@ export function SlotExperience() {
             </button>
 
             <div className="slot-dialog__heading">
-              <span className="slot-kicker">Cabine visual 6DNX</span>
-              <h2 id="slot-machine-title">Conheça a experiência.</h2>
+              <span className="slot-kicker">{content.machineEyebrow}</span>
+              <h2 id="slot-machine-title">{content.machineTitle}</h2>
               <p>
                 Esta animação é determinística: não consome moedas, não escolhe
                 prêmio e não chama uma rota de giro.
@@ -456,8 +464,8 @@ export function SlotExperience() {
               ×
             </button>
             <div className="slot-dialog__heading">
-              <span className="slot-kicker">Diversão responsável</span>
-              <h2 id="slot-rules-title">Regras claras, antes de jogar.</h2>
+              <span className="slot-kicker">{content.rulesEyebrow}</span>
+              <h2 id="slot-rules-title">{content.rulesTitle}</h2>
               <p>
                 O visual pode ser intenso. A lógica precisa ser limitada,
                 explicável e auditável.

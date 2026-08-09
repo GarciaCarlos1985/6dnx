@@ -1149,3 +1149,107 @@ isolated test checkout, and an automated games-and-AI news area.
 - Every successful `main` push must be followed through the Vercel deployment
   until the production domain returns the new commit successfully.
 - `.env.local` is ignored by Git and must remain secret.
+
+### 2026-08-09 — Dual rewards administration (isolated, not released)
+
+- The reward domain now models two independent closed wallets:
+  `community` for **6DNX Coins** used in Discord missions/feedback/redemptions,
+  and `slot` for the future Slot experience. They share an immutable audit
+  infrastructure but never share or transfer balance.
+- A new admin surface at `/admin/recompensas` searches registered users and
+  shows both balances. Maycon can add/remove either balance, use the explicit
+  `+10 · Compra + feedback` preset after human validation, or debit the
+  documented community rewards (80/100/130/150 Coins). Every operation records
+  the admin actor, reason, optional note, request UUID and before/after balance;
+  retries reuse the same request UUID and cannot duplicate the adjustment.
+- `20260809210000_add_dual_loyalty_wallets.sql` is versioned locally but **not
+  applied in Production**. It depends on the still-pending fidelity migration, separates the
+  balance primary key by wallet, adds admin-only RPCs, rejects negative
+  balances and disables the legacy automatic purchase-credit trigger. The two
+  migrations passed the isolated rollback/concurrency laboratory and must be
+  applied in order during a separately authorized, controlled checkout
+  maintenance window; do not use a generic `db push`.
+- The account endpoint and `/conta` can present both balances while preserving
+  the legacy Slot balance alias. Missing reward schema remains fail-soft; order
+  history stays mandatory. Checkout, StorM, paid-order state and the Slot engine
+  were not changed or enabled.
+- Purchase + feedback remains a human-validated `+10` community action because
+  no trustworthy feedback-proof integration exists yet. No automatic reward
+  emission, migration application, commit, push or deployment occurred in this
+  checkpoint.
+
+### 2026-08-09 — Aline pilot identity and safe rollout boundary
+
+- The signed-in Aline account was resolved to exactly one `auth.users` UUID in
+  Production. Future reward operations must use that UUID, never a display
+  name or e-mail match. The full UUID and e-mail are deliberately not copied to
+  documentation, logs or browser code.
+- Production still does not expose the pending loyalty schema through
+  PostgREST. Therefore no Slot coin or 6DNX Coin was credited during this
+  checkpoint. Aline is the selected pilot only after the migrations pass the
+  controlled database gate and the admin can confirm both independent balances.
+- The fidelity base migration no longer creates the unapproved automatic
+  paid-order credit trigger. The dual-wallet migration also defaults to manual,
+  audited adjustments. Applying either migration with a generic `db push`
+  remains forbidden because older pending migrations could be included.
+
+### 2026-08-09 — Safe Visual Studio (isolated, not released)
+
+- `/admin/estudio` is a new organized editing surface for the approved home,
+  account and Slot text fields, page color tokens, local font presets and a
+  maximum of two bounded particle families. It provides local preview, saved
+  draft, explicit publish confirmation and revision restore without accepting
+  arbitrary CSS, HTML, scripts, URLs, particle counts or client code.
+- `20260809220000_add_site_experience_studio.sql` keeps public published
+  configuration, admin-only drafts and admin-only revisions in separate
+  tables. Public RLS can never reveal drafts or actor UUIDs. Publish and restore
+  require an authenticated admin session with AAL2, exact revision locking and
+  one atomic RPC. The migration does not read or write `product_catalog`,
+  checkout, commerce orders, StorM, reward wallets or the Slot outcome engine.
+- Public rendering uses a versioned validator and safe defaults. A missing or
+  unapplied Studio schema leaves the current site copy/theme intact. Effects
+  are deterministic and bounded to 24 nodes on desktop, 10 on narrow screens
+  and zero animation under `prefers-reduced-motion`.
+- Automated gates passed after integration: 76/76 tests, ESLint, strict
+  TypeScript and the 33-route production build. Browser verification on the
+  isolated dev server confirmed the real 21-product Supabase catalog, safe
+  anonymous `/conta`, the Pixi cabin with one canvas and no error overlay, and
+  `/admin/estudio` redirecting an anonymous session to the protected login.
+- No migration, reward credit, commit, push or deployment was performed. The
+  next irreversible step is a separate human-approved, migration-specific
+  rollout with rollback evidence; application publication remains a later and
+  separate authorization.
+
+### 2026-08-09 — Fidelity, dual wallets and Studio database laboratory
+
+- The pending migrations `20260806100000_add_user_fidelity.sql`,
+  `20260809210000_add_dual_loyalty_wallets.sql` and
+  `20260809220000_add_site_experience_studio.sql` were validated against the
+  official Supabase PostgreSQL 17.6 image in a disposable local container.
+  They remain **not applied in Production**; no remote DDL, reward credit,
+  checkout mutation or deployment occurred.
+- Four release blockers were corrected in the versioned SQL: composed-row
+  retry now uses `SELECT ... INTO`, wallet upserts target the named primary-key
+  constraint, `service_role` receives explicit read privilege without client
+  DML, and the fidelity base migration no longer creates the unapproved
+  automatic paid-order credit trigger. Defensive drops also remove that legacy
+  trigger/function pair if a drifted database contains them.
+- Fidelity and dual-wallet rollback probes passed idempotent retry, AAL2 admin
+  authorization, AAL1 and ordinary-user denial, independent `slot` and
+  `community` balances, non-negative balance enforcement, audit visibility,
+  absence of automatic purchase credit and unchanged fingerprints for
+  `product_catalog`, `commerce_orders` and `commerce_offers`.
+- Real multi-session probes passed: two calls with the same request UUID apply
+  only once; independent concurrent credits serialize without lost updates;
+  competing debits cannot make the balance negative. The Studio similarly
+  accepts only one concurrent draft save/publish and rejects the stale session
+  with a revision conflict rather than overwriting newer work.
+- The Studio database validator now matches the TypeScript boundary for the
+  48-KiB document ceiling, per-field limits, exact effect keys, dangerous or
+  invisible text rejection and WCAG contrast thresholds. Public reads expose
+  only the published singleton; drafts/revisions remain private and the
+  migration leaves catalog and commerce fingerprints unchanged.
+- Administrative authority remains claim-based
+  (`app_metadata.role = admin`) plus AAL2 for financial adjustments and Studio
+  publication. The operational e-mail is deliberately not hardcoded, and the
+  shared account's audit identity remains its single authenticated UUID.

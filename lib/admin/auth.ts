@@ -19,10 +19,16 @@ export type AdminAuthResult =
   | { ok: true; session: AdminSession }
   | {
       ok: false;
-      reason: "not-configured" | "unauthenticated" | "forbidden";
+      reason: "not-configured" | "unauthenticated" | "forbidden" | "mfa-required";
     };
 
-export async function getAdminSession(): Promise<AdminAuthResult> {
+type AdminAuthOptions = {
+  requireAal2?: boolean;
+};
+
+export async function getAdminSession(
+  options: AdminAuthOptions = {},
+): Promise<AdminAuthResult> {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false, reason: "not-configured" };
 
@@ -39,6 +45,9 @@ export async function getAdminSession(): Promise<AdminAuthResult> {
   ) as ClaimsRecord;
   if (appMetadata.role !== "admin") {
     return { ok: false, reason: "forbidden" };
+  }
+  if (options.requireAal2 && claims.aal !== "aal2") {
+    return { ok: false, reason: "mfa-required" };
   }
 
   return {
@@ -63,14 +72,16 @@ export async function requireAdminPage() {
   return result.session;
 }
 
-export async function requireAdminApi() {
-  const result = await getAdminSession();
+export async function requireAdminApi(options: AdminAuthOptions = {}) {
+  const result = await getAdminSession(options);
   if (result.ok) return result.session;
 
   return Response.json(
     {
       error:
-        result.reason === "forbidden"
+        result.reason === "mfa-required"
+          ? "Confirme o segundo fator da conta administrativa para continuar."
+          : result.reason === "forbidden"
           ? "Esta conta não possui permissão de administrador."
           : result.reason === "not-configured"
             ? "Supabase Auth ainda não está configurado."
@@ -78,7 +89,10 @@ export async function requireAdminApi() {
       code: result.reason,
     },
     {
-      status: result.reason === "forbidden" ? 403 : 401,
+      status:
+        result.reason === "forbidden" || result.reason === "mfa-required"
+          ? 403
+          : 401,
       headers: { "cache-control": "no-store" },
     },
   );

@@ -34,6 +34,7 @@ export function databaseErrorResponse(error: {
     error.message?.includes("product_catalog") ||
     error.message?.includes("checkout_banner") ||
     error.message?.includes("storefront_content") ||
+    error.message?.includes("site_experience_") ||
     error.message?.includes("commerce_coupons") ||
     error.message?.includes("commerce_order_discounts") ||
     error.message?.includes("demo_images");

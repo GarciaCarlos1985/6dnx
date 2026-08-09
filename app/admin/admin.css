@@ -3721,6 +3721,364 @@
   }
 }
 
+.admin-rewards-layout {
+  display: grid;
+  grid-template-columns: minmax(17rem, 22rem) minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--admin-line-strong);
+  background: rgb(255 255 255 / 1.5%);
+}
+
+.admin-reward-users {
+  min-height: 43rem;
+  border-right: 1px solid var(--admin-line);
+  background: rgb(0 0 0 / 28%);
+}
+
+.admin-reward-users form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--admin-line);
+  padding: 0.85rem;
+}
+
+.admin-reward-users input,
+.admin-reward-users form button {
+  min-height: 2.8rem;
+  border: 1px solid var(--admin-line-strong);
+  color: var(--admin-ink);
+  background: #090708;
+  padding: 0 0.75rem;
+}
+
+.admin-reward-users form button {
+  color: #fff;
+  background: var(--admin-red);
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.admin-reward-users nav {
+  display: grid;
+  max-height: 38rem;
+  overflow-y: auto;
+  scrollbar-color: #741126 transparent;
+  scrollbar-width: thin;
+}
+
+.admin-reward-users nav > button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  border: 0;
+  border-bottom: 1px solid var(--admin-line);
+  color: var(--admin-ink);
+  background: transparent;
+  padding: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-reward-users nav > button:hover,
+.admin-reward-users nav > button.is-active {
+  background: linear-gradient(90deg, rgb(227 6 44 / 16%), transparent);
+}
+
+.admin-reward-users nav > button.is-active { box-shadow: inset 2px 0 var(--admin-red-bright); }
+.admin-reward-users nav span { display: grid; gap: 0.18rem; min-width: 0; }
+.admin-reward-users nav span:last-child { text-align: right; }
+.admin-reward-users nav strong,
+.admin-reward-users nav small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-reward-users nav strong { font-size: 0.72rem; }
+.admin-reward-users nav b { color: #ff8ca5; }
+.admin-reward-users nav small,
+.admin-reward-users nav > p { color: var(--admin-muted); font-size: 0.62rem; }
+.admin-reward-users nav > p { padding: 1rem; }
+
+.admin-reward-workspace { display: grid; gap: 1.25rem; padding: clamp(1rem, 3vw, 2rem); }
+.admin-reward-user-heading h2 { margin: 0.35rem 0; font-family: var(--font-display), sans-serif; font-size: clamp(1.8rem, 4vw, 3rem); }
+.admin-reward-user-heading p { margin: 0; color: var(--admin-muted); }
+
+.admin-wallet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.admin-wallet-card {
+  display: grid;
+  gap: 0.65rem;
+  min-height: 15rem;
+  align-content: start;
+  border: 1px solid var(--admin-line-strong);
+  background: #080607;
+  padding: 1.2rem;
+}
+
+.admin-wallet-card--community { background: linear-gradient(145deg, rgb(227 6 44 / 15%), transparent 58%), #080607; }
+.admin-wallet-card--slot { background: linear-gradient(145deg, rgb(255 191 71 / 12%), transparent 58%), #080607; }
+.admin-wallet-card > span { color: var(--admin-muted); font-size: 0.62rem; font-weight: 900; letter-spacing: 0.13em; text-transform: uppercase; }
+.admin-wallet-card > strong { font-family: var(--font-display), sans-serif; font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 0.9; }
+.admin-wallet-card--community > strong { color: #ff8ca5; }
+.admin-wallet-card--slot > strong { color: #ffe0a4; }
+.admin-wallet-card p { min-height: 2.8rem; margin: 0; color: var(--admin-muted); font-size: 0.72rem; line-height: 1.55; }
+.admin-wallet-card button,
+.admin-community-rewards button {
+  min-height: 2.7rem;
+  border: 1px solid rgb(255 255 255 / 16%);
+  color: #fff;
+  background: var(--admin-red);
+  padding: 0.65rem 0.8rem;
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.admin-wallet-card button.is-muted { color: var(--admin-muted); background: rgb(255 255 255 / 4%); }
+.admin-wallet-card button:disabled,
+.admin-community-rewards button:disabled { cursor: not-allowed; opacity: 0.42; }
+
+.admin-reward-adjustment,
+.admin-community-rewards {
+  border: 1px solid var(--admin-line);
+  background: rgb(255 255 255 / 2%);
+  padding: 1.2rem;
+}
+.admin-reward-adjustment .admin-form-grid { margin: 1rem 0; }
+.admin-reward-adjustment > .admin-primary-button { min-width: 13rem; }
+.admin-community-rewards > div:last-child { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; margin-top: 1rem; }
+.admin-community-rewards button { display: grid; gap: 0.25rem; min-height: 4.5rem; background: rgb(255 255 255 / 4%); text-align: left; }
+.admin-community-rewards button strong { color: #ff8ca5; }
+.admin-community-rewards button span { color: var(--admin-muted); font-size: 0.58rem; line-height: 1.35; }
+.admin-reward-empty { display: grid; min-height: 32rem; place-content: center; text-align: center; }
+.admin-reward-empty strong { font-family: var(--font-display), sans-serif; font-size: 2rem; }
+.admin-reward-empty p { color: var(--admin-muted); }
+
+.admin-experience-page {
+  --experience-bg: #050405;
+  --experience-surface: #12080a;
+  --experience-accent: #ed002c;
+  --experience-heading: #ffffff;
+  --experience-body: #c9c3c5;
+}
+
+.admin-experience-page .admin-content-workspace { width: min(112rem, 100%); }
+
+.admin-experience-tabs {
+  position: sticky;
+  z-index: 12;
+  top: 4.8rem;
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  border: 1px solid var(--admin-line);
+  background: rgb(5 4 5 / 94%);
+  padding: 0.55rem;
+  backdrop-filter: blur(1rem);
+  scrollbar-width: thin;
+}
+
+.admin-experience-tabs button,
+.admin-effect-options button,
+.admin-experience-history button {
+  border: 1px solid var(--admin-line);
+  color: var(--admin-muted);
+  background: rgb(255 255 255 / 2%);
+  cursor: pointer;
+  font: inherit;
+}
+
+.admin-experience-tabs button {
+  flex: none;
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-experience-tabs button:hover,
+.admin-experience-tabs button:focus-visible,
+.admin-experience-tabs button.is-active,
+.admin-effect-options button:hover,
+.admin-effect-options button:focus-visible,
+.admin-effect-options button.is-active {
+  border-color: rgb(237 0 44 / 70%);
+  color: #fff;
+  background: rgb(237 0 44 / 14%);
+}
+
+.admin-experience-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(19rem, 27rem);
+  align-items: start;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.admin-experience-form { display: grid; gap: 1.25rem; }
+
+.admin-experience-form > .admin-form-section,
+.admin-experience-page > .admin-content-workspace > .admin-form-section {
+  border: 1px solid var(--admin-line);
+  background: var(--admin-panel);
+}
+
+.admin-experience-colors {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(7rem, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.admin-experience-colors label {
+  display: grid;
+  gap: 0.5rem;
+  border: 1px solid var(--admin-line);
+  background: #080607;
+  padding: 0.75rem;
+}
+
+.admin-experience-colors span {
+  color: var(--admin-muted);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-experience-colors input {
+  width: 100%;
+  height: 2.6rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.admin-experience-colors code { color: var(--admin-dim); font-size: 0.65rem; }
+
+.admin-effect-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.admin-effect-options button {
+  min-height: 3.5rem;
+  padding: 0.7rem;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.admin-experience-preview {
+  position: sticky;
+  z-index: 1;
+  top: 9.6rem;
+  min-height: 30rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--experience-accent) 70%, transparent);
+  color: var(--experience-body);
+  background:
+    radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--experience-accent) 20%, transparent), transparent 40%),
+    var(--experience-bg);
+  box-shadow: 0 1.5rem 5rem rgb(0 0 0 / 35%);
+}
+
+.admin-experience-preview > .site-atmosphere { z-index: 0; }
+
+.admin-experience-preview > div:last-child {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  align-content: center;
+  gap: 1rem;
+  min-height: 30rem;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--experience-surface) 84%, transparent), transparent 70%);
+}
+
+.admin-experience-preview span,
+.admin-experience-preview small {
+  color: var(--experience-accent);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-experience-preview h2 {
+  max-width: 14ch;
+  margin: 0;
+  color: var(--experience-heading);
+  font-family: var(--experience-display-font), sans-serif;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 0.94;
+}
+
+.admin-experience-preview p {
+  max-width: 38rem;
+  margin: 0;
+  color: var(--experience-body);
+  font-family: var(--experience-body-font), sans-serif;
+  line-height: 1.65;
+}
+
+.admin-experience-preview button {
+  min-height: 3rem;
+  border: 0;
+  color: #fff;
+  background: var(--experience-accent);
+  padding: 0.8rem 1rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-experience-preview small { color: color-mix(in srgb, var(--experience-body) 72%, transparent); line-height: 1.5; }
+
+.admin-experience-history {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0.65rem;
+}
+
+.admin-experience-history button {
+  display: grid;
+  gap: 0.35rem;
+  min-height: 4.5rem;
+  padding: 0.8rem;
+  text-align: left;
+}
+
+.admin-experience-history button:hover:not(:disabled),
+.admin-experience-history button:focus-visible:not(:disabled) { border-color: var(--admin-red-bright); }
+.admin-experience-history button:disabled { cursor: not-allowed; opacity: 0.45; }
+.admin-experience-history strong { color: #fff; font-size: 0.7rem; }
+.admin-experience-history span { color: var(--admin-muted); font-size: 0.62rem; }
+
+@media (max-width: 920px) {
+  .admin-rewards-layout { grid-template-columns: 1fr; }
+  .admin-reward-users { min-height: 0; border-right: 0; border-bottom: 1px solid var(--admin-line); }
+  .admin-reward-users nav { max-height: 18rem; }
+  .admin-experience-layout { grid-template-columns: 1fr; }
+  .admin-experience-preview { position: relative; top: 0; }
+  .admin-experience-colors { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .admin-wallet-grid,
+  .admin-community-rewards > div:last-child { grid-template-columns: 1fr; }
+  .admin-experience-colors,
+  .admin-effect-options { grid-template-columns: 1fr 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .admin-root *,
   .admin-root *::before,

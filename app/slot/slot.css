@@ -1,5 +1,5 @@
 .slot-page {
-  --slot-red: #ef0038;
+  --slot-red: var(--experience-accent, #ef0038);
   --slot-red-dark: #760019;
   --slot-gold: #f4bd42;
   --slot-ivory: #fff6e6;
@@ -10,9 +10,15 @@
   background:
     radial-gradient(circle at 78% 18%, rgba(190, 0, 39, 0.3), transparent 30rem),
     radial-gradient(circle at 18% 84%, rgba(106, 0, 31, 0.24), transparent 34rem),
-    linear-gradient(145deg, #040205 0%, #100207 46%, #020204 100%);
-  font-family: var(--font-body), sans-serif;
+    linear-gradient(145deg, var(--experience-bg, #040205) 0%, var(--experience-surface, #100207) 46%, #020204 100%);
+  font-family: var(--experience-body-font, var(--font-body)), sans-serif;
+  color: var(--experience-body, #fff);
 }
+
+.slot-page h1,
+.slot-page h2,
+.slot-page h3 { color: var(--experience-heading, #fff); font-family: var(--experience-display-font, var(--font-display)), sans-serif; }
+.slot-page > .site-atmosphere { z-index: 0; }
 
 .slot-page::before {
   position: fixed;

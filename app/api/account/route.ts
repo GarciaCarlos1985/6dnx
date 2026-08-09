@@ -43,10 +43,10 @@ export async function GET() {
   try {
     const repository = new AccountRepository(config);
     const orders = await repository.listOrdersByUser(user.id);
-    let balance: number | null = null;
+    let wallets: { slot: number; community: number } | null = null;
 
     try {
-      balance = await repository.getLoyaltyBalance(user.id);
+      wallets = await repository.getRewardBalances(user.id);
     } catch (err) {
       // Pedidos são a parte obrigatória da conta. Fidelidade é best-effort
       // enquanto o domínio ainda não foi homologado em todos os ambientes.
@@ -56,10 +56,15 @@ export async function GET() {
     return NextResponse.json(
       {
         user: { id: user.id, email: user.email, name },
-        balance,
+        // Alias retrocompatível consumido pela prévia da Slot.
+        balance: wallets?.slot ?? null,
+        wallets: {
+          slot: wallets?.slot ?? null,
+          community: wallets?.community ?? null,
+        },
         loyalty: {
-          available: balance !== null,
-          status: balance === null ? "preparing" : "ready",
+          available: wallets !== null,
+          status: wallets === null ? "preparing" : "ready",
         },
         orders,
       },

@@ -5,6 +5,12 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DiscordMark } from "@/components/discord-mark";
+import { SiteAtmosphere } from "@/components/site-atmosphere";
+import type { ExperienceStyle } from "@/lib/site-experience/presentation";
+import type {
+  AccountExperienceContent,
+  ExperienceEffects,
+} from "@/lib/site-experience/types";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type AccountOrder = {
@@ -20,6 +26,7 @@ type AccountOrder = {
 type AccountData = {
   user: { id: string; email: string | null; name: string };
   balance: number | null;
+  wallets?: { slot: number | null; community: number | null };
   loyalty?: { available: boolean; status: "ready" | "preparing" };
   orders: AccountOrder[];
 };
@@ -117,7 +124,15 @@ function AccountIcon({ name }: { name: "coins" | "orders" | "shield" }) {
   );
 }
 
-export function AccountDashboard() {
+export function AccountDashboard({
+  content,
+  effects,
+  themeStyle,
+}: {
+  content: AccountExperienceContent;
+  effects: ExperienceEffects;
+  themeStyle: ExperienceStyle;
+}) {
   const router = useRouter();
   const [state, setState] = useState<AccountState>({ status: "loading" });
   const [signingOut, setSigningOut] = useState(false);
@@ -143,7 +158,8 @@ export function AccountDashboard() {
   }, [router]);
 
   return (
-    <main className="account-page">
+    <main className="account-page" style={themeStyle}>
+      <SiteAtmosphere effects={effects} />
       <div className="account-page__ambient" aria-hidden />
       <div className="account-page__orb account-page__orb--one" aria-hidden />
       <div className="account-page__orb account-page__orb--two" aria-hidden />
@@ -153,7 +169,7 @@ export function AccountDashboard() {
           <span className="account-header__brand-mark">6</span>
           <span>
             <strong>6DNX</strong>
-            <small>Central do jogador</small>
+            <small>{content.navigationLabel}</small>
           </span>
         </Link>
         <nav className="account-header__nav" aria-label="Atalhos da conta">
@@ -174,7 +190,7 @@ export function AccountDashboard() {
 
       <section className="account-stage" aria-live="polite">
         {state.status === "loading" ? <AccountLoading /> : null}
-        {state.status === "anon" ? <AnonymousAccount /> : null}
+        {state.status === "anon" ? <AnonymousAccount content={content} /> : null}
         {state.status === "error" ? (
           <AccountError
             message={state.message}
@@ -189,6 +205,7 @@ export function AccountDashboard() {
         {state.status === "ready" ? (
           <AccountHome
             data={state.data}
+            content={content}
             onSignOut={handleSignOut}
             signingOut={signingOut}
           />
@@ -211,17 +228,13 @@ function AccountLoading() {
   );
 }
 
-function AnonymousAccount() {
+function AnonymousAccount({ content }: { content: AccountExperienceContent }) {
   return (
     <section className="account-state-card">
       <div className="account-state-card__copy">
-        <span className="account-kicker">Sua história começa aqui</span>
-        <h1>Entre para transformar compras em uma jornada 6DNX.</h1>
-        <p>
-          O login não é obrigatório para comprar. Ele serve para ligar novos
-          pedidos à sua conta, acompanhar entregas e liberar benefícios quando
-          o programa de fidelidade estiver ativo.
-        </p>
+        <span className="account-kicker">{content.anonymousEyebrow}</span>
+        <h1>{content.anonymousTitle}</h1>
+        <p>{content.anonymousSupport}</p>
         <div className="account-actions">
           <Link className="account-primary-button" href="/#inicio">
             Entrar com Google ou Discord
@@ -237,6 +250,7 @@ function AnonymousAccount() {
           alt=""
           width={768}
           height={768}
+          loading="eager"
           sizes="(max-width: 760px) 70vw, 360px"
         />
       </div>
@@ -278,10 +292,12 @@ function AccountError({
 
 function AccountHome({
   data,
+  content,
   onSignOut,
   signingOut,
 }: {
   data: AccountData;
+  content: AccountExperienceContent;
   onSignOut: () => void;
   signingOut: boolean;
 }) {
@@ -295,6 +311,8 @@ function AccountHome({
   );
   const firstName = data.user.name.trim().split(/\s+/)[0] || "Jogador";
   const initial = firstName.charAt(0).toUpperCase();
+  const slotBalance = data.wallets?.slot ?? data.balance;
+  const communityBalance = data.wallets?.community ?? null;
 
   return (
     <>
@@ -323,12 +341,20 @@ function AccountHome({
       </section>
 
       <section className="account-metrics" aria-label="Resumo da conta">
+        <article className="account-metric account-metric--community">
+          <span className="account-metric__icon"><AccountIcon name="coins" /></span>
+          <div>
+            <span className="account-metric__label">6DNX Coins</span>
+            <strong>{communityBalance === null ? "Em preparação" : communityBalance.toLocaleString("pt-BR")}</strong>
+            <p>{communityBalance === null ? "A carteira da comunidade ainda não foi homologada." : "Use nas trocas assistidas pelo ticket 6DNX."}</p>
+          </div>
+        </article>
         <article className="account-metric account-metric--gold">
           <span className="account-metric__icon"><AccountIcon name="coins" /></span>
           <div>
-            <span className="account-metric__label">Moedas 6DNX</span>
-            <strong>{data.balance === null ? "Em preparação" : data.balance.toLocaleString("pt-BR")}</strong>
-            <p>{data.balance === null ? "O saldo será exibido quando o Loyalty for homologado." : "Saldo fechado, sem saque ou conversão em dinheiro."}</p>
+            <span className="account-metric__label">Moedas da Slot</span>
+            <strong>{slotBalance === null ? "Em preparação" : slotBalance.toLocaleString("pt-BR")}</strong>
+            <p>{slotBalance === null ? "O saldo será exibido quando a carteira da Slot for homologada." : "Saldo fechado e exclusivo das experiências 6DNX."}</p>
           </div>
         </article>
         <article className="account-metric">
@@ -353,8 +379,8 @@ function AccountHome({
         <article className="account-panel account-panel--journey">
           <div className="account-panel__heading">
             <div>
-              <span className="account-kicker">Ecossistema 6DNX</span>
-              <h2>Sua jornada de benefícios</h2>
+              <span className="account-kicker">{content.journeyEyebrow}</span>
+              <h2>{content.journeyTitle}</h2>
             </div>
             <span className="account-pill">Evolução segura</span>
           </div>
@@ -369,7 +395,7 @@ function AccountHome({
             </li>
             <li className="account-journey__item">
               <span>03</span>
-              <div><strong>Ganhe moedas fechadas</strong><p>Ativação somente após o ledger de fidelidade ser homologado.</p></div>
+              <div><strong>Ganhe recompensas separadas</strong><p>6DNX Coins e Moedas da Slot possuem saldos e usos independentes.</p></div>
             </li>
             <li className="account-journey__item">
               <span>04</span>
@@ -389,8 +415,8 @@ function AccountHome({
             />
           </div>
           <div className="account-slot-card__copy">
-            <span className="account-kicker">Nova experiência</span>
-            <h2>Slot da Sorte 6DNX</h2>
+            <span className="account-kicker">{content.slotCardEyebrow}</span>
+            <h2>{content.slotCardTitle}</h2>
             <p>
               Uma experiência de fidelidade com moeda interna, resultado
               decidido no servidor e recompensas assistidas pelo Discord.
@@ -405,8 +431,8 @@ function AccountHome({
       <section className="account-panel account-orders-panel">
         <div className="account-panel__heading">
           <div>
-            <span className="account-kicker">Histórico operacional</span>
-            <h2>Meus pedidos</h2>
+            <span className="account-kicker">{content.ordersEyebrow}</span>
+            <h2>{content.ordersTitle}</h2>
           </div>
           <span className="account-pill">{data.orders.length} registro{data.orders.length === 1 ? "" : "s"}</span>
         </div>

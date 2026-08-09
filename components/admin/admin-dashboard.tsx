@@ -1328,11 +1328,11 @@ export function AdminDashboard({
             <small>Arrastar e ordenar os cards com confirmação</small>
           </p>
         </button>
-        <Link href="/admin/conteudo" className="admin-content-entry">
+        <Link href="/admin/estudio" className="admin-content-entry">
           <span aria-hidden>✎</span>
           <p>
-            <strong>Textos da vitrine</strong>
-            <small>Hero, títulos e descrições do catálogo</small>
+            <strong>Estúdio visual</strong>
+            <small>Textos, cores, fontes, efeitos, prévia e histórico</small>
           </p>
         </Link>
         <Link href="/admin/cupons" className="admin-content-entry">
@@ -1340,6 +1340,13 @@ export function AdminDashboard({
           <p>
             <strong>Cupons de desconto</strong>
             <small>Códigos, percentual, validade e campanhas</small>
+          </p>
+        </Link>
+        <Link href="/admin/recompensas" className="admin-content-entry">
+          <span aria-hidden>◆</span>
+          <p>
+            <strong>Moedas e 6DNX Coins</strong>
+            <small>Dois saldos separados, ajustes e trocas auditadas</small>
           </p>
         </Link>
         <nav className="admin-product-list" aria-label="Lista de produtos">

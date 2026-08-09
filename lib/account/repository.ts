@@ -18,6 +18,11 @@ export type AccountOrder = {
   createdAt: string;
 };
 
+export type AccountRewardBalances = {
+  slot: number;
+  community: number;
+};
+
 export class AccountDatabaseError extends Error {
   constructor(
     readonly operation: string,
@@ -70,12 +75,12 @@ export class AccountRepository {
    * ausência como indisponibilidade (`null`) em vez de falhar a tela toda ou
    * inventar um saldo zero.
    */
-  async getLoyaltyBalance(userId: string): Promise<number | null> {
+  async getRewardBalances(userId: string): Promise<AccountRewardBalances | null> {
     const result = await this.client
       .from("loyalty_balances")
-      .select("balance")
+      .select("wallet, balance")
       .eq("user_id", userId)
-      .maybeSingle();
+      .in("wallet", ["slot", "community"]);
 
     if (isMissingDatabaseRelation(result.error)) {
       // A fidelidade ainda não foi instalada neste ambiente. `null` informa
@@ -83,6 +88,13 @@ export class AccountRepository {
       return null;
     }
     if (result.error) throw databaseError("get-balance", result.error);
-    return Number(result.data?.balance ?? 0);
+    const balances: AccountRewardBalances = { slot: 0, community: 0 };
+    for (const row of result.data ?? []) {
+      const wallet = typeof row.wallet === "string" ? row.wallet : "";
+      if (wallet === "slot" || wallet === "community") {
+        balances[wallet] = Number(row.balance ?? 0);
+      }
+    }
+    return balances;
   }
 }

@@ -5,6 +5,7 @@ import { isMissingDatabaseRelation } from "../lib/account/errors.ts";
 
 test("account recognizes SQL and PostgREST missing-relation errors", () => {
   assert.equal(isMissingDatabaseRelation({ code: "42P01" }), true);
+  assert.equal(isMissingDatabaseRelation({ code: "PGRST204" }), true);
   assert.equal(isMissingDatabaseRelation({ code: "PGRST205" }), true);
   assert.equal(isMissingDatabaseRelation({ code: "42501" }), false);
   assert.equal(isMissingDatabaseRelation(null), false);
@@ -17,8 +18,8 @@ test("account keeps orders mandatory and loyalty balance best-effort", async () 
   );
   assert.match(route, /const orders = await repository\.listOrdersByUser/);
   assert.doesNotMatch(route, /Promise\.all/);
-  assert.match(route, /let balance: number \| null = null/);
-  assert.match(route, /status: balance === null \? "preparing" : "ready"/);
+  assert.match(route, /let wallets: \{ slot: number; community: number \} \| null = null/);
+  assert.match(route, /status: wallets === null \? "preparing" : "ready"/);
 });
 
 test("account preserves the authentication boundary and nullable loyalty contract", async () => {
@@ -32,9 +33,10 @@ test("account preserves the authentication boundary and nullable loyalty contrac
   const orderRead = route.indexOf("repository.listOrdersByUser(user.id)");
   assert.ok(authCheck >= 0 && orderRead > authCheck);
   assert.match(route, /status: 401/);
-  assert.match(repository, /Promise<number \| null>/);
+  assert.match(repository, /Promise<AccountRewardBalances \| null>/);
   assert.match(repository, /isMissingDatabaseRelation\(result\.error\)[\s\S]*return null/);
   assert.match(dashboard, /balance: number \| null/);
+  assert.match(dashboard, /wallets\?: \{ slot: number \| null; community: number \| null \}/);
 });
 
 test("slot preview cannot create a real spin or choose a random result", async () => {
@@ -66,7 +68,7 @@ test("slot stays a single hero with modal cabin, rules and mascot reactions", as
 
   assert.match(source, /type ExperiencePanel = "machine" \| "rules" \| null/);
   assert.match(source, />\s*Cabine\s*</);
-  assert.match(source, />\s*Regras claras\s*</);
+  assert.match(source, /\{content\.secondaryAction\}/);
   assert.match(source, /role="dialog"/);
   assert.match(source, /type MascotMood = "idle" \| "anticipation" \| "celebration"/);
   assert.doesNotMatch(source, /slot-console-section/);

@@ -42,13 +42,18 @@ moeda interna fechada + RTP < 100% (matemática, não promessa).
 
 | Fonte | Regra | Observação |
 |---|---|---|
-| **Compra paga** | Pedido `paid` de cadastrado → **R$ 1 = 1 moeda** (floor) | Já implementado (migration + trigger). Só entra quem já te pagou. |
+| **Fonte homologada** | Ainda não definida | Nenhum trigger automático está autorizado nesta fase. |
 | **Login diário** (recomendado) | Pequeno bônus diário (ex. **5 moedas/dia**) | Mantém o usuário voltando; teto diário. |
 | **Tempo no Discord** (futuro) | Horas conectadas → moedas, com teto diário | Requer integração com o bot. |
 
 **Invariante anti-fraude:** moeda é interna, **não vira R$ e não tem saque**.
 Como ela entra de forma limitada (via compra ou teto diário), o total de moedas
 existentes no sistema é **finito e previsível** — o dono nunca "banca a toa".
+
+> **Separação obrigatória:** estas são exclusivamente as Moedas da Slot
+> (`wallet='slot'`). Os **6DNX Coins** (`wallet='community'`) usados em missões,
+> feedback e trocas por keys no Discord nunca entram num giro, nunca pagam
+> prêmio da Slot e não podem ser transferidos para esta carteira.
 
 ## 5. Custo e limites (defaults — ajustáveis)
 
