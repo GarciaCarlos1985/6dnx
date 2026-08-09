@@ -2,6 +2,19 @@
 
 Last updated: 2026-08-09
 
+## Identidade de favicon 6DNX — release para main
+
+- O favicon genérico da Vercel foi substituído por um recorte determinístico da
+  arte oficial `public/logo-asas.png`: coroa, número 6 e asas sobre fundo
+  preto/carmesim. Nenhuma marca foi redesenhada ou gerada por IA.
+- `app/favicon.ico` contém tamanhos de 16 a 256 px e mantém a URL estável
+  `/favicon.ico`; `app/icon.png` (512 x 512) e `app/apple-icon.png`
+  (180 x 180) completam navegador, atalhos e dispositivos Apple.
+- O Next.js injeta automaticamente os links de ícone no `<head>`. A home e o
+  arquivo do favicon permanecem liberados para rastreamento; o Google ainda
+  depende de novo rastreamento/indexação para substituir o ícone antigo nos
+  resultados de pesquisa.
+
 ## Cupons comerciais + galeria demonstrativa — branch de revisão
 
 - A branch `codex/storefront-navigation-content` agora contém o sistema de
