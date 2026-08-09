@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { isMissingDatabaseRelation } from "@/lib/account/errors";
 
 type DatabaseConfig = {
   supabaseUrl: string;
@@ -15,10 +16,6 @@ export type AccountOrder = {
   amountCents: number;
   status: string;
   createdAt: string;
-};
-
-export type LoyaltyBalance = {
-  balance: number;
 };
 
 export class AccountDatabaseError extends Error {
@@ -70,18 +67,20 @@ export class AccountRepository {
   /**
    * Saldo de moedas de fidelidade. Como a coluna/tabela pode ainda não existir
    * (migration versionada, não aplicada) ou o usuário não ter linha, tratamos
-   * ausência como saldo 0 em vez de falhar a tela toda.
+   * ausência como indisponibilidade (`null`) em vez de falhar a tela toda ou
+   * inventar um saldo zero.
    */
-  async getLoyaltyBalance(userId: string): Promise<number> {
+  async getLoyaltyBalance(userId: string): Promise<number | null> {
     const result = await this.client
       .from("loyalty_balances")
       .select("balance")
       .eq("user_id", userId)
       .maybeSingle();
 
-    if (result.error && result.error.code === "42P01") {
-      // relation does not exist -> migration not applied yet; fail-soft to 0
-      return 0;
+    if (isMissingDatabaseRelation(result.error)) {
+      // A fidelidade ainda não foi instalada neste ambiente. `null` informa
+      // indisponibilidade sem inventar um saldo zero para o usuário.
+      return null;
     }
     if (result.error) throw databaseError("get-balance", result.error);
     return Number(result.data?.balance ?? 0);

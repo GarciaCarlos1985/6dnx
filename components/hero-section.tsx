@@ -4,7 +4,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
-import { HeroAuth } from "@/components/hero-auth";
+import type { StorefrontContent } from "@/lib/storefront-content/types";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -33,7 +33,7 @@ type ParticleStyle = CSSProperties & {
   "--particle-drift": string;
 };
 
-export function HeroSection() {
+export function HeroSection({ content }: { content: StorefrontContent }) {
   const sceneRef = useRef<HTMLElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
   const leftActorRef = useRef<HTMLDivElement>(null);
@@ -782,13 +782,11 @@ export function HeroSection() {
 
   return (
     <section
+      id="inicio"
       ref={sceneRef}
       className="hero-apocalypse relative flex w-full items-center justify-center overflow-hidden bg-transparent"
       aria-label="6DNX"
     >
-      <div className="hero-auth-anchor absolute right-5 top-5 z-[var(--z-hero-copy)]">
-        <HeroAuth />
-      </div>
       <div
         ref={backdropRef}
         className="hero-apocalypse-stage pointer-events-none absolute inset-0"
@@ -1040,12 +1038,14 @@ export function HeroSection() {
             </span>
           </h1>
           <p className="hero-copy-headline mb-0 text-balance text-[clamp(0.95rem,2.2vw,1.6rem)] font-extrabold uppercase tracking-[0.05em]">
-            Soluções <span className="italic text-primary">Incríveis</span>,{" "}
-            <span className="italic text-primary">Seguras</span> e Profissionais
+            {content.heroHeadlineLead}{" "}
+            <span className="italic text-primary">
+              {content.heroHeadlineAccent}
+            </span>{" "}
+            {content.heroHeadlineTail}
           </p>
           <p className="hero-copy-support mx-auto max-w-xl text-[0.65rem] uppercase leading-[1.45] tracking-[0.22em] md:text-xs">
-            Descubra soluções criadas para elevar sua experiência em diferentes
-            jogos.
+            {content.heroSupport}
           </p>
         </div>
       </div>
@@ -1056,11 +1056,11 @@ export function HeroSection() {
         aria-hidden
       >
         <p className="mx-auto max-w-2xl text-[clamp(1.4rem,4vw,2.75rem)] font-extrabold uppercase leading-[1.05] tracking-tight text-ink">
-          Informação clara. Compra assistida.{" "}
-          <span className="text-primary">Suporte humano.</span>
+          {content.heroRevealTitle}{" "}
+          <span className="text-primary">{content.heroRevealAccent}</span>
         </p>
         <p className="mx-auto mt-4 max-w-md text-[0.65rem] uppercase tracking-[0.24em] text-muted">
-          Escolha sua solução abaixo
+          {content.heroRevealSupport}
         </p>
       </div>
 
@@ -1071,7 +1071,7 @@ export function HeroSection() {
         aria-label="Comprar agora — ver soluções 6DNX"
       >
         <span className="hero-buy-key">
-          <span className="hero-buy-key__label">Comprar agora</span>
+          <span className="hero-buy-key__label">{content.heroCtaLabel}</span>
           <span ref={cueArrowRef} className="hero-buy-key__glow" aria-hidden />
         </span>
       </a>

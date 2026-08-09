@@ -31,10 +31,12 @@ import {
 } from "@/lib/product-catalog-layout";
 import { PixCheckoutModal } from "@/components/pix-checkout-modal";
 import { DiscordMark } from "@/components/discord-mark";
+import type { StorefrontContent } from "@/lib/storefront-content/types";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const PER_PAGE = CATALOG_CARDS_PER_ROW;
+const SHOW_GLOBAL_PRODUCT_PAGER = false;
 const MARGIN = 12;
 const GAP = 20;
 const INFO_W = 360;
@@ -1067,11 +1069,13 @@ export function ProductShowcase({
   checkoutAvailable,
   paymentTestAvailable,
   developerCreditUrl,
+  content,
 }: {
   catalogProducts: Product[];
   checkoutAvailable: boolean;
   paymentTestAvailable: boolean;
   developerCreditUrl: string | null;
+  content: StorefrontContent;
 }) {
   if (catalogProducts.length === 0) {
     return (
@@ -1114,6 +1118,7 @@ export function ProductShowcase({
       checkoutAvailable={checkoutAvailable}
       paymentTestAvailable={paymentTestAvailable}
       developerCreditUrl={developerCreditUrl}
+      content={content}
     />
   );
 }
@@ -1123,11 +1128,13 @@ function ProductCatalogShowcase({
   checkoutAvailable,
   paymentTestAvailable,
   developerCreditUrl,
+  content,
 }: {
   catalogProducts: Product[];
   checkoutAvailable: boolean;
   paymentTestAvailable: boolean;
   developerCreditUrl: string | null;
+  content: StorefrontContent;
 }) {
   const productCatalog = useMemo(
     () =>
@@ -1200,6 +1207,7 @@ function ProductCatalogShowcase({
   );
 
   useLayoutEffect(() => {
+    if (!SHOW_GLOBAL_PRODUCT_PAGER) return;
     const section = sectionRef.current;
     const pager = pagerRef.current;
     if (!section || !pager) return;
@@ -1539,11 +1547,10 @@ function ProductCatalogShowcase({
             id="produtos-heading"
             className="mb-3 text-[clamp(2rem,5vw,3.25rem)] tracking-tight text-ink"
           >
-            Soluções 6DNX
+            {content.catalogTitle}
           </h2>
           <p className="mx-auto max-w-2xl text-white/72">
-            Doze soluções ficam à vista. Cada fileira possui navegação própria
-            para explorar o restante do catálogo sem perder a posição.
+            {content.catalogDescription}
           </p>
         </div>
 
@@ -1557,13 +1564,13 @@ function ProductCatalogShowcase({
       >
         <div className="reveal-up relative z-[var(--z-content)] mx-auto mb-12 max-w-6xl text-center">
           <span className="text-[0.6rem] font-black uppercase tracking-[0.24em] text-primary">
-            Catálogo em profundidade
+            {content.continuationEyebrow}
           </span>
           <h2
             id="produtos-continuacao-heading"
             className="mt-3 text-[clamp(1.8rem,4vw,2.8rem)] tracking-tight text-ink"
           >
-            Continue explorando
+            {content.continuationTitle}
           </h2>
         </div>
 
@@ -1571,8 +1578,10 @@ function ProductCatalogShowcase({
 
         <nav
           ref={pagerRef}
-          className="product-pager relative z-[var(--z-content)] mx-auto mt-16 flex max-w-5xl flex-col items-center gap-4"
+          className={`product-pager relative z-[var(--z-content)] mx-auto mt-16 max-w-5xl flex-col items-center gap-4 ${SHOW_GLOBAL_PRODUCT_PAGER ? "flex" : "product-pager--disabled"}`}
           aria-label="Navegar por todas as fileiras de produtos"
+          aria-hidden={SHOW_GLOBAL_PRODUCT_PAGER ? undefined : true}
+          inert={SHOW_GLOBAL_PRODUCT_PAGER ? undefined : true}
         >
           <div className="flex items-center justify-center gap-1.5 sm:gap-3">
             <button
@@ -1728,7 +1737,6 @@ function ProductCatalogShowcase({
           >
             Desenvolvido por Developer Bicho
           </a>
-          {!developerCreditUrl ? <small>Contato em breve</small> : null}
         </footer>
       </section>
 

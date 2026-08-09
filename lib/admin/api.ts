@@ -30,7 +30,8 @@ export function databaseErrorResponse(error: {
     error.code === "42P01" ||
     error.code === "PGRST205" ||
     error.message?.includes("product_catalog") ||
-    error.message?.includes("checkout_banner");
+    error.message?.includes("checkout_banner") ||
+    error.message?.includes("storefront_content");
 
   return noStoreJson(
     {

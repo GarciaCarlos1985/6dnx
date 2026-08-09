@@ -42,15 +42,25 @@ export async function GET() {
 
   try {
     const repository = new AccountRepository(config);
-    const [orders, balance] = await Promise.all([
-      repository.listOrdersByUser(user.id),
-      repository.getLoyaltyBalance(user.id),
-    ]);
+    const orders = await repository.listOrdersByUser(user.id);
+    let balance: number | null = null;
+
+    try {
+      balance = await repository.getLoyaltyBalance(user.id);
+    } catch (err) {
+      // Pedidos são a parte obrigatória da conta. Fidelidade é best-effort
+      // enquanto o domínio ainda não foi homologado em todos os ambientes.
+      if (!(err instanceof AccountDatabaseError)) throw err;
+    }
 
     return NextResponse.json(
       {
         user: { id: user.id, email: user.email, name },
         balance,
+        loyalty: {
+          available: balance !== null,
+          status: balance === null ? "preparing" : "ready",
+        },
         orders,
       },
       { headers: { "cache-control": "no-store" } },

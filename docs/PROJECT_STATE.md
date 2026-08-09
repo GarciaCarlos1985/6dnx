@@ -1,6 +1,6 @@
 # 6DNX project state
 
-Last updated: 2026-08-06
+Last updated: 2026-08-09
 
 ## Handoff 2026-08-06 — estado real para qualquer agente que assumir
 
@@ -18,10 +18,13 @@ Last updated: 2026-08-06
   `SLOT_DA_SORTE_6DNX.md`; scripts `confirm-test-payment.mjs` e
   `investigate-order-083f6810.mjs` (somente leitura).
 
-### Migration de fidelidade — NÃO APLICADA (decisão do dono)
+### Migration completa de fidelidade — NÃO APLICADA (decisão do dono)
 - `supabase/migrations/20260806100000_add_user_fidelity.sql` está versionada
-  **mas NÃO foi aplicada em nenhum banco**. Sem ela: `/conta` mostra nome logado
-  mas saldo 0 e pedidos vazios (coluna `user_id` não existe em produção).
+  **mas NÃO foi aplicada em nenhum banco**. A compatibilidade emergencial
+  isolada de `commerce_orders.user_id` foi aplicada depois pelo trabalho
+  `ff82cac`; isso restaurou checkout e pedidos sem ativar ledger, moedas ou
+  Slot. Enquanto a migration completa continuar pendente, fidelidade deve ser
+  exibida como `preparing`/indisponível, nunca confundida com um saldo real.
 - Aplicar exige autorização explícita + teste em transação com ROLLBACK primeiro.
 
 ### Branches e PRs abertas
@@ -909,6 +912,137 @@ isolated test checkout, and an automated games-and-AI news area.
   project continuity is currently provided by `AGENTS.md` and this file.
 
 ## Safety status
+
+### 2026-08-09 — Storefront navigation and editable presentation copy (isolated)
+
+- The work remains isolated on `codex/storefront-navigation-content`; no
+  commit, push, deployment, or database migration has been performed.
+- The retained global `6 D N X` pager is reversibly hidden behind
+  `SHOW_GLOBAL_PRODUCT_PAGER = false`; its markup and behavior were not
+  deleted. Per-row arrows and adjacent-card previews now have stronger
+  contrast, glow, and fine-pointer feedback while reduced-motion remains
+  respected.
+- A fixed, translucent white navigation bar now links to the existing Home,
+  Products, News, Account, and `/slot` destinations. Google and Discord retain
+  their existing authentication flows with provider-specific presentation.
+- Hero and catalog presentation copy can be edited from `/admin/conteudo`.
+  The public storefront fails safely to versioned defaults while
+  `storefront_content` is absent; the admin editor stays read-only and explains
+  that the migration is pending.
+- `20260809120000_add_storefront_content_admin.sql` creates the singleton
+  content row, revisions, optimistic concurrency, and least-privilege RLS. It
+  is versioned for review only and **has not been applied**.
+- Footer copyright and developer credit now render in white. The obsolete
+  `Contato em breve` fallback was removed; the credit continues resolving the
+  validated server-side `DEVELOPER_CREDIT_URL` first. Checkout, commerce
+  offers, organizer behavior, StorM, and payment flags were not changed in
+  this work.
+
+### 2026-08-09 — Account resilience and Slot visual laboratory (isolated)
+
+- `/api/account` now treats loyalty as best-effort: user orders remain the
+  mandatory response, while an absent `loyalty_balances` relation (`42P01` or
+  PostgREST `PGRST205`) returns `balance: null` and a `preparing` status rather
+  than collapsing the complete account route. It does not invent a zero
+  balance and does not create or apply the future loyalty schema.
+- `/conta` was redesigned as a responsive player center with identity,
+  confirmed-purchase metrics, benefit journey, order history, explicit
+  anonymous/error states, and clear loyalty readiness. Purchases remain
+  possible without authentication; only future account-linked benefits use
+  the signed-in identity.
+- Storefront, account, and Slot navigation now expose a visible `Suporte`
+  action. It opens the existing server-side `/api/redirect`, which validates
+  `DISCORD_INVITE_URL` and never exposes or reuses a Discord webhook.
+- `/slot` is now one focused hero instead of a long presentation page. The
+  top navigation and hero CTAs open accessible in-place dialogs for the
+  centered cabin and for clear rules; Escape, backdrop, and close-button
+  dismissal preserve the page position and lock background scroll.
+- The supplied `slot-mascote.png` and `slot-modelos-mascote.png` remain as
+  immutable visual references. Runtime presentation now uses four individually
+  cut, transparent dragon assets (`dragon-*-v2.png`), so the mascot is no
+  longer trapped inside a white rectangular sheet. The transparent dragon
+  leads the hero, appears in account surfaces, and reacts inside the cabin in
+  idle, anticipation, and celebration states. `slot-layout.png` remains a
+  design reference in `public/slot` but is deliberately not downloaded at
+  runtime.
+- The cabin remains explicitly marked `PRÉVIA VISUAL` and `SEM PRÊMIO`: it
+  does not call a spin endpoint, mutate balance, consume coins, select a
+  random outcome, or deliver a reward.
+- The future real Slot remains gated by authentication, an immutable ledger,
+  server-side outcome, idempotency, provably-fair evidence, daily limits, and
+  separate human authorization. No loyalty/Slot migration, runtime endpoint,
+  commit, push, or deployment was performed in this checkpoint.
+
+### 2026-08-09 — DeepSeek account/Slot audit reconciliation
+
+- DeepSeek completed a read-only contract audit on isolated branch
+  `deepseek/account-slot-contract`, based on older `origin/main` commit
+  `0924c94`. Its two artifacts remain isolated and were not copied wholesale:
+  the report correctly described that older snapshot, but its claims that
+  `/api/account` was still coupled and that `/slot` did not exist are stale for
+  the current storefront worktree.
+- The useful contracts are now represented by green tests in
+  `tests/account-slot-experience.test.mts`: anonymous access remains `401`,
+  orders are mandatory, loyalty is best-effort and nullable, missing-relation
+  codes `42P01`/`PGRST205` are recognized, and the Slot preview cannot call a
+  spin endpoint or choose a random outcome in the browser.
+- The proposed `PGRST204 -> []` fallback for order history was deliberately
+  rejected. A missing `commerce_orders.user_id` column is a schema regression
+  and must remain visible as an operational failure; returning an empty list
+  would falsely tell a customer that no purchases exist. A present loyalty
+  table with no row may legitimately mean a real zero balance, while a missing
+  loyalty table continues to mean `null`/unavailable.
+- Release integration must preserve the already isolated compatibility and
+  payment-safety work (`ff82cac`, `06d9866`, `1faca6c`) before this visual
+  storefront branch can be proposed for publication. No merge, migration,
+  commit, push, or deployment was performed during this reconciliation.
+
+### 2026-08-09 — PixiJS Slot vertical slice (isolated)
+
+- The visual laboratory now uses `pixi.js@8.19.0` only after the centered
+  cabin dialog is opened. The homepage, checkout and admin do not import or
+  mount the WebGL canvas; no Unity or Spine runtime was added.
+- `components/slot-pixi-stage.tsx` owns a code-native PixiJS scene with four
+  masked columns identified by `6 D N X`, deterministic symbol rows, paylines,
+  lighting, particles and transparent mascot reactions. The principal dragon
+  floats and breathes continuously without a rectangular panel, while a second
+  ambient cutout appears behind the reels and changes motion and visibility as
+  anticipation and celebration progress. Each column now accelerates smoothly and stops on its own
+  staggered schedule instead of snapping all columns at once. Movement uses
+  Pixi ticker delta time, the renderer is limited to 60 FPS, reduced motion is
+  honored, and render resolution remains capped at 1.6 DPR.
+- `×2` and `+1` exist only as clearly labeled visual concepts in this preview;
+  they have no multiplier, free-spin, balance or prize effect. No fabricated
+  near-miss, false win message or deceptive odds behavior was introduced.
+- Three bounded sound cues derived from the owner-supplied files are now tied
+  to the same deterministic preview timeline: a button cue, one cue for each
+  sequential reel stop, and a short celebration chime. Playback can begin only
+  from the explicit `VER ANIMAÇÃO` user gesture, has a visible sound toggle,
+  uses moderate volume, and is stopped/cleaned when the cabin closes. The
+  supplied jackpot and coin-payout recordings are deliberately not referenced,
+  because this laboratory has no payout or prize to announce.
+- The first DeepSeek PixiJS performance audit was reconciled selectively. The
+  four WebGL blur filters now use one bounded pass, coarse-pointer devices turn
+  off antialiasing, cap resolution at 1.35 DPR and request low-power GPU mode,
+  while desktop retains the 1.6 DPR/high-performance profile. Partial Pixi
+  initialization failures now destroy the in-progress application instead of
+  leaking a renderer. Responsive scene composition, asset atlasing/WebP and
+  multi-session performance profiling remain future optimization work; they
+  are not required to preserve the current deterministic preview contract.
+- The demonstration remains intentionally non-commercial: it contains no
+  `fetch`, no `/api/slot` call, no `Math.random`, no balance mutation and no
+  reward decision. The visible result rows are fixed presentation fixtures;
+  a future real outcome must come exclusively from the authenticated server.
+- Browser QA caught and fixed a DOM ownership regression in the first draft:
+  Pixi had replaced React's loading node before React removed it. React now
+  retains its own nodes while Pixi appends and removes only its canvas. The
+  cabin opens, animates, celebrates, closes and reopens without a new runtime
+  error at desktop and at a 390 x 844 mobile viewport.
+- Browser QA confirmed the staggered order `6 -> D -> N -> X`, the visible
+  `Som ligado/desligado` control, and a clean interaction cycle. The complete
+  46-test suite, ESLint, strict TypeScript and the
+  27-route production build all pass. No commit, push, migration or deployment
+  was performed for this vertical slice.
 
 - The commerce migration and the webhook-only Production deployment were
   explicitly authorized and completed on 2026-08-02. No commit or push was

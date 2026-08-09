@@ -1,0 +1,18 @@
+export const SLOT_PREVIEW_REEL_STOP_START_MS = [
+  1700,
+  2300,
+  2900,
+  3500,
+] as const;
+
+export const SLOT_PREVIEW_REEL_STOP_DURATION_MS = 800;
+
+export const SLOT_PREVIEW_REEL_STOP_COMPLETION_MS = [
+  2500,
+  3100,
+  3700,
+  4300,
+] as const;
+
+export const SLOT_PREVIEW_DURATION_MS = 4500;
+export const SLOT_PREVIEW_REDUCED_DURATION_MS = 450;

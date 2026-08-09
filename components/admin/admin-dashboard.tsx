@@ -1255,6 +1255,13 @@ export function AdminDashboard({
             <small>Arrastar e ordenar os cards com confirmação</small>
           </p>
         </button>
+        <Link href="/admin/conteudo" className="admin-content-entry">
+          <span aria-hidden>✎</span>
+          <p>
+            <strong>Textos da vitrine</strong>
+            <small>Hero, títulos e descrições do catálogo</small>
+          </p>
+        </Link>
         <nav className="admin-product-list" aria-label="Lista de produtos">
           {filteredItems.map((item) => (
             <button
