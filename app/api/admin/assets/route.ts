@@ -29,10 +29,13 @@ export async function POST(request: NextRequest) {
 
   const declaredType = request.headers.get("content-type")?.toLowerCase();
   const sourceKey = request.headers.get("x-product-source-key");
+  const requestedSlot = request.headers.get("x-asset-slot");
   const assetSlot =
-    request.headers.get("x-asset-slot") === "checkout-banner"
+    requestedSlot === "checkout-banner"
       ? "checkout"
-      : "card";
+      : requestedSlot === "demo-gallery"
+        ? "demo"
+        : "card";
   if (!declaredType || !sourceKey) {
     return noStoreJson({ error: "Selecione uma imagem válida." }, 400);
   }

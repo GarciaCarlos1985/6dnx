@@ -71,6 +71,41 @@ function domainError(error: CheckoutDomainError) {
         },
         429,
       );
+    case "coupon-invalid":
+      return noStore(
+        {
+          error: "Cupom não encontrado, pausado ou inativo.",
+          code: error.code,
+        },
+        409,
+      );
+    case "coupon-not-started":
+      return noStore(
+        { error: "Este cupom ainda não entrou em vigor.", code: error.code },
+        409,
+      );
+    case "coupon-expired":
+      return noStore(
+        { error: "A validade deste cupom terminou.", code: error.code },
+        409,
+      );
+    case "coupon-minimum":
+      return noStore(
+        {
+          error: "Esta opção não alcança o valor mínimo exigido pelo cupom.",
+          code: error.code,
+        },
+        409,
+      );
+    case "coupon-schema-missing":
+      return noStore(
+        {
+          error:
+            "Os cupons ainda não foram habilitados no servidor. Remova o código para continuar sem desconto.",
+          code: error.code,
+        },
+        503,
+      );
     case "payment-creation-in-progress":
       return noStore(
         {
@@ -169,6 +204,7 @@ export async function POST(request: NextRequest) {
     payerName?: unknown;
     payerDocument?: unknown;
     requestId?: unknown;
+    couponCode?: unknown;
   };
   try {
     payload = await readBoundedJson<typeof payload>(request, MAX_BODY_BYTES);
@@ -189,7 +225,10 @@ export async function POST(request: NextRequest) {
     typeof payload.payerName !== "string" ||
     typeof payload.payerDocument !== "string" ||
     typeof payload.requestId !== "string" ||
-    !UUID_PATTERN.test(payload.requestId)
+    !UUID_PATTERN.test(payload.requestId) ||
+    (payload.couponCode !== undefined &&
+      (typeof payload.couponCode !== "string" ||
+        payload.couponCode.length > 32))
   ) {
     return noStore({ error: "Dados do pedido inválidos" }, 400);
   }
@@ -205,6 +244,8 @@ export async function POST(request: NextRequest) {
       clientRequestId: payload.requestId,
       requestFingerprint: requestFingerprint(request),
       userId,
+      couponCode:
+        typeof payload.couponCode === "string" ? payload.couponCode : null,
     });
     return noStore(result, 201);
   } catch (error) {

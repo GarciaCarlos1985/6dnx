@@ -6,6 +6,7 @@ import type {
   Variant,
 } from "@/lib/products";
 import {
+  MAX_PRODUCT_DEMO_IMAGES,
   MAX_PRODUCT_VARIANTS,
   variantAvailabilityStates,
 } from "@/lib/products";
@@ -20,6 +21,34 @@ const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 const YOUTUBE_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
 const MAX_FEATURES = 40;
 const MAX_TUTORIAL_STEPS = 80;
+
+function parseDemoImages(value: unknown, errors: string[]) {
+  if (!Array.isArray(value)) {
+    errors.push("Galeria demonstrativa deve ser uma lista.");
+    return [];
+  }
+  if (value.length > MAX_PRODUCT_DEMO_IMAGES) {
+    errors.push(
+      `A galeria aceita no máximo ${MAX_PRODUCT_DEMO_IMAGES} imagens.`,
+    );
+  }
+  return value.slice(0, MAX_PRODUCT_DEMO_IMAGES).flatMap((entry, index) => {
+    const image = optionalText(
+      entry,
+      `Imagem demonstrativa ${index + 1}`,
+      500,
+      errors,
+    );
+    if (!image) return [];
+    if (!image.startsWith("/") && !image.startsWith("https://")) {
+      errors.push(
+        `Imagem demonstrativa ${index + 1} deve ser um caminho do site ou uma URL HTTPS.`,
+      );
+      return [];
+    }
+    return [image];
+  });
+}
 
 type RecordLike = Record<string, unknown>;
 
@@ -353,6 +382,10 @@ export function parseProduct(value: unknown): ValidationResult<Product> {
       "Banner do checkout deve ser um caminho do site ou uma URL HTTPS.",
     );
   }
+  const hasDemoImages = Object.hasOwn(value, "demoImages");
+  const demoImages = hasDemoImages
+    ? parseDemoImages(value.demoImages, errors)
+    : undefined;
 
   const status: ProductStatus =
     value.status === "custom" || value.status === "sold-out"
@@ -402,6 +435,7 @@ export function parseProduct(value: unknown): ValidationResult<Product> {
     tutorialSteps: parseTutorialSteps(value.tutorialSteps, errors),
     image,
     ...(hasCheckoutBanner ? { checkoutBanner } : {}),
+    ...(hasDemoImages ? { demoImages } : {}),
     status,
     variants: parseVariants(value.variants, errors),
     youtubeId,

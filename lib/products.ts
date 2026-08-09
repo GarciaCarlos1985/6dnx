@@ -10,6 +10,7 @@ export type VariantAvailability =
   (typeof variantAvailabilityStates)[number];
 
 export const MAX_PRODUCT_VARIANTS = 40;
+export const MAX_PRODUCT_DEMO_IMAGES = 5;
 
 export type Variant = {
   name: string;
@@ -60,6 +61,8 @@ export type Product = {
    * card como fallback sem recortá-la.
    */
   checkoutBanner?: string | null;
+  /** Galeria demonstrativa exibida no popup direito (máximo de cinco artes). */
+  demoImages?: string[];
   status: ProductStatus;
   variants: Variant[];
   /** ID do vídeo do YouTube (o trecho depois de `v=`), quando disponível. */

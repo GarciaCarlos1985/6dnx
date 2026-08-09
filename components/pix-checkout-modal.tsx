@@ -25,6 +25,20 @@ type CheckoutSession = {
   amountLabel: string;
   pixCode: string;
   qrCode: string;
+  originalAmountLabel: string | null;
+  discountAmountLabel: string | null;
+  couponCode: string | null;
+  couponName: string | null;
+  discountPercent: number | null;
+};
+
+type CouponQuote = {
+  code: string;
+  name: string;
+  discountPercent: number;
+  originalAmountLabel: string;
+  discountAmountLabel: string;
+  finalAmountLabel: string;
 };
 
 type CheckoutPhase =
@@ -43,12 +57,24 @@ const UUID_PATTERN =
 const MAX_POLL_ATTEMPTS = 120;
 const POLL_DELAY_MS = 7_000;
 
-function requestStorageKey(productSlug: string, variantName: string) {
-  return `6dnx:checkout-request:${productSlug}:${variantName}`;
+function normalizeCouponInput(value: string) {
+  return value.trim().toUpperCase().replace(/\s+/g, "");
 }
 
-function getOrCreateRequestId(productSlug: string, variantName: string) {
-  const key = requestStorageKey(productSlug, variantName);
+function requestStorageKey(
+  productSlug: string,
+  variantName: string,
+  couponCode: string | null,
+) {
+  return `6dnx:checkout-request:${productSlug}:${variantName}:${couponCode ?? "sem-cupom"}`;
+}
+
+function getOrCreateRequestId(
+  productSlug: string,
+  variantName: string,
+  couponCode: string | null,
+) {
+  const key = requestStorageKey(productSlug, variantName, couponCode);
   const existing = window.sessionStorage.getItem(key);
   if (existing && UUID_PATTERN.test(existing)) return existing;
   const created = window.crypto.randomUUID();
@@ -56,8 +82,14 @@ function getOrCreateRequestId(productSlug: string, variantName: string) {
   return created;
 }
 
-function clearRequestId(productSlug: string, variantName: string) {
-  window.sessionStorage.removeItem(requestStorageKey(productSlug, variantName));
+function clearRequestId(
+  productSlug: string,
+  variantName: string,
+  couponCode: string | null,
+) {
+  window.sessionStorage.removeItem(
+    requestStorageKey(productSlug, variantName, couponCode),
+  );
 }
 
 async function responsePayload<T>(response: Response) {
@@ -99,6 +131,10 @@ export function PixCheckoutModal({
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [session, setSession] = useState<CheckoutSession | null>(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponQuote, setCouponQuote] = useState<CouponQuote | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponChecking, setCouponChecking] = useState(false);
   const [copied, setCopied] = useState(false);
   const [supportUrl, setSupportUrl] = useState(
     `/api/redirect?slug=${encodeURIComponent(product.slug)}`,
@@ -175,7 +211,7 @@ export function PixCheckoutModal({
         if (stopped) return;
 
         if (response.ok && payload.status === "paid") {
-          clearRequestId(product.slug, variant.name);
+          clearRequestId(product.slug, variant.name, session.couponCode);
           if (payload.supportUrl) setSupportUrl(payload.supportUrl);
           setPhase("paid");
           return;
@@ -232,6 +268,7 @@ export function PixCheckoutModal({
     requestControllerRef.current?.abort();
     requestControllerRef.current = controller;
 
+    const normalizedCoupon = normalizeCouponInput(couponCode) || null;
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -241,7 +278,12 @@ export function PixCheckoutModal({
           variantName: variant.name,
           payerName: normalizePayerName(payerName),
           payerDocument: normalizeCpf(payerDocument),
-          requestId: getOrCreateRequestId(product.slug, variant.name),
+          requestId: getOrCreateRequestId(
+            product.slug,
+            variant.name,
+            normalizedCoupon,
+          ),
+          couponCode: normalizedCoupon ?? undefined,
         }),
         cache: "no-store",
         signal: controller.signal,
@@ -254,17 +296,28 @@ export function PixCheckoutModal({
           pixCode?: string | null;
           qrCode?: string | null;
           status?: "pending" | "confirming" | "paid";
+          originalAmountLabel?: string | null;
+          discountAmountLabel?: string | null;
+          couponCode?: string | null;
+          couponName?: string | null;
+          discountPercent?: number | null;
         }
       >(response);
 
       if (!response.ok) {
+        if (payload.code?.startsWith("coupon-")) {
+          setCouponError(payload.error || "Não foi possível aplicar o cupom.");
+          setCouponQuote(null);
+          setPhase("form");
+          return;
+        }
         setError(payload.error || "Não foi possível iniciar o pedido.");
         setErrorCode(payload.code || null);
         setPhase("failed");
         return;
       }
       if (payload.status === "paid") {
-        clearRequestId(product.slug, variant.name);
+        clearRequestId(product.slug, variant.name, normalizedCoupon);
         setPhase("paid");
         return;
       }
@@ -286,6 +339,11 @@ export function PixCheckoutModal({
         amountLabel: payload.amountLabel,
         pixCode: payload.pixCode,
         qrCode: payload.qrCode,
+        originalAmountLabel: payload.originalAmountLabel ?? null,
+        discountAmountLabel: payload.discountAmountLabel ?? null,
+        couponCode: payload.couponCode ?? null,
+        couponName: payload.couponName ?? null,
+        discountPercent: payload.discountPercent ?? null,
       });
       setPhase(payload.status === "confirming" ? "confirming" : "pix");
     } catch (submitError) {
@@ -297,6 +355,50 @@ export function PixCheckoutModal({
       }
       setError("A conexão falhou antes de gerar o PIX. Tente novamente.");
       setPhase("failed");
+    }
+  };
+
+  const applyCoupon = async () => {
+    const normalized = normalizeCouponInput(couponCode);
+    setCouponError(null);
+    setCouponQuote(null);
+    if (normalized.length < 3) {
+      setCouponError("Digite um código de cupom válido.");
+      return;
+    }
+    setCouponChecking(true);
+    try {
+      const response = await fetch("/api/checkout/coupon", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          productSlug: product.slug,
+          variantName: variant.name,
+          couponCode: normalized,
+        }),
+        cache: "no-store",
+      });
+      const payload = await responsePayload<ApiError & Partial<CouponQuote>>(
+        response,
+      );
+      if (
+        !response.ok ||
+        !payload.code ||
+        !payload.name ||
+        !payload.originalAmountLabel ||
+        !payload.discountAmountLabel ||
+        !payload.finalAmountLabel ||
+        typeof payload.discountPercent !== "number"
+      ) {
+        setCouponError(payload.error || "Não foi possível aplicar o cupom.");
+        return;
+      }
+      setCouponCode(payload.code);
+      setCouponQuote(payload as CouponQuote);
+    } catch {
+      setCouponError("A validação do cupom falhou. Tente novamente.");
+    } finally {
+      setCouponChecking(false);
     }
   };
 
@@ -312,7 +414,11 @@ export function PixCheckoutModal({
   };
 
   const resetRequest = () => {
-    clearRequestId(product.slug, variant.name);
+    clearRequestId(
+      product.slug,
+      variant.name,
+      session?.couponCode ?? (normalizeCouponInput(couponCode) || null),
+    );
     setError(null);
     setErrorCode(null);
     setSession(null);
@@ -547,6 +653,65 @@ export function PixCheckoutModal({
                   </p>
                 )}
 
+                <div className="mt-5 border border-white/10 bg-black/30 p-3">
+                  <label className="block text-[0.65rem] font-bold uppercase tracking-[0.16em] text-white/78">
+                    Cupom de desconto <span className="text-white/38">· opcional</span>
+                    <span className="mt-2 flex gap-2">
+                      <input
+                        type="text"
+                        name="coupon-code"
+                        autoComplete="off"
+                        value={couponCode}
+                        onChange={(event) => {
+                          setCouponCode(
+                            event.target.value
+                              .toUpperCase()
+                              .replace(/[^A-Z0-9_-]/g, "")
+                              .slice(0, 32),
+                          );
+                          setCouponQuote(null);
+                          setCouponError(null);
+                        }}
+                        placeholder="EX.: BEMVINDO10"
+                        maxLength={32}
+                        className="h-11 min-w-0 flex-1 border border-white/14 bg-black/45 px-3 text-sm tracking-[0.08em] text-white outline-none transition focus:border-primary"
+                      />
+                      <button
+                        type="button"
+                        onClick={applyCoupon}
+                        disabled={couponChecking || !couponCode.trim()}
+                        className="min-h-11 shrink-0 border border-primary/65 bg-primary/10 px-4 text-[0.62rem] font-black uppercase tracking-[0.12em] text-primary transition hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
+                      >
+                        {couponChecking ? "Validando…" : "Aplicar"}
+                      </button>
+                    </span>
+                  </label>
+                  {couponError ? (
+                    <p className="mt-2 text-xs text-red-300" role="alert">
+                      {couponError}
+                    </p>
+                  ) : null}
+                  {couponQuote ? (
+                    <div className="mt-3 grid grid-cols-3 gap-2 border-t border-white/10 pt-3 text-center">
+                      <span>
+                        <small className="block text-[0.55rem] uppercase tracking-[0.12em] text-white/42">Original</small>
+                        <strong className="text-xs text-white/60 line-through">{couponQuote.originalAmountLabel}</strong>
+                      </span>
+                      <span>
+                        <small className="block text-[0.55rem] uppercase tracking-[0.12em] text-green-300/70">Desconto</small>
+                        <strong className="text-xs text-green-300">− {couponQuote.discountAmountLabel}</strong>
+                      </span>
+                      <span>
+                        <small className="block text-[0.55rem] uppercase tracking-[0.12em] text-white/42">Total PIX</small>
+                        <strong className="text-sm text-white">{couponQuote.finalAmountLabel}</strong>
+                      </span>
+                      <p className="col-span-3 text-[0.62rem] text-white/55">
+                        Cupom <strong className="text-primary">{couponQuote.code}</strong> · {couponQuote.name} · {couponQuote.discountPercent}% aplicado
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+
                 <button
                   type="submit"
                   disabled={phase === "creating"}
@@ -574,6 +739,14 @@ export function PixCheckoutModal({
                 <p className="mt-2 text-3xl font-black text-white">
                   {session.amountLabel}
                 </p>
+                {session.couponCode && session.discountAmountLabel ? (
+                  <div className="mt-2 text-xs text-green-300">
+                    <span className="mr-2 text-white/45 line-through">
+                      {session.originalAmountLabel}
+                    </span>
+                    Cupom {session.couponCode} economizou {session.discountAmountLabel}
+                  </div>
+                ) : null}
                 <div className="mx-auto mt-5 w-fit border border-primary/35 bg-white p-2 shadow-[0_0_35px_oklch(0.55_0.22_25_/_0.2)]">
                   <Image
                     src={session.qrCode}

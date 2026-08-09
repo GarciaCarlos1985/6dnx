@@ -10,8 +10,11 @@ import {
 import type { CheckoutRuntimeConfig } from "@/lib/checkout/config";
 import {
   CommerceRepository,
+  CouponRepositoryError,
   type CommerceOrder,
+  type OrderDiscountSnapshot,
 } from "@/lib/checkout/commerce-repository";
+import { isCouponCode, normalizeCouponCode } from "@/lib/coupons/validation";
 import {
   coordinatePaymentCreation,
   PaymentCreationCoordinationError,
@@ -67,7 +70,12 @@ export class CheckoutDomainError extends Error {
       | "payment-creation-ambiguous"
       | "payment-recovery-unavailable"
       | "payment-terminal"
-      | "payment-creation-retryable",
+      | "payment-creation-retryable"
+      | "coupon-invalid"
+      | "coupon-not-started"
+      | "coupon-expired"
+      | "coupon-minimum"
+      | "coupon-schema-missing",
   ) {
     super(code);
     this.name = "CheckoutDomainError";
@@ -145,6 +153,62 @@ export function formatAmountFromCents(amountCents: number) {
   }).format(amountCents / 100);
 }
 
+function couponDomainError(error: CouponRepositoryError) {
+  return new CheckoutDomainError(
+    error.reason === "coupon-request-conflict"
+      ? "request-conflict"
+      : error.reason,
+  );
+}
+
+function pricingPayload(
+  order: CommerceOrder,
+  discount: OrderDiscountSnapshot | null,
+) {
+  return {
+    amountLabel: formatAmountFromCents(order.amountCents),
+    originalAmountLabel: discount
+      ? formatAmountFromCents(discount.originalAmountCents)
+      : null,
+    discountAmountLabel: discount
+      ? formatAmountFromCents(discount.discountAmountCents)
+      : null,
+    couponCode: discount?.code ?? null,
+    couponName: discount?.name ?? null,
+    discountPercent: discount?.discountPercent ?? null,
+  };
+}
+
+export async function getCommerceCouponQuote(input: {
+  config: CheckoutRuntimeConfig;
+  productSlug: string;
+  variantName: string;
+  couponCode: string;
+}) {
+  const couponCode = normalizeCouponCode(input.couponCode);
+  if (!isCouponCode(couponCode)) {
+    throw new CheckoutDomainError("coupon-invalid");
+  }
+  const repository = new CommerceRepository(input.config);
+  const offer = await repository.findApprovedOffer(
+    input.productSlug,
+    input.variantName,
+  );
+  if (!offer) throw new CheckoutDomainError("offer-unavailable");
+  try {
+    const quote = await repository.quoteCoupon(offer.id, couponCode);
+    return {
+      ...quote,
+      originalAmountLabel: formatAmountFromCents(quote.originalAmountCents),
+      discountAmountLabel: formatAmountFromCents(quote.discountAmountCents),
+      finalAmountLabel: formatAmountFromCents(quote.finalAmountCents),
+    };
+  } catch (error) {
+    if (error instanceof CouponRepositoryError) throw couponDomainError(error);
+    throw error;
+  }
+}
+
 export async function createCommerceCheckout(input: {
   config: CheckoutRuntimeConfig;
   productSlug: string;
@@ -154,6 +218,7 @@ export async function createCommerceCheckout(input: {
   clientRequestId: string;
   requestFingerprint: string;
   userId?: string | null;
+  couponCode?: string | null;
 }) {
   const payerName = normalizePayerName(input.payerName);
   const payerDocument = normalizeCpf(input.payerDocument);
@@ -176,12 +241,23 @@ export async function createCommerceCheckout(input: {
     input.requestFingerprint,
     input.config.checkoutHashSecret,
   );
+  const couponCode = input.couponCode
+    ? normalizeCouponCode(input.couponCode)
+    : null;
+  if (couponCode && !isCouponCode(couponCode)) {
+    throw new CheckoutDomainError("coupon-invalid");
+  }
 
   let order = await repository.findOrderByClientRequestId(
     input.clientRequestId,
   );
+  let discount: OrderDiscountSnapshot | null = null;
   if (order) {
     if (!orderMatches(order, offer.id, payerName, payerDocumentHash)) {
+      throw new CheckoutDomainError("request-conflict");
+    }
+    discount = await repository.getOrderDiscount(order.id);
+    if ((discount?.code ?? null) !== couponCode) {
       throw new CheckoutDomainError("request-conflict");
     }
   } else {
@@ -195,17 +271,39 @@ export async function createCommerceCheckout(input: {
     }
 
     const id = randomUUID();
-    order = await repository.insertOrder({
-      id,
-      clientRequestId: input.clientRequestId,
-      externalId: `6DNX-${id}`,
-      offer,
-      payerName,
-      payerDocumentHash,
-      payerDocumentLast4: payerDocument.slice(-4),
-      requestFingerprintHash,
-      userId: input.userId ?? null,
-    });
+    try {
+      if (couponCode) {
+        const inserted = await repository.insertDiscountedOrder({
+          id,
+          clientRequestId: input.clientRequestId,
+          externalId: `6DNX-${id}`,
+          offer,
+          payerName,
+          payerDocumentHash,
+          payerDocumentLast4: payerDocument.slice(-4),
+          requestFingerprintHash,
+          userId: input.userId ?? null,
+          couponCode,
+        });
+        order = inserted.order;
+        discount = inserted.discount;
+      } else {
+        order = await repository.insertOrder({
+          id,
+          clientRequestId: input.clientRequestId,
+          externalId: `6DNX-${id}`,
+          offer,
+          payerName,
+          payerDocumentHash,
+          payerDocumentLast4: payerDocument.slice(-4),
+          requestFingerprintHash,
+          userId: input.userId ?? null,
+        });
+      }
+    } catch (error) {
+      if (error instanceof CouponRepositoryError) throw couponDomainError(error);
+      throw error;
+    }
     if (!orderMatches(order, offer.id, payerName, payerDocumentHash)) {
       throw new CheckoutDomainError("request-conflict");
     }
@@ -219,7 +317,7 @@ export async function createCommerceCheckout(input: {
         input.config.checkoutHashSecret,
       ),
       status: "paid" as const,
-      amountLabel: formatAmountFromCents(order.amountCents),
+      ...pricingPayload(order, discount),
       pixCode: null,
       qrCode: null,
     };
@@ -283,7 +381,7 @@ export async function createCommerceCheckout(input: {
         input.config.checkoutHashSecret,
       ),
       status: "paid" as const,
-      amountLabel: formatAmountFromCents(order.amountCents),
+      ...pricingPayload(order, discount),
       pixCode: null,
       qrCode: null,
     };
@@ -320,7 +418,7 @@ export async function createCommerceCheckout(input: {
       payment.status === "COMPLETO"
         ? ("confirming" as const)
         : ("pending" as const),
-    amountLabel: formatAmountFromCents(order.amountCents),
+    ...pricingPayload(order, discount),
     pixCode: payment.pixCode,
     qrCode: payment.qrCode,
   };

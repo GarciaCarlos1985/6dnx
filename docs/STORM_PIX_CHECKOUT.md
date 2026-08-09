@@ -291,6 +291,32 @@ Vercel. Não cole o valor em chat, documentação, GitHub ou captura de tela.
 Não aprove todas as ofertas por SQL em massa. O painel administrativo ainda não
 possui uma tela comercial própria para esse campo; isso é uma etapa separada.
 
+## Cupons de desconto — contrato server-side
+
+O cupom é opcional. Sem código, o checkout segue exatamente o fluxo PIX já
+existente. Com código, a aplicação consulta a oferta comercial aprovada e chama
+uma RPC transacional que calcula o percentual dentro do PostgreSQL. O navegador
+envia somente `productSlug`, `variantName` e `couponCode`; nenhum total, desconto
+ou preço informado pelo cliente é aceito como fonte de verdade.
+
+A migration `20260809180000_add_commerce_coupons.sql` cria:
+
+- `commerce_coupons`, administrada somente por usuários com papel de admin;
+- `commerce_order_discounts`, com a fotografia imutável do cupom usado;
+- `quote_commerce_coupon`, somente para o backend validar a prévia;
+- `create_discounted_commerce_order`, que bloqueia a oferta/cupom, recalcula o
+  total, cria pedido e fotografia na mesma transação.
+
+O valor final nunca pode chegar a zero. Cupom inativo, fora da validade ou
+abaixo da compra mínima falha antes da criação do pedido e da chamada à StorM.
+Depois do pedido, o fluxo de criação idempotente do PIX, webhook, reconciliação
+e Discord permanece o mesmo e usa o valor final persistido no pedido.
+
+Esta migration é versionada, mas não deve ser aplicada por `supabase db push`
+genérico. Audite o histórico remoto e aplique o arquivo exato somente depois de
+revisão humana. Publicar o código antes da migration não interrompe compras sem
+cupom; apenas a validação de cupons responde indisponível de forma controlada.
+
 ## Estados e prova de pagamento
 
 ```text

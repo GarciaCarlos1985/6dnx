@@ -68,6 +68,20 @@ export async function PUT(
     );
   }
   if (
+    parsed.value.product.demoImages?.some(
+      (image) =>
+        !isAllowedProductImage(image, getPublicSupabaseConfig()?.url),
+    )
+  ) {
+    return noStoreJson(
+      {
+        error:
+          "Use na galeria apenas imagens do site ou enviadas pelo próprio painel.",
+      },
+      400,
+    );
+  }
+  if (
     parsed.value.product.checkoutBanner &&
     !isAllowedProductImage(
       parsed.value.product.checkoutBanner,

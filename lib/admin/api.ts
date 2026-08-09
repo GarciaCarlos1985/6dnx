@@ -23,6 +23,8 @@ export function databaseErrorResponse(error: {
   message?: string;
 }) {
   const duplicate = error.code === "23505";
+  const duplicateCoupon =
+    duplicate && Boolean(error.message?.includes("commerce_coupons"));
   const catalogInvalid = error.code === "CATALOG_INVALID";
   const catalogChanged = error.code === "40001";
   const invalidCatalogOrder = error.code === "22023";
@@ -31,11 +33,16 @@ export function databaseErrorResponse(error: {
     error.code === "PGRST205" ||
     error.message?.includes("product_catalog") ||
     error.message?.includes("checkout_banner") ||
-    error.message?.includes("storefront_content");
+    error.message?.includes("storefront_content") ||
+    error.message?.includes("commerce_coupons") ||
+    error.message?.includes("commerce_order_discounts") ||
+    error.message?.includes("demo_images");
 
   return noStoreJson(
     {
-      error: duplicate
+      error: duplicateCoupon
+        ? "Já existe um cupom com este código."
+        : duplicate
         ? "Já existe um produto com essa rota."
         : catalogInvalid
           ? "O catálogo atual contém um campo incompatível. Corrija a fonte antes de importar; nenhum card foi gravado."
@@ -46,8 +53,10 @@ export function databaseErrorResponse(error: {
         : schemaMissing
           ? "O banco do painel ainda não foi preparado. Revise e aplique a migração documentada."
           : "O Supabase recusou a alteração. Nenhum dado foi perdido.",
-      code: duplicate
-        ? "duplicate-slug"
+      code: duplicateCoupon
+        ? "coupon-duplicate"
+        : duplicate
+          ? "duplicate-slug"
         : catalogInvalid
           ? "catalog-invalid"
         : catalogChanged

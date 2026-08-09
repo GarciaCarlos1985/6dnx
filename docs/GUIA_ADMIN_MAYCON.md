@@ -401,6 +401,38 @@ o produto e clique em **Restaurar card**.
 - **Ver site:** abre a loja em outra aba para conferência;
 - **Sair:** encerra a sessão administrativa.
 
+## Galeria demonstrativa do popup
+
+Na aba **Visual** de cada produto, use **Galeria demonstrativa** para enviar até
+cinco imagens 16:9. Elas aparecem no popup da direita quando o cliente abre o
+card. O site troca as imagens automaticamente e também mostra setas grandes
+para avançar ou voltar em loop.
+
+- **Adicionar imagens:** aceita JPG, PNG, WEBP ou AVIF de até 5 MB;
+- **Setas da miniatura:** mudam a ordem da apresentação;
+- **Remover:** retira somente aquela arte da galeria;
+- galeria vazia mantém “Demonstração em preparação” e não quebra o card.
+
+Depois de organizar, faça a revisão normal e salve o produto. A imagem principal
+do card e o banner do checkout são campos separados; mexer na galeria não troca
+nenhum deles.
+
+## Cupons de desconto
+
+Abra **Cupons de desconto** na central de comando. Um cupom possui:
+
+- código que o cliente digita;
+- nome interno da campanha;
+- percentual inteiro de 1% a 90%;
+- compra mínima opcional;
+- data de início e validade opcionais;
+- status rascunho, ativo, pausado ou arquivado.
+
+Somente **Ativo** funciona no checkout. Prefira **Pausar** para interromper uma
+campanha temporariamente e **Arquivar** para encerrar sem apagar o histórico. O
+preço final é calculado pelo servidor a partir da oferta comercial aprovada; o
+administrador não precisa editar preço de produto para criar uma campanha.
+
 ## Campos que exigem cuidado
 
 ### ID do vídeo no YouTube

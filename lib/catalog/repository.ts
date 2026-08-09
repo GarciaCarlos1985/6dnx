@@ -41,6 +41,7 @@ type CatalogRow = {
   tutorial_steps: unknown;
   image: string;
   checkout_banner?: string | null;
+  demo_images?: unknown;
   status: string;
   variants: unknown;
   youtube_id: string | null;
@@ -79,6 +80,7 @@ function rowProductCandidate(row: CatalogRow) {
     ...(row.checkout_banner !== undefined
       ? { checkoutBanner: row.checkout_banner }
       : {}),
+    ...(row.demo_images !== undefined ? { demoImages: row.demo_images } : {}),
     status: row.status,
     variants: row.variants,
     youtubeId: row.youtube_id ?? undefined,
@@ -127,6 +129,9 @@ export function catalogMutationColumns(
     image: product.image,
     ...(Object.hasOwn(product, "checkoutBanner")
       ? { checkout_banner: product.checkoutBanner ?? null }
+      : {}),
+    ...(Object.hasOwn(product, "demoImages")
+      ? { demo_images: product.demoImages ?? [] }
       : {}),
     status: product.status,
     variants: product.variants,

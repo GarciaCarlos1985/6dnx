@@ -811,6 +811,115 @@
   line-height: 1.35;
 }
 
+.admin-coupon-layout {
+  display: grid;
+  grid-template-columns: minmax(17rem, 22rem) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.admin-coupon-list,
+.admin-coupon-form {
+  border: 1px solid var(--admin-line);
+  background: rgb(8 6 7 / 82%);
+}
+
+.admin-coupon-list {
+  display: grid;
+  gap: 0;
+  max-height: 42rem;
+  overflow: auto;
+}
+
+.admin-coupon-list__tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.admin-coupon-list__tools input,
+.admin-coupon-list__tools button {
+  min-height: 2.75rem;
+  border: 1px solid var(--admin-line);
+  color: var(--admin-ink);
+  background: rgb(0 0 0 / 35%);
+  padding: 0.7rem;
+}
+
+.admin-coupon-list__tools button {
+  border-color: var(--admin-line-strong);
+  color: var(--admin-red-bright);
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-coupon-list > button {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 0;
+  border-bottom: 1px solid var(--admin-line);
+  color: var(--admin-ink);
+  background: transparent;
+  padding: 1rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-coupon-list > button:hover,
+.admin-coupon-list > button.is-active {
+  background: rgb(227 6 44 / 9%);
+  box-shadow: inset 3px 0 var(--admin-red-bright);
+}
+
+.admin-coupon-list > button span { display: grid; gap: 0.25rem; }
+.admin-coupon-list > button span:last-child { text-align: right; }
+.admin-coupon-list > button small,
+.admin-coupon-list > p { color: var(--admin-muted); font-size: 0.68rem; }
+.admin-coupon-list > p { padding: 1rem; }
+
+.admin-coupon-form { padding: clamp(1rem, 3vw, 2rem); }
+.admin-coupon-form .admin-form-grid { margin-top: 1.5rem; }
+
+.admin-coupon-summary {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.45rem 1rem;
+  align-items: center;
+  margin-top: 1.5rem;
+  border: 1px solid rgb(85 224 120 / 25%);
+  background: rgb(85 224 120 / 5%);
+  padding: 1rem;
+}
+
+.admin-coupon-summary > span,
+.admin-coupon-summary > small { color: var(--admin-muted); font-size: 0.64rem; }
+.admin-coupon-summary > strong { letter-spacing: 0.12em; }
+.admin-coupon-summary > b { color: var(--admin-green); }
+.admin-coupon-summary > small { grid-column: 2 / -1; }
+
+.admin-coupon-archive {
+  margin-top: 1rem;
+  min-height: 2.75rem;
+  border: 1px solid rgb(255 255 255 / 14%);
+  color: var(--admin-muted);
+  background: transparent;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+@media (max-width: 880px) {
+  .admin-coupon-layout { grid-template-columns: 1fr; }
+  .admin-coupon-list { max-height: 18rem; }
+}
+
 .admin-content-entry {
   display: grid;
   grid-template-columns: 2.2rem 1fr;
@@ -2279,6 +2388,143 @@
   width: 100%;
 }
 
+.admin-demo-gallery {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--admin-line);
+  background:
+    radial-gradient(circle at 88% 12%, rgb(227 6 44 / 10%), transparent 28%),
+    #080607;
+  padding: clamp(1rem, 2vw, 1.5rem);
+}
+
+.admin-demo-gallery__heading,
+.admin-demo-gallery__actions,
+.admin-demo-gallery__controls {
+  display: flex;
+  align-items: center;
+}
+
+.admin-demo-gallery__heading {
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-demo-gallery__heading h3,
+.admin-demo-gallery__heading p,
+.admin-demo-gallery__empty p {
+  margin: 0;
+}
+
+.admin-demo-gallery__heading h3 {
+  margin-top: 0.35rem;
+  font: 400 clamp(1.15rem, 2vw, 1.5rem) var(--font-display), sans-serif;
+}
+
+.admin-demo-gallery__heading p,
+.admin-demo-gallery__empty p,
+.admin-demo-gallery__actions small {
+  max-width: 42rem;
+  color: var(--admin-muted);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+.admin-demo-gallery__heading > strong {
+  min-width: 4.4rem;
+  border: 1px solid rgb(227 6 44 / 42%);
+  color: var(--admin-red-bright);
+  background: rgb(227 6 44 / 8%);
+  padding: 0.65rem 0.75rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+
+.admin-demo-gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-demo-gallery__grid li {
+  min-width: 0;
+  border: 1px solid var(--admin-line);
+  background: #030203;
+}
+
+.admin-demo-gallery__preview {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background-position: center;
+  background-size: cover;
+}
+
+.admin-demo-gallery__preview::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(180deg, rgb(0 0 0 / 8%), rgb(0 0 0 / 68%));
+}
+
+.admin-demo-gallery__preview span {
+  position: absolute;
+  z-index: 1;
+  right: 0.45rem;
+  bottom: 0.35rem;
+  color: white;
+  font: 400 0.72rem var(--font-display), sans-serif;
+}
+
+.admin-demo-gallery__controls {
+  justify-content: space-between;
+  gap: 0.25rem;
+  padding: 0.35rem;
+}
+
+.admin-demo-gallery__controls button {
+  min-height: 2rem;
+  border: 1px solid rgb(255 255 255 / 12%);
+  color: var(--admin-ink);
+  background: rgb(255 255 255 / 3%);
+  padding: 0.35rem 0.5rem;
+  font-size: 0.56rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.admin-demo-gallery__controls button:hover:not(:disabled) {
+  border-color: var(--admin-red-bright);
+  background: rgb(227 6 44 / 12%);
+}
+
+.admin-demo-gallery__controls button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.admin-demo-gallery__empty {
+  border: 1px dashed rgb(255 255 255 / 15%);
+  background: rgb(255 255 255 / 1.5%);
+  padding: 1rem;
+}
+
+.admin-demo-gallery__empty strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.74rem;
+}
+
+.admin-demo-gallery__actions {
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
 .admin-color-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3293,6 +3539,14 @@
   .admin-publication-options,
   .admin-protection-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-demo-gallery__heading {
+    align-items: flex-start;
+  }
+
+  .admin-demo-gallery__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .admin-editor-tabs {

@@ -464,6 +464,101 @@ function ProductPurchasePanel({
 }
 
 function ProductMediaPreview({ product }: { product: Product }) {
+  const demoImages = useMemo(
+    () =>
+      (product.demoImages ?? [])
+        .filter((image): image is string => Boolean(image))
+        .slice(0, 5),
+    [product.demoImages],
+  );
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  const move = useCallback(
+    (direction: -1 | 1) => {
+      if (demoImages.length < 2) return;
+      setActiveIndex((current) =>
+        (current + direction + demoImages.length) % demoImages.length,
+      );
+    },
+    [demoImages.length],
+  );
+
+  useEffect(() => {
+    if (
+      demoImages.length < 2 ||
+      paused ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    const interval = window.setInterval(() => move(1), 4_500);
+    return () => window.clearInterval(interval);
+  }, [demoImages.length, move, paused]);
+
+  if (demoImages.length) {
+    const visibleIndex = activeIndex % demoImages.length;
+    const activeImage = demoImages[visibleIndex] ?? demoImages[0];
+    return (
+      <div
+        className="relative h-full min-h-52 overflow-hidden bg-black"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        <div
+          key={`${product.slug}-${visibleIndex}-${activeImage}`}
+          className="product-demo-slide absolute inset-0"
+        >
+          <Image
+            src={activeImage}
+            alt={`Demonstração ${visibleIndex + 1} de ${demoImages.length} — ${product.title}`}
+            fill
+            sizes="(max-width: 1023px) 92vw, 420px"
+            className="object-cover"
+          />
+        </div>
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.18),transparent_48%,rgba(0,0,0,.88))]" />
+        <div className="pointer-events-none absolute left-4 top-4 border border-primary/65 bg-black/80 px-3 py-2 text-[0.52rem] font-black uppercase tracking-[0.2em] text-white shadow-[0_0_28px_rgba(227,6,44,.3)]">
+          6DNX // demonstração {visibleIndex + 1}/{demoImages.length}
+        </div>
+        {demoImages.length > 1 ? (
+          <div className="absolute inset-x-0 bottom-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-gradient-to-t from-black via-black/85 to-transparent px-4 pb-4 pt-10">
+            <button
+              type="button"
+              className="product-demo-arrow justify-self-start"
+              onClick={() => move(-1)}
+              aria-label={`Ver demonstração anterior de ${product.title}`}
+            >
+              <span aria-hidden>‹</span>
+              Anterior
+            </button>
+            <div className="flex items-center gap-1.5" aria-hidden>
+              {demoImages.map((_image, index) => (
+                <span
+                  key={index}
+                  className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
+                    index === visibleIndex
+                      ? "w-6 bg-primary"
+                      : "w-1.5 bg-white/45"
+                  }`}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              className="product-demo-arrow justify-self-end"
+              onClick={() => move(1)}
+              aria-label={`Ver próxima demonstração de ${product.title}`}
+            >
+              Próxima
+              <span aria-hidden>›</span>
+            </button>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="relative h-full min-h-52 overflow-hidden bg-black">
       <Image
@@ -688,7 +783,7 @@ function Popups({
           className="product-popup product-popup--video-right fixed z-[80] overflow-hidden border border-primary/40 bg-black shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)]"
           style={placement.video}
         >
-          <ProductMediaPreview product={product} />
+          <ProductMediaPreview key={product.slug} product={product} />
         </section>
       </div>
 
@@ -2041,7 +2136,7 @@ function MobileSheet({
 
         <div className="product-scrollbar min-h-0 flex-1 overflow-y-auto">
           <div className="aspect-video w-full bg-black">
-            <ProductMediaPreview product={product} />
+            <ProductMediaPreview key={product.slug} product={product} />
           </div>
 
           <div className="px-4 py-3">

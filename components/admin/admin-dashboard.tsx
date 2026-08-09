@@ -13,6 +13,7 @@ import type {
 } from "@/lib/catalog/types";
 import {
   isRustCloneCatalogKey,
+  MAX_PRODUCT_DEMO_IMAGES,
   MAX_PRODUCT_VARIANTS,
   priceFrom,
   productStatusLabel,
@@ -588,6 +589,7 @@ export function AdminDashboard({
   const [organizingOrder, setOrganizingOrder] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const checkoutBannerInputRef = useRef<HTMLInputElement>(null);
+  const demoImagesInputRef = useRef<HTMLInputElement>(null);
 
   const dirty = Boolean(draft && fingerprint(draft) !== savedFingerprint);
   const publishedCount = items.filter(
@@ -1050,6 +1052,77 @@ export function AdminDashboard({
     }
   };
 
+  const uploadDemoImages = async (files: FileList) => {
+    if (!draft || demoMode || busy || files.length === 0) return;
+    const currentImages = draft.product.demoImages ?? [];
+    const availableSlots = MAX_PRODUCT_DEMO_IMAGES - currentImages.length;
+    if (availableSlots <= 0) {
+      announce("A galeria já atingiu o limite de cinco imagens.", "info");
+      return;
+    }
+
+    const selectedFiles = Array.from(files).slice(0, availableSlots);
+    const uploaded: string[] = [];
+    setBusy("upload-demo");
+    try {
+      for (const file of selectedFiles) {
+        const payload = await readApi<{ url: string }>(
+          await fetch("/api/admin/assets", {
+            method: "POST",
+            headers: {
+              "content-type": file.type,
+              "x-product-source-key": draft.sourceKey,
+              "x-asset-slot": "demo-gallery",
+            },
+            body: file,
+          }),
+        );
+        uploaded.push(payload.url);
+      }
+
+      updateProduct("demoImages", [...currentImages, ...uploaded]);
+      announce(
+        `${uploaded.length} ${uploaded.length === 1 ? "imagem adicionada" : "imagens adicionadas"}. Organize a sequência e salve o card para publicar a galeria.`,
+        "ok",
+      );
+    } catch (reason) {
+      if (uploaded.length) {
+        updateProduct("demoImages", [...currentImages, ...uploaded]);
+      }
+      announce(
+        reason instanceof Error
+          ? reason.message
+          : "Não foi possível enviar todas as imagens demonstrativas.",
+        "error",
+      );
+    } finally {
+      setBusy("");
+      if (demoImagesInputRef.current) demoImagesInputRef.current.value = "";
+    }
+  };
+
+  const moveDemoImage = (index: number, offset: -1 | 1) => {
+    if (!draft) return;
+    const images = [...(draft.product.demoImages ?? [])];
+    const destination = index + offset;
+    if (destination < 0 || destination >= images.length) return;
+    [images[index], images[destination]] = [
+      images[destination],
+      images[index],
+    ];
+    updateProduct("demoImages", images);
+  };
+
+  const removeDemoImage = (index: number) => {
+    if (!draft) return;
+    updateProduct(
+      "demoImages",
+      (draft.product.demoImages ?? []).filter(
+        (_image, imageIndex) => imageIndex !== index,
+      ),
+    );
+  };
+
   const openHistory = async () => {
     if (!draft || demoMode || busy) return;
     setBusy("history");
@@ -1260,6 +1333,13 @@ export function AdminDashboard({
           <p>
             <strong>Textos da vitrine</strong>
             <small>Hero, títulos e descrições do catálogo</small>
+          </p>
+        </Link>
+        <Link href="/admin/cupons" className="admin-content-entry">
+          <span aria-hidden>%</span>
+          <p>
+            <strong>Cupons de desconto</strong>
+            <small>Códigos, percentual, validade e campanhas</small>
           </p>
         </Link>
         <nav className="admin-product-list" aria-label="Lista de produtos">
@@ -1658,6 +1738,114 @@ export function AdminDashboard({
                       </label>
                     </div>
                   </div>
+                  <section className="admin-demo-gallery" aria-labelledby="demo-gallery-title">
+                    <div className="admin-demo-gallery__heading">
+                      <div>
+                        <span className="admin-kicker">Popup de apresentação</span>
+                        <h3 id="demo-gallery-title">Galeria demonstrativa</h3>
+                        <p>
+                          Adicione até cinco artes. No site elas avançam
+                          automaticamente em loop e também podem ser navegadas
+                          pelas setas.
+                        </p>
+                      </div>
+                      <strong>
+                        {(draft.product.demoImages ?? []).length}/
+                        {MAX_PRODUCT_DEMO_IMAGES}
+                      </strong>
+                    </div>
+
+                    <input
+                      ref={demoImagesInputRef}
+                      hidden
+                      multiple
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/avif"
+                      onChange={(event) => {
+                        if (event.target.files) {
+                          void uploadDemoImages(event.target.files);
+                        }
+                      }}
+                    />
+
+                    {(draft.product.demoImages ?? []).length ? (
+                      <ol className="admin-demo-gallery__grid">
+                        {(draft.product.demoImages ?? []).map((image, index) => (
+                          <li key={`${image}-${index}`}>
+                            <div
+                              className="admin-demo-gallery__preview"
+                              style={{
+                                backgroundImage: `url("${image.replaceAll('"', "%22")}")`,
+                              }}
+                              role="img"
+                              aria-label={`Imagem demonstrativa ${index + 1}`}
+                            >
+                              <span>{String(index + 1).padStart(2, "0")}</span>
+                            </div>
+                            <div className="admin-demo-gallery__controls">
+                              <button
+                                type="button"
+                                onClick={() => moveDemoImage(index, -1)}
+                                disabled={demoMode || Boolean(busy) || index === 0}
+                                aria-label={`Mover imagem ${index + 1} para trás`}
+                              >
+                                ←
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => removeDemoImage(index)}
+                                disabled={demoMode || Boolean(busy)}
+                              >
+                                Remover
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => moveDemoImage(index, 1)}
+                                disabled={
+                                  demoMode ||
+                                  Boolean(busy) ||
+                                  index === (draft.product.demoImages ?? []).length - 1
+                                }
+                                aria-label={`Mover imagem ${index + 1} para frente`}
+                              >
+                                →
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <div className="admin-demo-gallery__empty">
+                        <strong>Nenhuma arte cadastrada.</strong>
+                        <p>
+                          Enquanto a galeria estiver vazia, o popup mantém a
+                          mensagem “Demonstração em preparação”.
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="admin-demo-gallery__actions">
+                      <button
+                        type="button"
+                        className="admin-secondary-button"
+                        onClick={() => demoImagesInputRef.current?.click()}
+                        disabled={
+                          demoMode ||
+                          Boolean(busy) ||
+                          (draft.product.demoImages ?? []).length >=
+                            MAX_PRODUCT_DEMO_IMAGES
+                        }
+                      >
+                        {busy === "upload-demo"
+                          ? "Enviando…"
+                          : "Adicionar imagens"}
+                      </button>
+                      <small>
+                        WEBP ou AVIF 16:9, até 5 MB por imagem. A ordem acima é
+                        a ordem exibida no popup.
+                      </small>
+                    </div>
+                  </section>
                   <div className="admin-safety-check">
                     <span aria-hidden>✓</span>
                     <div>

@@ -6,6 +6,7 @@ import type {
   PaymentCreationState,
 } from "@/lib/checkout/payment-creation-coordinator";
 import type { StormReconciliationCandidate } from "@/lib/checkout/storm-reconciliation";
+import type { CouponQuote } from "@/lib/coupons/types";
 
 type DatabaseConfig = {
   supabaseUrl: string;
@@ -51,6 +52,25 @@ export type PaymentAttempt = {
   lastPolledAt: string | null;
 };
 
+export type OrderDiscountSnapshot = CouponQuote & {
+  orderId: string;
+};
+
+export type CouponFailureReason =
+  | "coupon-invalid"
+  | "coupon-not-started"
+  | "coupon-expired"
+  | "coupon-minimum"
+  | "coupon-schema-missing"
+  | "coupon-request-conflict";
+
+export class CouponRepositoryError extends Error {
+  constructor(readonly reason: CouponFailureReason) {
+    super(reason);
+    this.name = "CouponRepositoryError";
+  }
+}
+
 export type StormWebhookResult = {
   orderId: string;
   productSlug: string;
@@ -81,6 +101,30 @@ export class CommerceDatabaseError extends Error {
 
 function databaseError(operation: string, error: { code?: string } | null) {
   return new CommerceDatabaseError(operation, error?.code);
+}
+
+function couponSchemaMissing(error: { code?: string; message?: string } | null) {
+  return Boolean(
+    error &&
+      (error.code === "42P01" ||
+        error.code === "PGRST202" ||
+        error.code === "PGRST205" ||
+        error.message?.includes("commerce_coupons") ||
+        error.message?.includes("commerce_order_discounts") ||
+        error.message?.includes("quote_commerce_coupon") ||
+        error.message?.includes("create_discounted_commerce_order")),
+  );
+}
+
+function couponFailure(error: { message?: string } | null) {
+  const message = error?.message ?? "";
+  const reasons: CouponFailureReason[] = [
+    "coupon-invalid",
+    "coupon-not-started",
+    "coupon-expired",
+    "coupon-minimum",
+  ];
+  return reasons.find((reason) => message.includes(reason)) ?? null;
 }
 
 const ORDER_SELECT =
@@ -131,6 +175,28 @@ function mapAttempt(row: Record<string, unknown>): PaymentAttempt {
         : null,
     lastPolledAt:
       typeof row.last_polled_at === "string" ? row.last_polled_at : null,
+  };
+}
+
+function mapDiscountSnapshot(
+  row: Record<string, unknown>,
+): OrderDiscountSnapshot {
+  return {
+    orderId: String(row.order_id ?? row.result_order_id),
+    code: String(row.coupon_code ?? row.result_coupon_code),
+    name: String(row.coupon_name ?? row.result_coupon_name),
+    discountPercent: Number(
+      row.discount_percent ?? row.result_discount_percent,
+    ),
+    originalAmountCents: Number(
+      row.original_amount_cents ?? row.result_original_amount_cents,
+    ),
+    discountAmountCents: Number(
+      row.discount_amount_cents ?? row.result_discount_amount_cents,
+    ),
+    finalAmountCents: Number(
+      row.final_amount_cents ?? row.result_final_amount_cents,
+    ),
   };
 }
 
@@ -285,6 +351,136 @@ export class CommerceRepository {
       if (existing) return existing;
     }
     throw databaseError("insert-order", result.error);
+  }
+
+  async quoteCoupon(offerId: string, couponCode: string) {
+    const result = await this.client.rpc("quote_commerce_coupon", {
+      p_offer_id: offerId,
+      p_coupon_code: couponCode,
+    });
+    if (result.error) {
+      if (couponSchemaMissing(result.error)) {
+        throw new CouponRepositoryError("coupon-schema-missing");
+      }
+      throw databaseError("quote-coupon", result.error);
+    }
+
+    const row = Array.isArray(result.data) ? result.data[0] : result.data;
+    if (!row || typeof row !== "object") {
+      throw new CommerceDatabaseError("quote-coupon-empty");
+    }
+    const record = row as Record<string, unknown>;
+    if (record.result_valid !== true) {
+      const reason = record.result_reason;
+      if (
+        reason === "coupon-invalid" ||
+        reason === "coupon-not-started" ||
+        reason === "coupon-expired" ||
+        reason === "coupon-minimum"
+      ) {
+        throw new CouponRepositoryError(reason);
+      }
+      throw new CommerceDatabaseError("quote-coupon-invalid");
+    }
+
+    const quote = {
+      code: String(record.result_code),
+      name: String(record.result_name),
+      discountPercent: Number(record.result_discount_percent),
+      originalAmountCents: Number(record.result_original_amount_cents),
+      discountAmountCents: Number(record.result_discount_amount_cents),
+      finalAmountCents: Number(record.result_final_amount_cents),
+    } satisfies CouponQuote;
+    if (
+      !Number.isSafeInteger(quote.originalAmountCents) ||
+      !Number.isSafeInteger(quote.discountAmountCents) ||
+      !Number.isSafeInteger(quote.finalAmountCents) ||
+      quote.originalAmountCents - quote.discountAmountCents !==
+        quote.finalAmountCents ||
+      quote.finalAmountCents <= 0
+    ) {
+      throw new CommerceDatabaseError("quote-coupon-amounts");
+    }
+    return quote;
+  }
+
+  async getOrderDiscount(orderId: string) {
+    const result = await this.client
+      .from("commerce_order_discounts")
+      .select(
+        "order_id, coupon_code, coupon_name, discount_percent, original_amount_cents, discount_amount_cents, final_amount_cents",
+      )
+      .eq("order_id", orderId)
+      .maybeSingle();
+    if (result.error) {
+      if (couponSchemaMissing(result.error)) return null;
+      throw databaseError("get-order-discount", result.error);
+    }
+    return result.data ? mapDiscountSnapshot(result.data) : null;
+  }
+
+  async insertDiscountedOrder(input: {
+    id: string;
+    clientRequestId: string;
+    externalId: string;
+    offer: ApprovedOffer;
+    payerName: string;
+    payerDocumentHash: string;
+    payerDocumentLast4: string;
+    requestFingerprintHash: string;
+    userId?: string | null;
+    couponCode: string;
+  }) {
+    const result = await this.client.rpc("create_discounted_commerce_order", {
+      p_id: input.id,
+      p_client_request_id: input.clientRequestId,
+      p_external_id: input.externalId,
+      p_offer_id: input.offer.id,
+      p_product_slug: input.offer.productSlug,
+      p_product_title: input.offer.productTitle,
+      p_payer_name: input.payerName,
+      p_payer_document_hash: input.payerDocumentHash,
+      p_payer_document_last4: input.payerDocumentLast4,
+      p_request_fingerprint_hash: input.requestFingerprintHash,
+      p_user_id: input.userId ?? null,
+      p_coupon_code: input.couponCode,
+    });
+    if (result.error) {
+      if (couponSchemaMissing(result.error)) {
+        throw new CouponRepositoryError("coupon-schema-missing");
+      }
+      const reason = couponFailure(result.error);
+      if (reason) throw new CouponRepositoryError(reason);
+      if (result.error.message?.includes("coupon-request-conflict")) {
+        throw new CouponRepositoryError("coupon-request-conflict");
+      }
+      throw databaseError("insert-discounted-order", result.error);
+    }
+
+    const row = Array.isArray(result.data) ? result.data[0] : result.data;
+    if (!row || typeof row !== "object") {
+      throw new CommerceDatabaseError("insert-discounted-order-empty");
+    }
+    const record = row as Record<string, unknown>;
+    const order = mapOrder({
+      id: record.result_order_id,
+      client_request_id: record.result_client_request_id,
+      external_id: record.result_external_id,
+      offer_id: record.result_offer_id,
+      product_slug: record.result_product_slug,
+      product_title: record.result_product_title,
+      variant_name: record.result_variant_name,
+      amount_cents: record.result_amount_cents,
+      payer_name: record.result_payer_name,
+      payer_document_hash: record.result_payer_document_hash,
+      user_id: record.result_user_id,
+      status: record.result_status,
+    });
+    const discount = mapDiscountSnapshot(record);
+    if (order.amountCents !== discount.finalAmountCents) {
+      throw new CommerceDatabaseError("insert-discounted-order-amounts");
+    }
+    return { order, discount };
   }
 
   async getOrder(orderId: string) {

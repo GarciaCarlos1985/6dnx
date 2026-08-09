@@ -2,12 +2,47 @@
 
 Last updated: 2026-08-09
 
+## Cupons comerciais + galeria demonstrativa — branch de revisão
+
+- A branch `codex/storefront-navigation-content` agora contém o sistema de
+  cupons percentuais administrado em `/admin/cupons`: código, nome interno,
+  compra mínima, início, validade, status ativo/pausado/arquivado e proteção
+  contra sobrescrita concorrente. O checkout aceita o código opcional, mas o
+  navegador nunca informa nem calcula o preço autorizado.
+- O valor original vem da oferta `approved` no servidor. A função SQL
+  `create_discounted_commerce_order` recalcula o desconto, cria o pedido e
+  grava uma fotografia imutável do cupom na mesma transação. Repetições com o
+  mesmo `client_request_id` são serializadas antes de qualquer insert.
+- Cada produto ganhou uma galeria opcional de até cinco imagens para o popup
+  direito. O admin faz upload, remove e ordena as artes. A vitrine reproduz a
+  sequência em loop a cada 4,5 segundos, com setas anterior/próxima, indicadores
+  e respeito a `prefers-reduced-motion`. Sem imagens, permanece o fallback
+  “Demonstração em preparação”.
+- As migrations `20260809180000_add_commerce_coupons.sql` e
+  `20260809183000_add_product_demo_gallery.sql` estão somente versionadas. Elas
+  **não foram aplicadas** neste checkpoint. A primeira cria novas tabelas/RPCs;
+  a segunda somente adiciona `demo_images = []` e não regrava título, preço,
+  imagem, publicação ou ordem de nenhum card existente.
+- O checkout sem cupom continua usando o caminho anterior e não depende dessas
+  migrations. Não executar `supabase db push` genérico: conferir primeiro o
+  histórico remoto e aplicar somente o conjunto explicitamente revisado e
+  autorizado.
+- A Slot continua pública como prévia visual. Saldo, débito de moedas, prêmio,
+  giro aleatório e entrega automática permanecem desligados.
+- Gates pré-commit concluídos: ESLint limpo, `next typegen && tsc --noEmit`,
+  61/61 testes Node e build de produção com 29/29 páginas. A verificação no
+  navegador cobriu desktop 1440x900, mobile 390x844, fallback da galeria,
+  seleção de variação e a barreira de autorização de `/admin/cupons`; não houve
+  erro de runtime. O único aviso observado é o aviso antigo de `sizes="100vw"`
+  em `/hero-apocalypse.jpg`, fora deste escopo. Os quatro gates serão repetidos
+  depois do commit e antes do push, conforme o protocolo de release solicitado.
+
 ## Storefront discovery + Discord announcements — local, pending owner review
 
 - Branch/worktree: `codex/storefront-navigation-content` in
   `6dnx-MayconFernandes-storefront-ui`. The product-discovery work in this
-  checkpoint is local and uncommitted; no push, deploy, migration or Production
-  mutation was performed.
+  checkpoint foi commitado na mesma branch de revisão; nenhuma migration ou
+  mutação de Production foi executada.
 - A new `Encontre seu produto` surface sits above the catalog rows. Its search
   and shortcut buttons are derived at runtime from the same published catalog
   returned by `getPublishedCatalog()`: no product name or category is
