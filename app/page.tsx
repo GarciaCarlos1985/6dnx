@@ -21,11 +21,14 @@ export default async function HomePage() {
   const developerCreditUrl =
     resolvePublicHttpsLink(process.env.DEVELOPER_CREDIT_URL) ??
     resolvePublicHttpsLink(process.env.DISCORD_INVITE_URL);
+  const announcementsUrl =
+    resolvePublicHttpsLink(process.env.DISCORD_ANNOUNCEMENTS_URL) ??
+    "https://discord.gg/5k9tvSerW";
 
   return (
     <main className="site-flow">
       <SiteAtmosphere />
-      <SiteNavigation />
+      <SiteNavigation announcementsUrl={announcementsUrl} />
       <HeroSection content={storefrontContent} />
       <CinematicCompanions scene="products" />
       <ProductShowcase

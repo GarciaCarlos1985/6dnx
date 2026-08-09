@@ -29,6 +29,7 @@ import {
   CATALOG_CARDS_PER_ROW,
   CATALOG_VISIBLE_ROWS,
 } from "@/lib/product-catalog-layout";
+import { filterProductShortcuts } from "@/lib/product-discovery";
 import { PixCheckoutModal } from "@/components/pix-checkout-modal";
 import { DiscordMark } from "@/components/discord-mark";
 import type { StorefrontContent } from "@/lib/storefront-content/types";
@@ -840,6 +841,7 @@ function Card({
       {!modalClone && onOpen ? (
         <button
           type="button"
+          data-product-card-trigger
           onClick={(event) =>
             onOpen(
               event.currentTarget.parentElement as HTMLElement,
@@ -1151,6 +1153,10 @@ function ProductCatalogShowcase({
   const [transitioningRows, setTransitioningRows] = useState<boolean[]>(() =>
     Array.from({ length: CATALOG_VISIBLE_ROWS }, () => false),
   );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [pendingShortcutSlug, setPendingShortcutSlug] = useState<string | null>(
+    null,
+  );
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [placement, setPlacement] = useState<Placement | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -1158,6 +1164,7 @@ function ProductCatalogShowcase({
   const anchorRef = useRef<HTMLElement | null>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const originScrollRef = useRef<number | null>(null);
+  const pendingShortcutTriggerRef = useRef<HTMLButtonElement | null>(null);
   const rowTransitionTimerRefs = useRef<Array<number | null>>(
     Array.from({ length: CATALOG_VISIBLE_ROWS }, () => null),
   );
@@ -1172,6 +1179,21 @@ function ProductCatalogShowcase({
 
   const openProduct =
     catalogProducts.find((product) => product.slug === openSlug) ?? null;
+  const filteredShortcuts = useMemo(
+    () => filterProductShortcuts(catalogProducts, searchQuery),
+    [catalogProducts, searchQuery],
+  );
+  const productLocations = useMemo(() => {
+    const locations = new Map<string, { rowIndex: number; pageIndex: number }>();
+    productCatalog.rows.forEach((row, rowIndex) => {
+      row.forEach((page, pageIndex) => {
+        page.forEach((product) => {
+          locations.set(product.slug, { rowIndex, pageIndex });
+        });
+      });
+    });
+    return locations;
+  }, [productCatalog]);
   const visibleRows = productCatalog.rows.map(
     (row, rowIndex) => row[rowPages[rowIndex] ?? 0] ?? row[0] ?? [],
   );
@@ -1427,6 +1449,39 @@ function ProductCatalogShowcase({
     };
   }, [openSlug, wide]);
 
+  useLayoutEffect(() => {
+    if (!pendingShortcutSlug) return;
+    const location = productLocations.get(pendingShortcutSlug);
+    if (
+      !location ||
+      rowPages[location.rowIndex] !== location.pageIndex ||
+      transitioningRows[location.rowIndex]
+    ) {
+      return;
+    }
+
+    const productCard = Array.from(
+      sectionRef.current?.querySelectorAll<HTMLElement>("[data-product-card]") ??
+        [],
+    ).find((element) => element.dataset.productCard === pendingShortcutSlug);
+    const shortcutTrigger = pendingShortcutTriggerRef.current;
+    if (!productCard || !shortcutTrigger) return;
+
+    anchorRef.current = productCard;
+    returnFocusRef.current = shortcutTrigger;
+    originScrollRef.current = wide ? window.scrollY : null;
+    pendingShortcutTriggerRef.current = null;
+    setPendingShortcutSlug(null);
+    setPlacement(null);
+    setOpenSlug(pendingShortcutSlug);
+  }, [
+    pendingShortcutSlug,
+    productLocations,
+    rowPages,
+    transitioningRows,
+    wide,
+  ]);
+
   const openCard = (
     slug: string,
     el: HTMLElement,
@@ -1458,6 +1513,50 @@ function ProductCatalogShowcase({
           current.map((value, index) => (index === rowIndex ? false : value)),
         );
       }, 420);
+    });
+  };
+
+  const openProductFromShortcut = (
+    product: Product,
+    trigger: HTMLButtonElement,
+  ) => {
+    const location = productLocations.get(product.slug);
+    if (!location || pageTransitioning) return;
+
+    pendingShortcutTriggerRef.current = trigger;
+    setPendingShortcutSlug(product.slug);
+
+    if (rowPages[location.rowIndex] === location.pageIndex) return;
+    setRowPages((current) =>
+      current.map((page, index) =>
+        index === location.rowIndex ? location.pageIndex : page,
+      ),
+    );
+    beginTransitions([location.rowIndex]);
+  };
+
+  const returnToFullShowcase = () => {
+    if (pageTransitioning) return;
+    setSearchQuery("");
+    setPendingShortcutSlug(null);
+    pendingShortcutTriggerRef.current = null;
+
+    const resetPages = productCatalog.rows.map(() => 0);
+    const changedRows = resetPages.flatMap((page, rowIndex) =>
+      page === rowPages[rowIndex] ? [] : [rowIndex],
+    );
+    if (changedRows.length > 0) {
+      setRowPages(resetPages);
+      beginTransitions(changedRows);
+    }
+
+    window.requestAnimationFrame(() => {
+      document.getElementById("produtos-heading")?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+        block: "start",
+      });
     });
   };
 
@@ -1553,6 +1652,97 @@ function ProductCatalogShowcase({
             {content.catalogDescription}
           </p>
         </div>
+
+        <section
+          className="product-discovery relative z-[var(--z-content)] mx-auto mb-14 max-w-6xl"
+          aria-labelledby="product-discovery-heading"
+        >
+          <div className="product-discovery__heading">
+            <div>
+              <span className="product-discovery__eyebrow">
+                Acesso r&aacute;pido ao cat&aacute;logo
+              </span>
+              <h3 id="product-discovery-heading">Encontre seu produto</h3>
+              <p>
+                Pesquise ou abra um card diretamente. A lista acompanha as
+                publica&ccedil;&otilde;es do painel admin.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={returnToFullShowcase}
+              disabled={pageTransitioning}
+              className="product-discovery__reset"
+            >
+              Vitrine completa
+            </button>
+          </div>
+
+          <div className="product-discovery__search" role="search">
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+            >
+              <circle cx="11" cy="11" r="6.5" stroke="currentColor" />
+              <path d="m16 16 4 4" stroke="currentColor" strokeLinecap="round" />
+            </svg>
+            <label htmlFor="product-search" className="sr-only">
+              Pesquisar produtos 6DNX
+            </label>
+            <input
+              id="product-search"
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Busque por produto, jogo ou plano..."
+              autoComplete="off"
+              aria-controls="product-shortcuts"
+            />
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                aria-label="Limpar pesquisa de produtos"
+              >
+                Limpar
+              </button>
+            ) : null}
+          </div>
+
+          <p className="product-discovery__count" aria-live="polite">
+            {filteredShortcuts.length === 1
+              ? "1 produto encontrado"
+              : `${filteredShortcuts.length} produtos encontrados`}
+          </p>
+
+          <div id="product-shortcuts" className="product-discovery__shortcuts">
+            {filteredShortcuts.map((product) => (
+              <button
+                key={product.catalogKey ?? product.slug}
+                type="button"
+                data-product-shortcut={product.slug}
+                disabled={pageTransitioning}
+                onClick={(event) =>
+                  openProductFromShortcut(product, event.currentTarget)
+                }
+                className="product-discovery__shortcut"
+              >
+                <span>{product.category}</span>
+                <strong>{product.title}</strong>
+              </button>
+            ))}
+          </div>
+
+          {filteredShortcuts.length === 0 ? (
+            <div className="product-discovery__empty" role="status">
+              Nenhum produto corresponde a esta busca. Limpe o filtro para
+              voltar ao cat&aacute;logo completo.
+            </div>
+          ) : null}
+        </section>
 
         <div className="product-catalog-rows">{renderRows([0, 1])}</div>
       </section>

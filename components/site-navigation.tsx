@@ -7,11 +7,14 @@ import { HeroAuth } from "@/components/hero-auth";
 const navigation = [
   { href: "#inicio", label: "Início" },
   { href: "#produtos", label: "Produtos" },
-  { href: "/noticias", label: "Notícias" },
   { href: "/conta", label: "Minha conta" },
 ] as const;
 
-export function SiteNavigation() {
+export function SiteNavigation({
+  announcementsUrl,
+}: {
+  announcementsUrl: string;
+}) {
   return (
     <header className="site-navigation-shell">
       <nav className="site-navigation" aria-label="Navegação principal">
@@ -31,6 +34,15 @@ export function SiteNavigation() {
               </Link>
             ),
           )}
+          <a
+            href={announcementsUrl}
+            className="site-navigation__link"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Abrir os anúncios da 6DNX no Discord"
+          >
+            Anúncios
+          </a>
           <Link href="/slot" className="site-navigation__link">
             Slot <small>prévia</small>
           </Link>

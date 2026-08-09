@@ -2,6 +2,38 @@
 
 Last updated: 2026-08-09
 
+## Storefront discovery + Discord announcements — local, pending owner review
+
+- Branch/worktree: `codex/storefront-navigation-content` in
+  `6dnx-MayconFernandes-storefront-ui`. The product-discovery work in this
+  checkpoint is local and uncommitted; no push, deploy, migration or Production
+  mutation was performed.
+- A new `Encontre seu produto` surface sits above the catalog rows. Its search
+  and shortcut buttons are derived at runtime from the same published catalog
+  returned by `getPublishedCatalog()`: no product name or category is
+  hard-coded. Publishing, archiving, renaming or reordering a product in the
+  admin therefore updates both the cards and shortcuts together after the
+  existing catalog cache invalidation.
+- Search ignores casing and diacritics and covers title, category, tagline,
+  description and variation metadata. Clicking a shortcut locates the product
+  across all four independent carousel rows, changes only the necessary row
+  page and opens the existing accessible product dialog. Closing returns focus
+  to the shortcut; `Vitrine completa` clears the filter and restores row pages
+  to `0,0,0,0`.
+- The home navigation label `Notícias` was replaced with `Anúncios`. It opens
+  the public Discord invite configured by `DISCORD_ANNOUNCEMENTS_URL`, with
+  `https://discord.gg/5k9tvSerW` as the safe fallback. This is a normal public
+  link, never a Discord webhook. The internal news collection/radar remains
+  untouched and can continue serving its operational database-wake purpose.
+- Verification: 49/49 Node tests, ESLint, strict TypeScript and Production build
+  passed. Browser QA used the live local Supabase catalog (24 published cards):
+  a search for `Rust16` moved row 4 to the correct page, opened that product,
+  closed back to the search control and reset the full showcase. The
+  390x844 viewport remained usable with a bounded two-column shortcut list.
+  One pre-existing Next Image development warning remains for
+  `/hero-apocalypse.jpg` using `sizes="100vw"`; this checkpoint did not change
+  the hero.
+
 ## Handoff 2026-08-06 — estado real para qualquer agente que assumir
 
 > Leia também `docs/CONSTITUICAO_TECNICA_6DNX.md` (fonte de verdade de regras
