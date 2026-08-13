@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { moveCatalogItem, swapCatalogItems } from "@/lib/catalog/order";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  moveCatalogItem,
+  parseCatalogDestination,
+  swapCatalogItems,
+} from "@/lib/catalog/order";
 import type { CatalogAdminItem } from "@/lib/catalog/types";
 
-const INITIAL_SHOWCASE_SIZE = 12;
+const CARDS_PER_ROW = 4;
+const VISIBLE_ROWS = 8;
+const INITIAL_SHOWCASE_SIZE = CARDS_PER_ROW * VISIBLE_ROWS;
 
 type CatalogOrderBoardProps = {
   items: CatalogAdminItem[];
@@ -25,48 +31,29 @@ type ShowcaseGroup = {
 };
 
 const groups: ShowcaseGroup[] = [
-  {
-    key: "section-2-row-1",
-    eyebrow: "Seção 2",
-    title: "Fileira 1",
-    description: "Os três primeiros cards abaixo do hero.",
-    start: 0,
-    end: 3,
-  },
-  {
-    key: "section-2-row-2",
-    eyebrow: "Seção 2",
-    title: "Fileira 2",
-    description: "Os três cards seguintes da primeira seção.",
-    start: 3,
-    end: 6,
-  },
-  {
-    key: "section-3-row-1",
-    eyebrow: "Seção 3",
-    title: "Fileira 1",
-    description: "Os três primeiros cards da continuação.",
-    start: 6,
-    end: 9,
-  },
-  {
-    key: "section-3-row-2",
-    eyebrow: "Seção 3",
-    title: "Fileira 2",
-    description: "Os três últimos cards da vitrine inicial.",
-    start: 9,
-    end: 12,
-  },
+  ...Array.from({ length: VISIBLE_ROWS }, (_, rowIndex) => {
+    const continuation = rowIndex >= VISIBLE_ROWS / 2;
+    const localRow = continuation ? rowIndex - VISIBLE_ROWS / 2 : rowIndex;
+    const start = rowIndex * CARDS_PER_ROW;
+    return {
+      key: `${continuation ? "section-3" : "section-2"}-row-${localRow + 1}`,
+      eyebrow: continuation ? "Catálogo em profundidade" : "Soluções 6DNX",
+      title: `Fileira ${localRow + 1}`,
+      description: `Cards ${String(start + 1).padStart(2, "0")}–${String(start + CARDS_PER_ROW).padStart(2, "0")} da vitrine publicada.`,
+      start,
+      end: start + CARDS_PER_ROW,
+    };
+  }),
   {
     key: "remaining",
     eyebrow: "Navegação lateral",
     title: "Demais cards",
-    description: "Aparecem pelas setas, sem substituir os doze iniciais.",
+    description: "Aparecem pelas setas quando o catálogo ultrapassa 32 cards.",
     start: INITIAL_SHOWCASE_SIZE,
   },
 ];
 
-function moveBeforeTarget(ids: string[], sourceId: string, targetId: string) {
+function moveToHouse(ids: string[], sourceId: string, targetId: string) {
   const targetIndex = ids.indexOf(targetId);
   return targetIndex < 0 ? ids : moveCatalogItem(ids, sourceId, targetIndex);
 }
@@ -78,10 +65,13 @@ function moveBy(ids: string[], id: string, offset: -1 | 1) {
 }
 
 function positionDescription(index: number) {
-  if (index < 3) return `Seção 2 · fileira 1 · espaço ${index + 1}`;
-  if (index < 6) return `Seção 2 · fileira 2 · espaço ${index - 2}`;
-  if (index < 9) return `Seção 3 · fileira 1 · espaço ${index - 5}`;
-  if (index < 12) return `Seção 3 · fileira 2 · espaço ${index - 8}`;
+  if (index < INITIAL_SHOWCASE_SIZE) {
+    const rowIndex = Math.floor(index / CARDS_PER_ROW);
+    const continuation = rowIndex >= VISIBLE_ROWS / 2;
+    const localRow = continuation ? rowIndex - VISIBLE_ROWS / 2 : rowIndex;
+    const section = continuation ? "Catálogo em profundidade" : "Soluções 6DNX";
+    return `${section} · fileira ${localRow + 1} · espaço ${(index % CARDS_PER_ROW) + 1}`;
+  }
   return `Navegação lateral · posição ${index + 1}`;
 }
 
@@ -108,6 +98,7 @@ export function CatalogOrderBoard({
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionCardId, setActionCardId] = useState<string | null>(null);
   const [actionTargetId, setActionTargetId] = useState<string | null>(null);
+  const savingRef = useRef(false);
   const dirty = orderedIds.some((id, index) => id !== initialIds[index]);
   const quickSelected = itemById.get(quickSelectedId);
   const actionCard = actionCardId ? itemById.get(actionCardId) : undefined;
@@ -164,12 +155,11 @@ export function CatalogOrderBoard({
   };
 
   const moveQuickItemToTypedPosition = () => {
-    const requestedPosition = Number(quickDestination);
-    if (!Number.isInteger(requestedPosition)) return;
-    const destinationIndex = Math.min(
-      orderedIds.length - 1,
-      Math.max(0, requestedPosition - 1),
+    const destinationIndex = parseCatalogDestination(
+      quickDestination,
+      orderedIds.length,
     );
+    if (destinationIndex === null) return;
     moveQuickItem(destinationIndex);
   };
 
@@ -262,7 +252,7 @@ export function CatalogOrderBoard({
   };
 
   const save = async () => {
-    if (!dirty || !confirmed || busy || demoMode) return;
+    if (!dirty || !confirmed || busy || demoMode || savingRef.current) return;
     if (
       !window.confirm(
         "Salvar esta ordem? Apenas a posição dos cards publicados será alterada.",
@@ -270,7 +260,12 @@ export function CatalogOrderBoard({
     ) {
       return;
     }
-    await onSave(orderedIds);
+    savingRef.current = true;
+    try {
+      await onSave(orderedIds);
+    } finally {
+      savingRef.current = false;
+    }
   };
 
   return (
@@ -485,7 +480,7 @@ export function CatalogOrderBoard({
                         const sourceId =
                           draggedId || event.dataTransfer.getData("text/plain");
                         if (sourceId) {
-                          updateOrder(moveBeforeTarget(orderedIds, sourceId, id));
+                          updateOrder(moveToHouse(orderedIds, sourceId, id));
                         }
                         setDraggedId(null);
                         setDragTargetId(null);
@@ -555,7 +550,7 @@ export function CatalogOrderBoard({
         />
         <span aria-hidden />
         <p>
-          <strong>Conferi as quatro fileiras e os doze cards iniciais.</strong>
+          <strong>Conferi as oito fileiras e os 32 cards iniciais.</strong>
           <small>
             O botão salvar continuará bloqueado enquanto esta confirmação não
             estiver marcada.
@@ -612,7 +607,7 @@ export function CatalogOrderBoard({
               <span><i data-kind="origin" /> Card escolhido</span>
               <span><i data-kind="target" /> Destino selecionado</span>
               <span>Arrastar sobre outro card troca as duas casas</span>
-              <span>Casas 01–12 formam a vitrine inicial</span>
+              <span>Casas 01–32 formam a vitrine inicial</span>
             </div>
 
             <ol className="admin-order-minimap" aria-label="Posições da vitrine">

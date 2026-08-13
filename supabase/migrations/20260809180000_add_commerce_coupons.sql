@@ -3,6 +3,8 @@
 -- remote migration history. Do not use a generic `supabase db push` because
 -- older, unrelated migrations may still be pending in Production.
 
+begin;
+
 create table if not exists public.commerce_coupons (
   id uuid primary key default gen_random_uuid(),
   code text not null unique
@@ -309,3 +311,5 @@ revoke all on function public.create_discounted_commerce_order(
 grant execute on function public.create_discounted_commerce_order(
   uuid, uuid, text, uuid, text, text, text, text, text, text, uuid, text
 ) to service_role;
+
+commit;

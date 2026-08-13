@@ -187,6 +187,23 @@ test("site experience draft and publish routes preserve their trust boundaries",
   assert.match(restore, /restoreSiteExperienceRevision/);
 });
 
+test("site experience admin never offers a silent save without persistence", async () => {
+  const [studio, adminCss, coupons] = await Promise.all([
+    readFile(new URL("../components/admin/site-experience-studio.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/admin/admin.css", import.meta.url), "utf8"),
+    readFile(new URL("../components/admin/coupon-manager.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(studio, /disabled=\{!dirty \|\| !validation\.ok \|\| Boolean\(busy\) \|\| !persistenceReady\}/);
+  assert.match(studio, /Salvar indisponível/);
+  assert.match(studio, /20260809220000_add_site_experience_studio\.sql/);
+  assert.match(studio, /não serão mantidas ao sair/);
+  assert.match(adminCss, /\.admin-field select[\s\S]*color-scheme:\s*dark/);
+  assert.match(adminCss, /\.admin-field select option[\s\S]*background-color:\s*#0b0809/);
+  assert.match(coupons, /20260809180000_add_commerce_coupons\.sql/);
+  assert.match(coupons, /Não use <code>supabase db push<\/code> genérico/);
+});
+
 test("site atmosphere has deterministic bounded pools and reduced-motion protection", async () => {
   const [component, globalCss] = await Promise.all([
     readFile(new URL("../components/site-atmosphere.tsx", import.meta.url), "utf8"),

@@ -1,13 +1,13 @@
 import type { Product } from "@/lib/products";
 
-export const CATALOG_CARDS_PER_ROW = 3;
-export const CATALOG_VISIBLE_ROWS = 4;
+export const CATALOG_CARDS_PER_ROW = 4;
+export const CATALOG_VISIBLE_ROWS = 8;
 export const CATALOG_INITIAL_VISIBLE_COUNT =
   CATALOG_CARDS_PER_ROW * CATALOG_VISIBLE_ROWS;
 
 export type ProductCatalogLayout = {
   /**
-   * Every row owns its own finite sequence of three-card pages. Pages are
+   * Every row owns its own finite sequence of four-card pages. Pages are
    * distributed round-robin so changing one row never duplicates a product
    * already visible in another row.
    */
@@ -28,10 +28,10 @@ function chunkProducts(products: readonly Product[], perPage: number) {
 /**
  * Converts the canonical catalog order into independent carousel rows.
  *
- * With four visible rows the first twelve products remain visible together:
- * pages 0..3 become the first page of rows 0..3, pages 4..7 become their
- * second page, and so on. This keeps every product reachable without an
- * infinite loop and makes the admin order the single source of truth.
+ * With eight visible rows the first 32 products remain visible together:
+ * pages 0..7 become the first page of rows 0..7, pages 8..15 become their
+ * second page, and so on. This keeps every product reachable while preserving
+ * the admin order as the single source of truth.
  */
 export function buildProductCatalogLayout(
   catalog: readonly Product[],

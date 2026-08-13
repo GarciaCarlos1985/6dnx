@@ -2,7 +2,10 @@ import { timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { shouldProtectSiteReview } from "@/lib/security/review-mode";
-import { isSocialPreviewImagePath } from "@/lib/security/social-preview";
+import {
+  isPublicCrawlerResourcePath,
+  isSocialPreviewImagePath,
+} from "@/lib/security/social-preview";
 import { refreshSupabaseSession } from "@/lib/supabase/proxy";
 
 const MIN_REVIEW_PASSWORD_LENGTH = 16;
@@ -31,7 +34,7 @@ function applySecurityHeaders(
     request.nextUrl.pathname,
   );
 
-  const indexable = socialPreviewImage || isPublicIndexablePath(
+  const indexable = isPublicCrawlerResourcePath(request.nextUrl.pathname) || isPublicIndexablePath(
     request.nextUrl.pathname,
   );
   if (indexable) {

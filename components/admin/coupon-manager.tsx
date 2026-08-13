@@ -185,7 +185,7 @@ export function CouponManager({
 
         {initialList.state !== "ready" ? (
           <div className="admin-notice admin-notice--info" role="status">
-            <span>i</span><p><strong>Cupons ainda não habilitados no banco.</strong><br />Aplique, após revisão, a migration <code>20260809180000_add_commerce_coupons.sql</code>. O checkout sem cupom continua funcionando.</p>
+            <span>i</span><p><strong>Cupons realmente não estão habilitados no banco.</strong><br />A migration <code>20260809180000_add_commerce_coupons.sql</code> está versionada, mas ainda não foi aplicada em Produção. O cadastro permanece bloqueado e o checkout sem cupom continua funcionando. Não use <code>supabase db push</code> genérico: há outras migrations pendentes.</p>
           </div>
         ) : null}
         {notice ? (

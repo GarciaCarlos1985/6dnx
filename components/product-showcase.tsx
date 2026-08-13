@@ -38,6 +38,9 @@ gsap.registerPlugin(ScrollTrigger);
 
 const PER_PAGE = CATALOG_CARDS_PER_ROW;
 const SHOW_GLOBAL_PRODUCT_PAGER = false;
+// Kept in source for a reversible return to the old shortcut directory. The
+// public storefront now uses the search field itself to filter the real cards.
+const SHOW_PRODUCT_SHORTCUT_DIRECTORY = false;
 const MARGIN = 12;
 const GAP = 20;
 const INFO_W = 360;
@@ -834,8 +837,8 @@ function Card({
           "--product-card-surface": productTheme.surfaceColor,
         } as React.CSSProperties
       }
-      className={`product-card group relative flex flex-col overflow-hidden rounded-[1.35rem] border bg-surface text-left transition-[border-color,box-shadow,transform,opacity] duration-500 ${
-        modalClone ? "h-full min-h-0" : "min-h-[31rem]"
+      className={`product-card group relative flex flex-col overflow-hidden rounded-[1.15rem] border bg-surface text-left transition-[border-color,box-shadow,transform,opacity] duration-500 ${
+        modalClone ? "h-full min-h-0" : "min-h-[25rem]"
       } ${centered && !modalClone ? "lg:col-start-2" : ""} ${
         open && modalClone
           ? "border-primary shadow-[0_0_54px_var(--primary-glow)]"
@@ -851,7 +854,7 @@ function Card({
           src={product.image}
           alt=""
           fill
-          sizes="(max-width: 639px) 92vw, (max-width: 1023px) 46vw, 31vw"
+          sizes="(max-width: 639px) 92vw, (max-width: 1023px) 46vw, 24vw"
           className="product-card__art object-cover transition duration-700 group-hover:scale-[1.055]"
         />
 
@@ -868,35 +871,37 @@ function Card({
           />
         </div>
 
-        <div className="absolute inset-x-4 top-4 z-[4] flex flex-wrap items-center gap-2">
+        <div className="absolute inset-x-3 top-3 z-[4] flex flex-wrap items-center gap-2">
           <span className="border border-accent/40 bg-black/70 px-2 py-1 text-[0.6rem] font-bold uppercase tracking-wider text-accent backdrop-blur-sm">
             {productStatusLabel(product.status)}
           </span>
         </div>
 
-        <p className="product-card__category absolute bottom-4 left-4 z-[4] max-w-[62%] border-l-2 border-primary bg-black/55 px-2.5 py-1 text-[0.56rem] font-black uppercase tracking-[0.2em] text-ink backdrop-blur-sm">
+        <p className="product-card__category absolute bottom-3 left-3 z-[4] max-w-[70%] border-l-2 border-primary bg-black/55 px-2 py-1 text-[0.52rem] font-black uppercase tracking-[0.17em] text-ink backdrop-blur-sm">
           {product.category}
         </p>
       </div>
 
-      <div className="product-card__body flex flex-1 flex-col p-6">
-        <p className="product-card__eyebrow mb-2 flex items-center gap-2 text-[0.58rem] font-bold uppercase tracking-[0.28em] text-primary/80">
+      <div className="product-card__body flex flex-1 flex-col p-4 xl:p-[1.125rem]">
+        <p className="product-card__eyebrow mb-1.5 flex items-center gap-2 text-[0.52rem] font-bold uppercase tracking-[0.22em] text-primary/80">
           <span
             className="product-card__eyebrow-line inline-block h-px w-7 bg-primary/70"
             aria-hidden
           />
           6DNX // catálogo seguro
         </p>
-        <h3 className="mb-1 text-2xl leading-tight text-ink">
+        <h3 className="mb-1 line-clamp-2 text-[1.2rem] leading-[1.12] text-ink xl:text-[1.28rem]">
           {product.title}
         </h3>
-        <p className="mb-5 text-sm text-muted">{product.tagline}</p>
+        <p className="mb-3 line-clamp-2 min-h-9 text-xs leading-[1.45] text-muted">
+          {product.tagline}
+        </p>
 
-        <ul className="mb-6 flex flex-1 flex-wrap content-start gap-1.5">
+        <ul className="mb-3 flex min-h-8 flex-1 flex-wrap content-start gap-1">
           {visibleVariants.slice(0, 5).map((v) => (
             <li
               key={v.name}
-              className="border border-white/10 bg-black/20 px-2 py-0.5 text-[0.7rem] text-muted"
+              className="border border-white/10 bg-black/20 px-1.5 py-0.5 text-[0.62rem] text-muted"
               style={v.accentColor ? { borderColor: v.accentColor } : undefined}
             >
               {v.name}
@@ -904,17 +909,17 @@ function Card({
             </li>
           ))}
           {visibleVariants.length > 5 ? (
-            <li className="product-card__more px-2 py-0.5 text-[0.7rem] text-primary">
+            <li className="product-card__more px-1.5 py-0.5 text-[0.62rem] text-primary">
               +{visibleVariants.length - 5}
             </li>
           ) : null}
         </ul>
 
-        <p className="mb-4 text-sm text-muted">
+        <p className="mb-3 mt-auto text-xs text-muted">
           {from ? (
             <>
               Referência a partir de{" "}
-              <span className="text-xl font-bold text-ink">
+              <span className="text-lg font-bold text-ink">
                 {formatBRL(from)}
               </span>
             </>
@@ -927,7 +932,7 @@ function Card({
 
         <span
           aria-hidden
-          className="product-card__cta inline-flex min-h-11 items-center justify-center border border-primary bg-primary px-4 text-sm font-bold uppercase tracking-[0.14em] text-ink transition-colors group-hover:bg-transparent group-hover:text-primary"
+          className="product-card__cta inline-flex min-h-9 items-center justify-center border border-primary bg-primary px-3 text-[0.66rem] font-bold uppercase tracking-[0.13em] text-ink transition-colors group-hover:bg-transparent group-hover:text-primary"
         >
           Ver detalhes
         </span>
@@ -1110,7 +1115,7 @@ function CatalogShelfRow({
           />
         ) : null}
 
-        <div className="pointer-events-none relative z-[var(--z-content)] mx-auto flex w-full max-w-7xl items-center justify-center gap-1.5 md:gap-2 lg:gap-8">
+        <div className="pointer-events-none relative z-[var(--z-content)] mx-auto flex w-full max-w-[90rem] items-center justify-center gap-1 md:gap-2 lg:gap-3">
           <button
             type="button"
             onClick={() => onNavigate(pageIndex - 1)}
@@ -1127,7 +1132,7 @@ function CatalogShelfRow({
             ‹
           </button>
 
-          <div className="pointer-events-auto relative grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="pointer-events-auto relative grid w-full max-w-[78rem] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:gap-5">
             {orderedProducts.map((product) => (
               <Card
                 key={product.slug}
@@ -1233,14 +1238,19 @@ function ProductCatalogShowcase({
   developerCreditUrl: string | null;
   content: StorefrontContent;
 }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredCatalogProducts = useMemo(
+    () => filterProductShortcuts(catalogProducts, searchQuery),
+    [catalogProducts, searchQuery],
+  );
   const productCatalog = useMemo(
     () =>
       buildProductCatalogLayout(
-        catalogProducts,
+        filteredCatalogProducts,
         PER_PAGE,
         CATALOG_VISIBLE_ROWS,
       ),
-    [catalogProducts],
+    [filteredCatalogProducts],
   );
   const [rowPages, setRowPages] = useState<number[]>(() =>
     Array.from({ length: CATALOG_VISIBLE_ROWS }, () => 0),
@@ -1248,7 +1258,6 @@ function ProductCatalogShowcase({
   const [transitioningRows, setTransitioningRows] = useState<boolean[]>(() =>
     Array.from({ length: CATALOG_VISIBLE_ROWS }, () => false),
   );
-  const [searchQuery, setSearchQuery] = useState("");
   const [pendingShortcutSlug, setPendingShortcutSlug] = useState<string | null>(
     null,
   );
@@ -1274,10 +1283,7 @@ function ProductCatalogShowcase({
 
   const openProduct =
     catalogProducts.find((product) => product.slug === openSlug) ?? null;
-  const filteredShortcuts = useMemo(
-    () => filterProductShortcuts(catalogProducts, searchQuery),
-    [catalogProducts, searchQuery],
-  );
+  const filteredShortcuts = filteredCatalogProducts;
   const productLocations = useMemo(() => {
     const locations = new Map<string, { rowIndex: number; pageIndex: number }>();
     productCatalog.rows.forEach((row, rowIndex) => {
@@ -1302,6 +1308,9 @@ function ProductCatalogShowcase({
     ? rowPages[0]
     : null;
   const pageTransitioning = transitioningRows.some(Boolean);
+  const showContinuation = productCatalog.rows
+    .slice(4)
+    .some((row) => row.length > 0);
 
   useEffect(() => {
     const resetRestoredPage = (event: PageTransitionEvent) => {
@@ -1655,6 +1664,22 @@ function ProductCatalogShowcase({
     });
   };
 
+  const updateSearchQuery = (value: string) => {
+    setSearchQuery(value);
+    setPendingShortcutSlug(null);
+    pendingShortcutTriggerRef.current = null;
+    setRowPages(Array.from({ length: CATALOG_VISIBLE_ROWS }, () => 0));
+  };
+
+  const jumpToCatalogEdge = (targetId: string) => {
+    document.getElementById(targetId)?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: targetId === "produtos" ? "start" : "end",
+    });
+  };
+
   const closeBeforeNavigation = () => {
     if (!openSlug) return;
     originScrollRef.current = null;
@@ -1749,10 +1774,10 @@ function ProductCatalogShowcase({
         </div>
 
         <section
-          className="product-discovery relative z-[var(--z-content)] mx-auto mb-14 max-w-6xl"
-          aria-labelledby="product-discovery-heading"
+          className="product-discovery product-discovery--search-only relative z-[var(--z-content)] mx-auto mb-10 max-w-5xl"
+          aria-label="Pesquisa rápida de produtos"
         >
-          <div className="product-discovery__heading">
+          {SHOW_PRODUCT_SHORTCUT_DIRECTORY ? <div className="product-discovery__heading">
             <div>
               <span className="product-discovery__eyebrow">
                 Acesso r&aacute;pido ao cat&aacute;logo
@@ -1771,7 +1796,7 @@ function ProductCatalogShowcase({
             >
               Vitrine completa
             </button>
-          </div>
+          </div> : null}
 
           <div className="product-discovery__search" role="search">
             <svg
@@ -1791,15 +1816,15 @@ function ProductCatalogShowcase({
               id="product-search"
               type="search"
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onChange={(event) => updateSearchQuery(event.target.value)}
               placeholder="Busque por produto, jogo ou plano..."
               autoComplete="off"
-              aria-controls="product-shortcuts"
+              aria-controls="product-catalog-results"
             />
             {searchQuery ? (
               <button
                 type="button"
-                onClick={() => setSearchQuery("")}
+                onClick={() => updateSearchQuery("")}
                 aria-label="Limpar pesquisa de produtos"
               >
                 Limpar
@@ -1807,13 +1832,13 @@ function ProductCatalogShowcase({
             ) : null}
           </div>
 
-          <p className="product-discovery__count" aria-live="polite">
+          <p className="sr-only" aria-live="polite">
             {filteredShortcuts.length === 1
               ? "1 produto encontrado"
               : `${filteredShortcuts.length} produtos encontrados`}
           </p>
 
-          <div id="product-shortcuts" className="product-discovery__shortcuts">
+          {SHOW_PRODUCT_SHORTCUT_DIRECTORY ? <div id="product-shortcuts" className="product-discovery__shortcuts">
             {filteredShortcuts.map((product) => (
               <button
                 key={product.catalogKey ?? product.slug}
@@ -1829,7 +1854,7 @@ function ProductCatalogShowcase({
                 <strong>{product.title}</strong>
               </button>
             ))}
-          </div>
+          </div> : null}
 
           {filteredShortcuts.length === 0 ? (
             <div className="product-discovery__empty" role="status">
@@ -1839,7 +1864,9 @@ function ProductCatalogShowcase({
           ) : null}
         </section>
 
-        <div className="product-catalog-rows">{renderRows([0, 1])}</div>
+        <div id="product-catalog-results" className="product-catalog-rows">
+          {renderRows([0, 1, 2, 3])}
+        </div>
       </section>
 
       <section
@@ -1847,7 +1874,7 @@ function ProductCatalogShowcase({
         className="product-showcase-section product-showcase-section--continuation site-flow-section relative bg-transparent px-2 pb-20 pt-16 sm:px-4 md:px-8 md:pb-28 md:pt-24"
         aria-labelledby="produtos-continuacao-heading"
       >
-        <div className="reveal-up relative z-[var(--z-content)] mx-auto mb-12 max-w-6xl text-center">
+        {showContinuation ? <><div className="reveal-up relative z-[var(--z-content)] mx-auto mb-12 max-w-6xl text-center">
           <span className="text-[0.6rem] font-black uppercase tracking-[0.24em] text-primary">
             {content.continuationEyebrow}
           </span>
@@ -1859,7 +1886,9 @@ function ProductCatalogShowcase({
           </h2>
         </div>
 
-        <div className="product-catalog-rows">{renderRows([2, 3])}</div>
+        <div className="product-catalog-rows">{renderRows([4, 5, 6, 7])}</div></> : null}
+
+        <div id="product-catalog-end" className="h-px" aria-hidden />
 
         <nav
           ref={pagerRef}
@@ -1904,7 +1933,7 @@ function ProductCatalogShowcase({
               type="button"
               onClick={() => changeAllRows(0)}
               disabled={Boolean(openSlug) || pageTransitioning}
-              aria-label="Voltar aos doze cards iniciais"
+              aria-label="Voltar aos 32 cards iniciais"
               aria-current={uniformStage === 0 ? "page" : undefined}
               className={`relative isolate inline-flex size-11 items-center justify-center text-3xl leading-none transition-colors ${
                 uniformStage === 0
@@ -1997,7 +2026,7 @@ function ProductCatalogShowcase({
           </div>
 
           <p className="sr-only" aria-live="polite">
-            Exibindo {visibleCount} produtos em quatro fileiras. Cada fileira
+            Exibindo {visibleCount} produtos em oito fileiras. Cada fileira
             pode estar em uma posição diferente.
           </p>
         </nav>
@@ -2024,6 +2053,17 @@ function ProductCatalogShowcase({
           </a>
         </footer>
       </section>
+
+      <nav className="catalog-quick-jump" aria-label="Atalhos da vitrine">
+        <button type="button" onClick={() => jumpToCatalogEdge("produtos")}>
+          <svg aria-hidden viewBox="0 0 24 24"><path d="m6 14 6-6 6 6M12 8v10" /></svg>
+          <span>Topo</span>
+        </button>
+        <button type="button" onClick={() => jumpToCatalogEdge("product-catalog-end")}>
+          <svg aria-hidden viewBox="0 0 24 24"><path d="m6 10 6 6 6-6M12 16V6" /></svg>
+          <span>Últimos</span>
+        </button>
+      </nav>
 
       {typeof document !== "undefined" && openProduct
         ? createPortal(

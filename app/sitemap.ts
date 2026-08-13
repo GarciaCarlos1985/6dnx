@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { officialSiteOrigin } from "@/lib/site-origin";
 
 /**
  * /sitemap.xml — public storefront routes only. Kept in sync with the
@@ -9,20 +10,8 @@ import type { MetadataRoute } from "next";
  * pointing the sitemap at routes that do not exist would create 404s and hurt
  * SEO. Add product entries here only once the per-product route ships.
  */
-function siteOrigin(): string {
-  const official = "https://www.6dnx.com.br";
-  const configured = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!configured) return official;
-  try {
-    const url = new URL(configured);
-    return url.protocol === "https:" ? url.origin : official;
-  } catch {
-    return official;
-  }
-}
-
 export default function sitemap(): MetadataRoute.Sitemap {
-  const origin = siteOrigin();
+  const origin = officialSiteOrigin();
   const now = new Date();
 
   return [

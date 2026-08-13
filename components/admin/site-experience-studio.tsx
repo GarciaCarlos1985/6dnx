@@ -95,6 +95,21 @@ export function SiteExperienceStudio({
   const dirty = JSON.stringify(draft) !== JSON.stringify(record.draft);
   const validation = useMemo(() => parseSiteExperienceConfig(draft), [draft]);
   const current = draft[page];
+  const persistenceReady = record.state === "ready";
+  const persistenceNotice = record.state === "schema-missing"
+    ? {
+        title: "Prévia local — rascunho ainda não pode ser salvo.",
+        text: "A migration 20260809220000_add_site_experience_studio.sql ainda não foi aplicada no banco. As alterações desta tela não serão mantidas ao sair.",
+      }
+    : record.state === "mfa-required"
+      ? {
+          title: "Confirmação de segurança necessária.",
+          text: "Conclua a autenticação em dois fatores da conta administrativa antes de salvar ou publicar.",
+        }
+      : {
+          title: "Armazenamento do Estúdio indisponível.",
+          text: "A prévia continua funcionando, mas nenhum rascunho será salvo enquanto a conexão não for restabelecida.",
+        };
 
   useEffect(() => {
     const protect = (event: BeforeUnloadEvent) => {
@@ -137,6 +152,7 @@ export function SiteExperienceStudio({
         },
       },
     } as SiteExperienceConfig));
+    setNotice(null);
   }
 
   function toggleEffect(family: ExperienceEffectFamily) {
@@ -154,10 +170,11 @@ export function SiteExperienceStudio({
         },
       },
     } as SiteExperienceConfig));
+    setNotice(null);
   }
 
   async function saveDraft() {
-    if (!dirty || !validation.ok || record.state !== "ready") return;
+    if (!dirty || !validation.ok || !persistenceReady) return;
     setBusy("save");
     setNotice(null);
     try {
@@ -254,12 +271,22 @@ export function SiteExperienceStudio({
           <div><span className="admin-kicker">Edição protegida</span><h1>Estúdio Visual 6DNX</h1><p>Conteúdo, cores, fontes e partículas com rascunho, prévia e publicação separada.</p></div>
           <div className="admin-content-heading__actions">
             <Link href="/admin" className="admin-secondary-button">Voltar ao painel</Link>
-            <button type="button" className="admin-secondary-button" onClick={saveDraft} disabled={!dirty || !validation.ok || Boolean(busy)}>{busy === "save" ? "Salvando…" : "Salvar rascunho"}</button>
+            <button
+              type="button"
+              className="admin-secondary-button"
+              onClick={saveDraft}
+              disabled={!dirty || !validation.ok || Boolean(busy) || !persistenceReady}
+              aria-describedby={!persistenceReady ? "admin-experience-persistence-notice" : undefined}
+              title={!persistenceReady ? persistenceNotice.title : undefined}
+            >
+              {busy === "save" ? "Salvando…" : persistenceReady ? "Salvar rascunho" : "Salvar indisponível"}
+            </button>
             <button type="button" className="admin-primary-button" onClick={publish} disabled={dirty || !validation.ok || Boolean(busy) || record.state !== "ready"}>{busy === "publish" ? "Publicando…" : "Publicar"}</button>
           </div>
         </header>
 
-        {record.state !== "ready" ? <div className="admin-notice admin-notice--info"><span>i</span><p><strong>Estúdio em modo de prévia local.</strong><br />A migration será aplicada somente depois da revisão humana. Nenhum card ou pagamento foi alterado.</p></div> : null}
+        {!persistenceReady ? <div id="admin-experience-persistence-notice" className="admin-notice admin-notice--info" role="status"><span>i</span><p><strong>{persistenceNotice.title}</strong><br />{persistenceNotice.text}</p></div> : null}
+        {dirty && !persistenceReady ? <div className="admin-notice admin-notice--warning" role="status"><span>!</span><p><strong>Alterações somente na prévia.</strong><br />Você pode conferir o visual à direita, mas voltar ao painel ou recarregar a página descartará estas mudanças.</p></div> : null}
         {notice ? <div className={`admin-notice admin-notice--${notice.tone}`} role={notice.tone === "error" ? "alert" : "status"}><span>{notice.tone === "ok" ? "✓" : notice.tone === "error" ? "!" : "i"}</span><p>{notice.text}</p></div> : null}
         {!validation.ok ? <div className="admin-notice admin-notice--error"><span>!</span><p><strong>Publicação bloqueada por segurança.</strong><br />{validation.errors.slice(0, 4).join(" ")}</p></div> : null}
 

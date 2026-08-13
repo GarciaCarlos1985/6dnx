@@ -1,6 +1,55 @@
 # 6DNX project state
 
-Last updated: 2026-08-09
+Last updated: 2026-08-13
+
+## Release final: vitrine compacta, persistência admin e SEO — 2026-08-13
+
+- Produção recebeu **somente** as migrations previamente autorizadas
+  `20260809180000_add_commerce_coupons.sql` e
+  `20260809220000_add_site_experience_studio.sql`, executadas de forma
+  direcionada. O histórico remoto e os objetos principais foram conferidos;
+  nenhuma outra migration pendente foi incluída e não houve `supabase db push`
+  genérico.
+- O Estúdio Visual agora persiste rascunhos no schema real e diferencia
+  claramente estado disponível de prévia local. Controles nativos do Windows
+  mantêm contraste escuro. Cupons ficam habilitados no banco sem alterar o
+  checkout quando nenhum código é informado.
+- A vitrine pública usa quatro cards compactos por fileira e oito fileiras,
+  totalizando 32 cards visíveis no primeiro estágio. O diretório de atalhos e o
+  botão `Vitrine completa` foram apenas ocultados por uma flag reversível; a
+  busca permanece em destaque e filtra os cards reais. Atalhos fixos levam ao
+  topo e ao final do catálogo.
+- Produção passou de 21 para 32 cards publicados pela restauração de exatamente
+  onze clones Rust que já existiam arquivados. A operação foi transacional e
+  restrita a `source_key` explícita + título `RustN`; não regravou título,
+  preço, arte, posição ou conteúdo dos 21 cards editados pelo Maycon. O trigger
+  comercial existente sincronizou as variações desses clones.
+- A proporção antiga de card permanece disponível como classe reversível
+  `product-card--legacy-size`, mas não está aplicada à nova vitrine.
+- SEO técnico agora fixa o domínio canônico em `https://www.6dnx.com.br`,
+  descreve a marca e o catálogo, publica Open Graph/Twitter e dados estruturados
+  de organização. `robots.txt`, `sitemap.xml`, favicon, ícones e imagem social
+  deixam de receber a política privada `X-Robots-Tag`. O sitemap também deixa
+  de anunciar o domínio `6dnx.vercel.app`.
+- A atualização visual do resultado do Google não é instantânea: depois do
+  deploy é necessário solicitar uma nova indexação no Google Search Console.
+  Favicon, título e descrição são fornecidos pelo site, mas a forma final e o
+  prazo de exibição pertencem ao Google.
+
+## Diagnóstico do Estúdio Visual e Cupons — 2026-08-13
+
+- A reprodução autenticada em `/admin/estudio` confirmou que o seletor de
+  partículas alterava apenas a prévia. O botão de rascunho parecia acionável,
+  porém `saveDraft()` encerrava silenciosamente quando o repositório informava
+  `schema-missing`. A interface agora bloqueia esse falso salvamento, mostra
+  `Salvar indisponível` e avisa explicitamente que as mudanças locais serão
+  descartadas ao sair.
+- O seletor nativo de densidade herdava texto claro sem declarar um esquema de
+  cores. Em Windows/Chrome, a lista podia abrir branca com opções ilegíveis.
+  O controle agora declara `color-scheme: dark` e cores explícitas para as
+  opções, sem trocar o valor salvo ou a lógica das partículas.
+- Naquele diagnóstico inicial as migrations ainda estavam ausentes. O estado
+  atual e a aplicação direcionada estão registrados no checkpoint acima.
 
 ## Identidade de favicon 6DNX — release para main
 

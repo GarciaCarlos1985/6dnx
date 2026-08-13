@@ -10,7 +10,10 @@ import { isTrustedMutationOrigin } from "../lib/security/request-origin.ts";
 import { shouldProtectSiteReview } from "../lib/security/review-mode.ts";
 import { shouldEnablePaymentTestMode } from "../lib/security/payment-test-mode.ts";
 import { resolvePublicHttpsLink } from "../lib/security/public-link.ts";
-import { isSocialPreviewImagePath } from "../lib/security/social-preview.ts";
+import {
+  isPublicCrawlerResourcePath,
+  isSocialPreviewImagePath,
+} from "../lib/security/social-preview.ts";
 import { protectedCatalogUpdateErrors } from "../lib/catalog/admin-safety.ts";
 import {
   buildRustCloneProducts,
@@ -30,9 +33,11 @@ import {
 } from "../lib/product-catalog-layout.ts";
 import {
   moveCatalogItem,
+  parseCatalogDestination,
   parseCatalogOrderPayload,
   swapCatalogItems,
 } from "../lib/catalog/order.ts";
+import { resolveSiteOrigin } from "../lib/site-origin.ts";
 import type {
   CatalogAdminItem,
   CatalogMutation,
@@ -94,6 +99,41 @@ test("only root social preview images bypass image indexing restrictions", () =>
   assert.equal(isSocialPreviewImagePath("/twitter-image.jpeg"), true);
   assert.equal(isSocialPreviewImagePath("/admin/opengraph-image.jpg"), false);
   assert.equal(isSocialPreviewImagePath("/api/opengraph-image.jpg"), false);
+});
+
+test("site metadata canonicalizes every known 6DNX host", () => {
+  assert.equal(resolveSiteOrigin(), "https://www.6dnx.com.br");
+  assert.equal(
+    resolveSiteOrigin("https://6dnx.vercel.app/some-path"),
+    "https://www.6dnx.com.br",
+  );
+  assert.equal(
+    resolveSiteOrigin("https://6dnx.com.br"),
+    "https://www.6dnx.com.br",
+  );
+  assert.equal(
+    resolveSiteOrigin("https://preview.example.com/path"),
+    "https://preview.example.com",
+  );
+  assert.equal(
+    resolveSiteOrigin("http://preview.example.com"),
+    "https://www.6dnx.com.br",
+  );
+});
+
+test("crawler resources stay readable while private paths remain blocked", () => {
+  for (const path of [
+    "/robots.txt",
+    "/sitemap.xml",
+    "/favicon.ico",
+    "/icon.png",
+    "/apple-icon.png",
+    "/opengraph-image.jpg",
+  ]) {
+    assert.equal(isPublicCrawlerResourcePath(path), true, path);
+  }
+  assert.equal(isPublicCrawlerResourcePath("/admin/icon.png"), false);
+  assert.equal(isPublicCrawlerResourcePath("/api/sitemap.xml"), false);
 });
 
 test("admin mutations require the exact same origin", () => {
@@ -306,7 +346,10 @@ test("Rust creation defaults to one next missing card and honors an explicit lim
   );
 });
 
-test("the catalog exposes twelve unique cards across four independent rows", () => {
+test("the catalog exposes thirty-two unique cards across eight four-card rows", () => {
+  assert.equal(CATALOG_CARDS_PER_ROW, 4);
+  assert.equal(CATALOG_VISIBLE_ROWS, 8);
+  assert.equal(CATALOG_INITIAL_VISIBLE_COUNT, 32);
   const layout = buildProductCatalogLayout(products);
   assert.equal(layout.rows.length, CATALOG_VISIBLE_ROWS);
   assert.ok(
@@ -356,6 +399,16 @@ test("catalog quick move can send one distant card directly to any position", ()
   assert.deepEqual(moveCatalogItem(original, "missing", 1), original);
   assert.deepEqual(moveCatalogItem(original, "c", 99), original);
   assert.deepEqual(original, ["a", "b", "c", "d", "e"]);
+});
+
+test("typed catalog positions reject invalid and out-of-range values", () => {
+  assert.equal(parseCatalogDestination("", 32), null);
+  assert.equal(parseCatalogDestination("   ", 32), null);
+  assert.equal(parseCatalogDestination("0", 32), null);
+  assert.equal(parseCatalogDestination("2.5", 32), null);
+  assert.equal(parseCatalogDestination("33", 32), null);
+  assert.equal(parseCatalogDestination("1", 32), 0);
+  assert.equal(parseCatalogDestination("32", 32), 31);
 });
 
 test("catalog board swaps exactly two selected cards without mutating input", () => {

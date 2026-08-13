@@ -45,15 +45,19 @@ test("product discovery matches categories and keeps the admin order", () => {
   assert.deepEqual(filterProductShortcuts(products, "inexistente"), []);
 });
 
-test("storefront shortcuts are generated from the published catalog", async () => {
+test("storefront keeps only search visible and filters the real catalog", async () => {
   const source = await readFile(
     new URL("../components/product-showcase.tsx", import.meta.url),
     "utf8",
   );
 
+  assert.match(source, /const SHOW_PRODUCT_SHORTCUT_DIRECTORY = false/);
   assert.match(source, /filterProductShortcuts\(catalogProducts, searchQuery\)/);
-  assert.match(source, /filteredShortcuts\.map\(\(product\) =>/);
-  assert.match(source, /data-product-shortcut=\{product\.slug\}/);
-  assert.match(source, /Vitrine completa/);
+  assert.match(source, /buildProductCatalogLayout\(\s*filteredCatalogProducts/);
+  assert.match(source, /aria-controls="product-catalog-results"/);
+  assert.match(source, /id="product-catalog-results"/);
+  assert.match(source, /renderRows\(\[0, 1, 2, 3\]\)/);
+  assert.match(source, /renderRows\(\[4, 5, 6, 7\]\)/);
+  assert.match(source, /className="catalog-quick-jump"/);
   assert.match(source, /data-product-card-trigger/);
 });

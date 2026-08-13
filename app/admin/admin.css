@@ -250,6 +250,12 @@
 .admin-field select {
   cursor: pointer;
   appearance: auto;
+  color-scheme: dark;
+}
+
+.admin-field select option {
+  color: #f8f5f6;
+  background-color: #0b0809;
 }
 
 .admin-field input:hover,
@@ -2118,6 +2124,17 @@
 .admin-notice--info {
   color: var(--admin-muted);
   background: rgb(255 255 255 / 2%);
+}
+
+.admin-notice--warning {
+  border-color: rgb(244 180 0 / 28%);
+  color: #f3d99a;
+  background: rgb(244 180 0 / 6%);
+}
+
+.admin-notice--warning > span {
+  color: #171008;
+  background: #f4b400;
 }
 
 .admin-editor-tabs {

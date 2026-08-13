@@ -3,6 +3,23 @@ const UUID_PATTERN =
 
 export const MAX_REORDERED_PRODUCTS = 500;
 
+export function parseCatalogDestination(
+  value: string,
+  totalItems: number,
+) {
+  if (!value.trim() || totalItems < 1) return null;
+  const requestedPosition = Number(value);
+  if (
+    !Number.isInteger(requestedPosition) ||
+    requestedPosition < 1 ||
+    requestedPosition > totalItems
+  ) {
+    return null;
+  }
+
+  return requestedPosition - 1;
+}
+
 export function moveCatalogItem(
   orderedIds: readonly string[],
   sourceId: string,
