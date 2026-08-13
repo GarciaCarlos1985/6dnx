@@ -2,6 +2,29 @@
 
 Last updated: 2026-08-13
 
+## Verificação operacional: PIX e cupom BICHO-DEV — 2026-08-13
+
+- O smoke test sem dados pessoais e sem criação de cobrança (`POST
+  /api/checkout` com corpo vazio e origem confiável) respondeu `400` tanto em
+  `localhost:3127` quanto em `https://www.6dnx.com.br`. Isso confirma que os
+  gates do checkout estão abertos nos dois ambientes; a indicação local de PIX
+  indisponível veio de uma home pré-renderizada sem as variáveis do arquivo
+  `.env.local`, não de falha da StorM ou do banco.
+- O cupom `BICHO-DEV` foi conferido somente por leitura. Ele foi cadastrado como
+  ativo, com 20% de desconto, mínimo de R$ 50,00 e janela extremamente curta:
+  13:46–14:00 no horário de Brasília. Às 13:55, a validação server-side da opção
+  de R$ 79,90 respondeu `200` e calculou R$ 63,92. O `409` anterior correspondeu
+  à tentativa fora da janela; nenhuma regra, pedido ou cupom foi alterado.
+
+## Ajuste local pós-release: detalhes sem rolagem interna — 2026-08-13
+
+- A lista de variações e o conteúdo técnico dos detalhes do produto deixaram de
+  usar caixas internas com rolagem. O painel cresce para apresentar o conteúdo
+  completo; quando a altura excede a tela, somente a camada modal externa rola.
+- A área informativa usa preto sólido para aumentar a nitidez, e o rótulo
+  `Escolha sua opção` passou a branco integral. Catálogo, preços, checkout e
+  dados administrativos permanecem inalterados.
+
 ## Ajuste local pós-release: atalho para o rodapé — 2026-08-13
 
 - O atalho fixo `Últimos` agora navega diretamente até `#creditos`, mantendo o

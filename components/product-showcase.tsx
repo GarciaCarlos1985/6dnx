@@ -410,7 +410,7 @@ function ProductPurchasePanel({
       {requiresVariant ? (
         <>
           <div className="mb-2 flex items-center justify-between gap-3">
-            <p className="text-[0.58rem] font-black uppercase tracking-[0.18em] text-white/72">
+            <p className="text-[0.58rem] font-black uppercase tracking-[0.18em] text-white">
               Escolha sua opção
             </p>
             {purchasableVariants.length === 1 ? (
@@ -419,7 +419,7 @@ function ProductPurchasePanel({
               </span>
             ) : null}
           </div>
-          <ul className="product-scrollbar max-h-32 space-y-1.5 overflow-y-auto pr-0.5">
+          <ul className="space-y-1.5">
             {visibleVariants.map((variant) => (
               <VariantRow
                 key={variant.name}
@@ -598,6 +598,116 @@ function ProductMediaPreview({ product }: { product: Product }) {
   );
 }
 
+function ProductTechnicalContent({ product }: { product: Product }) {
+  return (
+    <div className="bg-black px-4 py-3">
+      {product.description && (
+        <p className="mb-6 text-sm leading-relaxed text-muted">
+          {product.description}
+        </p>
+      )}
+
+      {product.features && product.features.length > 0 && (
+        <div className="mb-6">
+          <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+            AI Aimbot — Universal Edition
+          </h4>
+          <div className="grid grid-cols-2 gap-2">
+            {product.features.map((feature, index) => (
+              <div
+                key={`${feature.label}-${index}`}
+                className="flex flex-col rounded-md border border-white/5 bg-black/40 p-2 shadow-[inset_0_0_12px_rgba(255,255,255,0.02)]"
+              >
+                <span className="mb-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-muted/80">
+                  {feature.label}
+                </span>
+                <span
+                  className={`text-[0.75rem] font-bold ${
+                    feature.value.toLowerCase().includes("sim") ||
+                    feature.value.toLowerCase().includes("yes") ||
+                    feature.value.toLowerCase().includes("external")
+                      ? "text-green-400/90"
+                      : "text-ink"
+                  }`}
+                >
+                  {feature.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {product.systemSupport && product.systemSupport.length > 0 && (
+        <div className="mb-6">
+          <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+            Requisitos do Sistema
+          </h4>
+          <div className="grid grid-cols-2 gap-2">
+            {product.systemSupport.map((requirement, index) => (
+              <div
+                key={`${requirement.label}-${index}`}
+                className="flex flex-col rounded-md border border-primary/20 bg-primary/[0.03] p-2"
+              >
+                <span className="mb-0.5 text-[0.6rem] font-medium uppercase tracking-wide text-primary/70">
+                  {requirement.label}
+                </span>
+                <span className="text-[0.75rem] font-bold text-ink">
+                  {requirement.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {product.menuKeys && product.menuKeys.length > 0 && (
+        <div className="mb-6">
+          <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+            Teclas do Menu
+          </h4>
+          <div className="flex flex-col gap-2">
+            {product.menuKeys.map((menuKey, index) => (
+              <div
+                key={`${menuKey.label}-${index}`}
+                className="flex items-center gap-3 rounded-md border border-white/10 bg-black/60 p-2"
+              >
+                <span className="shrink-0 rounded bg-primary/20 px-2 py-0.5 text-[0.65rem] font-black tracking-widest text-primary">
+                  {menuKey.label}
+                </span>
+                <span className="text-[0.7rem] leading-tight text-muted">
+                  {menuKey.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {product.tutorialSteps && product.tutorialSteps.length > 0 && (
+        <div className="mb-6">
+          <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+            Tutorial de Inicialização
+          </h4>
+          <ul className="space-y-2">
+            {product.tutorialSteps.map((step, index) => (
+              <li
+                key={`${index}-${step}`}
+                className="flex items-start gap-2.5 rounded-md border border-white/5 bg-black/20 p-2.5 text-[0.7rem] text-muted/90"
+              >
+                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border border-primary/30 text-[0.55rem] font-black text-primary">
+                  {index + 1}
+                </span>
+                <span className="leading-relaxed">{step}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Popups({
   product,
   placement,
@@ -641,8 +751,12 @@ function Popups({
           aria-modal="true"
           aria-label={`Detalhes de ${product.title}`}
           data-popup-side="left"
-          className="product-popup product-popup--info-left fixed z-[80] flex flex-col overflow-hidden border border-primary/40 bg-surface/95 shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)] backdrop-blur-md"
-          style={placement.info}
+          className="product-popup product-popup--info-left absolute z-[80] flex flex-col overflow-visible border border-primary/40 bg-black shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)]"
+          style={{
+            top: placement.info.top,
+            left: placement.info.left,
+            width: placement.info.width,
+          }}
         >
           <header className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3">
             <div>
@@ -675,112 +789,7 @@ function Popups({
             supportUrl={supportUrl}
           />
 
-          <div className="product-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-3">
-            {product.description && (
-              <p className="mb-6 text-sm leading-relaxed text-muted">
-                {product.description}
-              </p>
-            )}
-
-            {product.features && product.features.length > 0 && (
-              <div className="mb-6">
-                <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
-                  AI Aimbot — Universal Edition
-                </h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {product.features.map((f, i) => (
-                    <div
-                      key={i}
-                      className="flex flex-col rounded-md border border-white/5 bg-black/40 p-2 shadow-[inset_0_0_12px_rgba(255,255,255,0.02)]"
-                    >
-                      <span className="mb-0.5 text-[0.6rem] font-medium tracking-wide text-muted/80 uppercase">
-                        {f.label}
-                      </span>
-                      <span
-                        className={`text-[0.75rem] font-bold ${
-                          f.value.toLowerCase().includes("sim") ||
-                          f.value.toLowerCase().includes("yes") ||
-                          f.value.toLowerCase().includes("external")
-                            ? "text-green-400/90"
-                            : "text-ink"
-                        }`}
-                      >
-                        {f.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {product.systemSupport && product.systemSupport.length > 0 && (
-              <div className="mb-6">
-                <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
-                  Requisitos do Sistema
-                </h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {product.systemSupport.map((f, i) => (
-                    <div
-                      key={i}
-                      className="flex flex-col rounded-md border border-primary/20 bg-primary/[0.03] p-2"
-                    >
-                      <span className="mb-0.5 text-[0.6rem] font-medium tracking-wide text-primary/70 uppercase">
-                        {f.label}
-                      </span>
-                      <span className="text-[0.75rem] font-bold text-ink">
-                        {f.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {product.menuKeys && product.menuKeys.length > 0 && (
-              <div className="mb-6">
-                <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
-                  Teclas do Menu
-                </h4>
-                <div className="flex flex-col gap-2">
-                  {product.menuKeys.map((k, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-3 rounded-md border border-white/10 bg-black/60 p-2"
-                    >
-                      <span className="shrink-0 rounded bg-primary/20 px-2 py-0.5 text-[0.65rem] font-black tracking-widest text-primary">
-                        {k.label}
-                      </span>
-                      <span className="text-[0.7rem] leading-tight text-muted">
-                        {k.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {product.tutorialSteps && product.tutorialSteps.length > 0 && (
-              <div className="mb-6">
-                <h4 className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
-                  Tutorial de Inicialização
-                </h4>
-                <ul className="space-y-2">
-                  {product.tutorialSteps.map((step, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-2.5 text-[0.7rem] text-muted/90 rounded-md border border-white/5 bg-black/20 p-2.5"
-                    >
-                      <span className="flex mt-0.5 h-4 w-4 shrink-0 items-center justify-center rounded border border-primary/30 text-[0.55rem] font-black text-primary">
-                        {i + 1}
-                      </span>
-                      <span className="leading-relaxed">{step}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-          </div>
+          <ProductTechnicalContent product={product} />
         </section>
 
         <section
@@ -2070,7 +2079,10 @@ function ProductCatalogShowcase({
 
       {typeof document !== "undefined" && openProduct
         ? createPortal(
-            <div data-product-modal-root>
+            <div
+              data-product-modal-root
+              className="fixed inset-0 z-50 overflow-x-hidden overflow-y-auto"
+            >
               <div
                 className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md"
                 onClick={close}
@@ -2146,7 +2158,7 @@ function MobileSheet({
         aria-label={`Detalhes de ${product.title}`}
         inert={checkoutVariant ? true : undefined}
         aria-hidden={checkoutVariant ? true : undefined}
-        className="fixed left-1/2 top-1/2 z-[80] flex max-h-[86vh] w-[min(30rem,92vw)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden border border-primary/40 bg-surface shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)]"
+        className="relative z-[80] mx-auto my-5 flex w-[min(30rem,92vw)] flex-col overflow-visible border border-primary/40 bg-black shadow-[0_0_50px_oklch(0.55_0.22_25_/_0.3)]"
       >
         <header className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3">
           <div>
@@ -2177,16 +2189,12 @@ function MobileSheet({
           supportUrl={supportUrl}
         />
 
-        <div className="product-scrollbar min-h-0 flex-1 overflow-y-auto">
+        <div className="bg-black">
           <div className="aspect-video w-full bg-black">
             <ProductMediaPreview key={product.slug} product={product} />
           </div>
 
-          <div className="px-4 py-3">
-            <p className="mb-4 text-sm leading-relaxed text-muted">
-              {product.description}
-            </p>
-          </div>
+          <ProductTechnicalContent product={product} />
         </div>
       </section>
 

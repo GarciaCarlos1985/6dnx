@@ -62,5 +62,9 @@ test("storefront keeps only search visible and filters the real catalog", async 
   assert.match(source, /className="catalog-quick-jump"/);
   assert.match(source, /jumpToCatalogEdge\("creditos"\)/);
   assert.doesNotMatch(source, /id="product-catalog-end"/);
+  assert.doesNotMatch(source, /max-h-32 space-y-1\.5 overflow-y-auto/);
+  assert.match(source, /product-popup--info-left absolute/);
+  assert.match(source, /data-product-modal-root[\s\S]*overflow-y-auto/);
+  assert.match(source, /tracking-\[0\.18em\] text-white"/);
   assert.match(source, /data-product-card-trigger/);
 });
