@@ -41,6 +41,9 @@ const SHOW_GLOBAL_PRODUCT_PAGER = false;
 // Kept in source for a reversible return to the old shortcut directory. The
 // public storefront now uses the search field itself to filter the real cards.
 const SHOW_PRODUCT_SHORTCUT_DIRECTORY = false;
+// Kept for a reversible return to per-row carousel navigation. With 32 cards
+// already visible, search is the clearer way to reach a specific product.
+const SHOW_ROW_CAROUSEL_CONTROLS = false;
 const MARGIN = 12;
 const GAP = 20;
 const INFO_W = 360;
@@ -1097,7 +1100,9 @@ function CatalogShelfRow({
       aria-label={`Fileira ${rowIndex + 1} de produtos`}
     >
       <div className="product-catalog-stage relative mx-auto w-full max-w-[90rem] overflow-x-clip">
-        {!openSlug && previousProducts.length > 0 ? (
+        {SHOW_ROW_CAROUSEL_CONTROLS &&
+        !openSlug &&
+        previousProducts.length > 0 ? (
           <AdjacentPagePeek
             side="previous"
             products={[...previousProducts].reverse()}
@@ -1106,7 +1111,7 @@ function CatalogShelfRow({
           />
         ) : null}
 
-        {!openSlug && nextProducts.length > 0 ? (
+        {SHOW_ROW_CAROUSEL_CONTROLS && !openSlug && nextProducts.length > 0 ? (
           <AdjacentPagePeek
             side="next"
             products={nextProducts}
@@ -1116,7 +1121,7 @@ function CatalogShelfRow({
         ) : null}
 
         <div className="pointer-events-none relative z-[var(--z-content)] mx-auto flex w-full max-w-[90rem] items-center justify-center gap-1 md:gap-2 lg:gap-3">
-          <button
+          {SHOW_ROW_CAROUSEL_CONTROLS ? <button
             type="button"
             onClick={() => onNavigate(pageIndex - 1)}
             disabled={
@@ -1130,7 +1135,7 @@ function CatalogShelfRow({
             }`}
           >
             ‹
-          </button>
+          </button> : null}
 
           <div className="pointer-events-auto relative grid w-full max-w-[78rem] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:gap-5">
             {orderedProducts.map((product) => (
@@ -1147,7 +1152,7 @@ function CatalogShelfRow({
             ))}
           </div>
 
-          <button
+          {SHOW_ROW_CAROUSEL_CONTROLS ? <button
             type="button"
             onClick={() => onNavigate(pageIndex + 1)}
             disabled={
@@ -1159,7 +1164,7 @@ function CatalogShelfRow({
             }`}
           >
             ›
-          </button>
+          </button> : null}
         </div>
       </div>
     </div>
@@ -1671,12 +1676,12 @@ function ProductCatalogShowcase({
     setRowPages(Array.from({ length: CATALOG_VISIBLE_ROWS }, () => 0));
   };
 
-  const jumpToCatalogEdge = (targetId: string) => {
+  const jumpToCatalogEdge = (targetId: "produtos" | "creditos") => {
     document.getElementById(targetId)?.scrollIntoView({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
         ? "auto"
         : "smooth",
-      block: targetId === "produtos" ? "start" : "end",
+      block: targetId === "produtos" ? "start" : "center",
     });
   };
 
@@ -1888,8 +1893,6 @@ function ProductCatalogShowcase({
 
         <div className="product-catalog-rows">{renderRows([4, 5, 6, 7])}</div></> : null}
 
-        <div id="product-catalog-end" className="h-px" aria-hidden />
-
         <nav
           ref={pagerRef}
           className={`product-pager relative z-[var(--z-content)] mx-auto mt-16 max-w-5xl flex-col items-center gap-4 ${SHOW_GLOBAL_PRODUCT_PAGER ? "flex" : "product-pager--disabled"}`}
@@ -2059,7 +2062,7 @@ function ProductCatalogShowcase({
           <svg aria-hidden viewBox="0 0 24 24"><path d="m6 14 6-6 6 6M12 8v10" /></svg>
           <span>Topo</span>
         </button>
-        <button type="button" onClick={() => jumpToCatalogEdge("product-catalog-end")}>
+        <button type="button" onClick={() => jumpToCatalogEdge("creditos")}>
           <svg aria-hidden viewBox="0 0 24 24"><path d="m6 10 6 6 6-6M12 16V6" /></svg>
           <span>Últimos</span>
         </button>

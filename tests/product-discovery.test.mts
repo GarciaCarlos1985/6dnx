@@ -52,6 +52,7 @@ test("storefront keeps only search visible and filters the real catalog", async 
   );
 
   assert.match(source, /const SHOW_PRODUCT_SHORTCUT_DIRECTORY = false/);
+  assert.match(source, /const SHOW_ROW_CAROUSEL_CONTROLS = false/);
   assert.match(source, /filterProductShortcuts\(catalogProducts, searchQuery\)/);
   assert.match(source, /buildProductCatalogLayout\(\s*filteredCatalogProducts/);
   assert.match(source, /aria-controls="product-catalog-results"/);
@@ -59,5 +60,7 @@ test("storefront keeps only search visible and filters the real catalog", async 
   assert.match(source, /renderRows\(\[0, 1, 2, 3\]\)/);
   assert.match(source, /renderRows\(\[4, 5, 6, 7\]\)/);
   assert.match(source, /className="catalog-quick-jump"/);
+  assert.match(source, /jumpToCatalogEdge\("creditos"\)/);
+  assert.doesNotMatch(source, /id="product-catalog-end"/);
   assert.match(source, /data-product-card-trigger/);
 });

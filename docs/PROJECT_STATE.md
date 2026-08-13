@@ -2,6 +2,23 @@
 
 Last updated: 2026-08-13
 
+## Ajuste local pós-release: atalho para o rodapé — 2026-08-13
+
+- O atalho fixo `Últimos` agora navega diretamente até `#creditos`, mantendo o
+  crédito `Desenvolvido por Developer Bicho` inteiro e centralizado na área
+  visível. A antiga âncora intermediária, posicionada antes do rodapé, foi
+  removida.
+- O destino público do crédito continua vindo exclusivamente de
+  `DEVELOPER_CREDIT_URL`, com fallback seguro para `DISCORD_INVITE_URL`; URLs de
+  webhook continuam rejeitadas.
+
+## Ajuste local pós-release: navegação lateral oculta — 2026-08-13
+
+- As setas por fileira e os cards de prévia lateral do antigo carrossel foram
+  desativados por `SHOW_ROW_CAROUSEL_CONTROLS=false`.
+- O código continua preservado e reversível. A vitrine exibe os 32 cards em
+  oito fileiras e mantém a busca como navegação principal.
+
 ## Release final: vitrine compacta, persistência admin e SEO — 2026-08-13
 
 - Produção recebeu **somente** as migrations previamente autorizadas
