@@ -7,6 +7,7 @@ import { SiteAtmosphere } from "@/components/site-atmosphere";
 import { SiteNavigation } from "@/components/site-navigation";
 import { getPublishedCatalog } from "@/lib/catalog/repository";
 import { checkoutReadiness } from "@/lib/checkout/config";
+import { OFFICIAL_6DNX_DISCORD_INVITE } from "@/lib/discord";
 import { shouldEnablePaymentTestMode } from "@/lib/security/payment-test-mode";
 import { resolvePublicHttpsLink } from "@/lib/security/public-link";
 import { experienceThemeStyle } from "@/lib/site-experience/presentation";
@@ -23,9 +24,7 @@ export default async function HomePage() {
   const developerCreditUrl =
     resolvePublicHttpsLink(process.env.DEVELOPER_CREDIT_URL) ??
     resolvePublicHttpsLink(process.env.DISCORD_INVITE_URL);
-  const announcementsUrl =
-    resolvePublicHttpsLink(process.env.DISCORD_ANNOUNCEMENTS_URL) ??
-    "https://discord.gg/5k9tvSerW";
+  const announcementsUrl = OFFICIAL_6DNX_DISCORD_INVITE;
 
   return (
     <main className="site-flow" style={experienceThemeStyle(experience.home.theme)}>

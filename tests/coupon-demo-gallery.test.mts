@@ -119,7 +119,7 @@ test("admin and public gallery implement five-image upload, autoplay and infinit
   assert.match(showcase, /window\.setInterval\(\(\) => move\(1\), 4_500\)/);
   assert.match(
     showcase,
-    /\(current \+ direction \+ demoImages\.length\) % demoImages\.length/,
+    /\(current \+ direction \+ media\.length\) % media\.length/,
   );
   assert.match(showcase, /prefers-reduced-motion: reduce/);
   assert.match(showcase, /Demonstração em preparação/);

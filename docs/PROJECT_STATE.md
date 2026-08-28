@@ -1,6 +1,34 @@
 # 6DNX project state
 
-Last updated: 2026-08-13
+Last updated: 2026-08-28
+
+## Correção local: apresentação de produtos e convite permanente — 2026-08-28
+
+- O caminho painel admin → catálogo → popup foi rastreado sem tocar em preço,
+  oferta, checkout ou pedidos. O campo existente `youtube_id` continua
+  disponível, mas a interface anterior aceitava somente o ID de 11 caracteres
+  e a vitrine não montava o player; por isso um link completo salvo pelo Maycon
+  não produzia a apresentação esperada.
+- O painel agora aceita link HTTPS completo ou ID do YouTube, normaliza o valor
+  no servidor e o popup direito apresenta o vídeo aprovado com o player de
+  privacidade do YouTube, sem autoplay de áudio e com link externo de fallback.
+  O mesmo navegador de mídia percorre o vídeo e até cinco imagens; imagens
+  continuam em loop automático somente enquanto uma imagem estiver visível.
+- Uma leitura segura do schema público de Produção retornou `PGRST204` para
+  `product_catalog.demo_images`: a coluna da galeria ainda não existe. Portanto,
+  o vídeo pode funcionar com a coluna já existente, mas uploads de imagens não
+  persistirão até a aplicação **direcionada** e explicitamente autorizada de
+  `20260809183000_add_product_demo_gallery.sql`. Nenhuma migration foi aplicada
+  neste checkpoint.
+- Todos os links operacionais do storefront — Canal Welcome, suporte,
+  pós-compra e Anúncios — usam a regra única do convite permanente
+  `https://discord.gg/6dnx`. `/api/redirect` não consulta mais um convite
+  antigo em variável de ambiente. O crédito independente “Developer Bicho”
+  continua usando `DEVELOPER_CREDIT_URL`. Webhooks do Discord permanecem
+  estritamente server-only e não são usados como links.
+- Este checkpoint não inclui migration. A publicação por Git deve ser
+  acompanhada no deploy da Vercel após os gates locais, sem reintroduzir um
+  convite de Discord em variável pública.
 
 ## Verificação operacional: PIX e cupom BICHO-DEV — 2026-08-13
 

@@ -408,6 +408,11 @@ cinco imagens 16:9. Elas aparecem no popup da direita quando o cliente abre o
 card. O site troca as imagens automaticamente e também mostra setas grandes
 para avançar ou voltar em loop.
 
+Na aba **Conteúdo**, o campo **Vídeo demonstrativo do YouTube** aceita o link
+completo ou o ID de 11 caracteres. Quando houver vídeo e imagens, o vídeo abre
+primeiro e as setas percorrem toda a apresentação. O player não inicia áudio
+sozinho e oferece um link para abrir o vídeo diretamente no YouTube.
+
 - **Adicionar imagens:** aceita JPG, PNG, WEBP ou AVIF de até 5 MB;
 - **Setas da miniatura:** mudam a ordem da apresentação;
 - **Remover:** retira somente aquela arte da galeria;
@@ -435,13 +440,14 @@ administrador não precisa editar preço de produto para criar uma campanha.
 
 ## Campos que exigem cuidado
 
-### ID do vídeo no YouTube
+### Vídeo demonstrativo do YouTube
 
-Cole somente os 11 caracteres finais do link. Exemplo:
+Cole o link HTTPS completo ou somente os 11 caracteres finais. O painel
+normaliza os dois formatos para o mesmo vídeo. Exemplo:
 
 ```text
 Link completo: https://www.youtube.com/watch?v=BqPwa1SXowE
-ID correto:    BqPwa1SXowE
+Também aceito: BqPwa1SXowE
 ```
 
 Depois escolha **Horizontal (16:9)** ou **Vertical (Shorts)**.

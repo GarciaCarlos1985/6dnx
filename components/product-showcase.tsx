@@ -33,6 +33,11 @@ import { filterProductShortcuts } from "@/lib/product-discovery";
 import { PixCheckoutModal } from "@/components/pix-checkout-modal";
 import { DiscordMark } from "@/components/discord-mark";
 import type { StorefrontContent } from "@/lib/storefront-content/types";
+import {
+  normalizeYouTubeVideoId,
+  youtubeNoCookieEmbedUrl,
+  youtubeWatchUrl,
+} from "@/lib/media/youtube";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -470,29 +475,50 @@ function ProductPurchasePanel({
 }
 
 function ProductMediaPreview({ product }: { product: Product }) {
-  const demoImages = useMemo(
-    () =>
-      (product.demoImages ?? [])
-        .filter((image): image is string => Boolean(image))
-        .slice(0, 5),
-    [product.demoImages],
-  );
+  const media = useMemo(() => {
+    const items: Array<
+      | { kind: "youtube"; id: string; embedUrl: string; watchUrl: string }
+      | { kind: "image"; src: string }
+    > = [];
+    const videoId = normalizeYouTubeVideoId(product.youtubeId);
+    const embedUrl = youtubeNoCookieEmbedUrl(videoId);
+    const watchUrl = youtubeWatchUrl(videoId);
+
+    if (videoId && embedUrl && watchUrl) {
+      items.push({ kind: "youtube", id: videoId, embedUrl, watchUrl });
+    }
+    items.push(
+      ...(product.demoImages ?? [])
+        .filter(
+          (image): image is string =>
+            Boolean(image) &&
+            (image.startsWith("/") || image.startsWith("https://")),
+        )
+        .slice(0, 5)
+        .map((src) => ({ kind: "image" as const, src })),
+    );
+    return items;
+  }, [product.demoImages, product.youtubeId]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
   const move = useCallback(
     (direction: -1 | 1) => {
-      if (demoImages.length < 2) return;
+      if (media.length < 2) return;
       setActiveIndex((current) =>
-        (current + direction + demoImages.length) % demoImages.length,
+        (current + direction + media.length) % media.length,
       );
     },
-    [demoImages.length],
+    [media.length],
   );
+
+  const visibleIndex = media.length ? activeIndex % media.length : 0;
+  const activeMedia = media[visibleIndex];
 
   useEffect(() => {
     if (
-      demoImages.length < 2 ||
+      media.length < 2 ||
+      activeMedia?.kind !== "image" ||
       paused ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
@@ -500,34 +526,59 @@ function ProductMediaPreview({ product }: { product: Product }) {
     }
     const interval = window.setInterval(() => move(1), 4_500);
     return () => window.clearInterval(interval);
-  }, [demoImages.length, move, paused]);
+  }, [activeMedia?.kind, media.length, move, paused]);
 
-  if (demoImages.length) {
-    const visibleIndex = activeIndex % demoImages.length;
-    const activeImage = demoImages[visibleIndex] ?? demoImages[0];
+  if (activeMedia) {
     return (
       <div
         className="relative h-full min-h-52 overflow-hidden bg-black"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
-        <div
-          key={`${product.slug}-${visibleIndex}-${activeImage}`}
-          className="product-demo-slide absolute inset-0"
-        >
-          <Image
-            src={activeImage}
-            alt={`Demonstração ${visibleIndex + 1} de ${demoImages.length} — ${product.title}`}
-            fill
-            sizes="(max-width: 1023px) 92vw, 420px"
-            className="object-cover"
-          />
-        </div>
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.18),transparent_48%,rgba(0,0,0,.88))]" />
+        {activeMedia.kind === "youtube" ? (
+          <div
+            key={`${product.slug}-youtube-${activeMedia.id}`}
+            className="absolute inset-0 flex items-center bg-black"
+          >
+            <iframe
+              className="aspect-video w-full border-0"
+              src={activeMedia.embedUrl}
+              title={`Demonstração em vídeo — ${product.title}`}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+            <a
+              href={activeMedia.watchUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="absolute bottom-16 right-4 border border-white/35 bg-black/85 px-3 py-2 text-[0.55rem] font-black uppercase tracking-[0.16em] text-white transition-colors hover:border-primary hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Abrir no YouTube ↗
+            </a>
+          </div>
+        ) : (
+          <div
+            key={`${product.slug}-${visibleIndex}-${activeMedia.src}`}
+            className="product-demo-slide absolute inset-0"
+          >
+            <Image
+              src={activeMedia.src}
+              alt={`Demonstração ${visibleIndex + 1} de ${media.length} — ${product.title}`}
+              fill
+              sizes="(max-width: 1023px) 92vw, 420px"
+              className="object-cover"
+            />
+          </div>
+        )}
+        {activeMedia.kind === "image" ? (
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.18),transparent_48%,rgba(0,0,0,.88))]" />
+        ) : null}
         <div className="pointer-events-none absolute left-4 top-4 border border-primary/65 bg-black/80 px-3 py-2 text-[0.52rem] font-black uppercase tracking-[0.2em] text-white shadow-[0_0_28px_rgba(227,6,44,.3)]">
-          6DNX // demonstração {visibleIndex + 1}/{demoImages.length}
+          6DNX // {activeMedia.kind === "youtube" ? "vídeo" : "arte"} {visibleIndex + 1}/{media.length}
         </div>
-        {demoImages.length > 1 ? (
+        {media.length > 1 ? (
           <div className="absolute inset-x-0 bottom-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-gradient-to-t from-black via-black/85 to-transparent px-4 pb-4 pt-10">
             <button
               type="button"
@@ -539,9 +590,9 @@ function ProductMediaPreview({ product }: { product: Product }) {
               Anterior
             </button>
             <div className="flex items-center gap-1.5" aria-hidden>
-              {demoImages.map((_image, index) => (
+              {media.map((item, index) => (
                 <span
-                  key={index}
+                  key={item.kind === "youtube" ? `youtube-${item.id}` : item.src}
                   className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
                     index === visibleIndex
                       ? "w-6 bg-primary"

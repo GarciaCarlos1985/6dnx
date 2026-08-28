@@ -24,6 +24,7 @@ import {
   type ProductFeature,
   type Variant,
 } from "@/lib/products";
+import { normalizeYouTubeVideoId } from "@/lib/media/youtube";
 
 type EditorTab =
   | "basic"
@@ -1881,19 +1882,28 @@ export function AdminDashboard({
                   </div>
                   <div className="admin-form-grid">
                     <label className="admin-field">
-                      <span>ID do vídeo no YouTube</span>
+                      <span>Vídeo demonstrativo do YouTube</span>
                       <input
                         value={draft.product.youtubeId ?? ""}
-                        maxLength={20}
+                        maxLength={500}
                         onChange={(event) =>
                           updateProduct(
                             "youtubeId",
                             event.target.value || undefined,
                           )
                         }
-                        placeholder="Ex.: BqPwa1SXowE"
+                        onBlur={(event) => {
+                          const videoId = normalizeYouTubeVideoId(
+                            event.target.value,
+                          );
+                          if (videoId) updateProduct("youtubeId", videoId);
+                        }}
+                        placeholder="Cole o link do YouTube ou o ID do vídeo"
                       />
-                      <small>Cole somente o trecho final do link.</small>
+                      <small>
+                        Aceita o link completo ou o ID. O vídeo aparece no
+                        popup de apresentação, sem iniciar áudio sozinho.
+                      </small>
                     </label>
                     <label className="admin-field">
                       <span>Formato do vídeo</span>

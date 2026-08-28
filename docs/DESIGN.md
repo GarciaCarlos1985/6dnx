@@ -101,10 +101,12 @@ Committed: crimson carries identity (~30–40% of accent moments). Surface is pu
   a non-interactive visual twin in the same body-level modal layer as the
   popups, above the blur. The original card stays in the grid beneath the
   backdrop; never move the portal into the inert page merely to fix stacking.
-- Product video embeds are temporarily disabled. Desktop and mobile always show
-  `ProductMediaPreview` with the product artwork, 6DNX angel and the
-  "Demonstração em preparação" copy. Stored YouTube IDs remain data-only so the
-  change can be reversed after official approval.
+- Product media is curated in the admin. `ProductMediaPreview` accepts one
+  approved YouTube video plus up to five 16:9 gallery images, keeps navigation
+  manual around videos, never starts audio automatically and uses the
+  privacy-enhanced `youtube-nocookie.com` player with a visible YouTube fallback
+  link. Products without approved media retain the branded
+  "Demonstração em preparação" state.
 - Radar: composição editorial assimétrica depois dos produtos; um destaque visual + linha cronológica, sem repetir o grid comercial
 - Reference composition: kernaim.to product density, 6DNX brand voice
 

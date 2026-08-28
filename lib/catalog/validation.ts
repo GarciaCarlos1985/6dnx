@@ -15,10 +15,10 @@ import {
   type CatalogMutation,
   type CatalogPublicationState,
 } from "@/lib/catalog/types";
+import { normalizeYouTubeVideoId } from "@/lib/media/youtube";
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
-const YOUTUBE_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
 const MAX_FEATURES = 40;
 const MAX_TUTORIAL_STEPS = 80;
 
@@ -399,14 +399,17 @@ export function parseProduct(value: unknown): ValidationResult<Product> {
     errors.push("Status comercial inválido.");
   }
 
-  const youtubeId = optionalText(
+  const youtubeInput = optionalText(
     value.youtubeId,
-    "ID do vídeo do YouTube",
-    20,
+    "Vídeo do YouTube",
+    500,
     errors,
   );
-  if (youtubeId && !YOUTUBE_ID_PATTERN.test(youtubeId)) {
-    errors.push("Informe somente o ID de 11 caracteres do vídeo do YouTube.");
+  const youtubeId = youtubeInput
+    ? normalizeYouTubeVideoId(youtubeInput) ?? undefined
+    : undefined;
+  if (youtubeInput && !youtubeId) {
+    errors.push("Cole um link HTTPS válido do YouTube ou o ID de 11 caracteres.");
   }
 
   const videoOrientation =
