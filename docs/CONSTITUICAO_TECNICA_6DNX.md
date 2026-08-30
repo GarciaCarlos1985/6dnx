@@ -358,9 +358,48 @@ Antes de qualquer handoff:
 
 ---
 
+## BLOCO 19 — CHECKLIST OBRIGATÓRIO DE PR
+
+Toda PR, independente de tamanho, deve responder estas perguntas no corpo:
+
+```text
+1. O que muda? (resumo de 1-3 linhas)
+2. Por que muda? (o problema real que resolve)
+3. Qual domínio afetado? (IDENTITY/CATALOG/ORDERS/LOYALTY/...)
+4. Existe uma alternativa mais simples? (se sim, por que não foi escolhida)
+5. Qual o risco? (segurança, financeiro, UX, dado)
+6. Como fazer rollback? (revert, migration down, flag off, etc.)
+7. Como testar? (passo a passo reproduzível)
+8. Como isso afeta o projeto em 3 anos? (dívida? patrimônio? consistência?)
+```
+
+Nenhuma PR entra na fila de merge sem esse checklist preenchido.
+
+---
+
+## BLOCO 20 — PROIBIÇÕES EXPLÍCITAS
+
+Nenhum agente pode criar, sob nenhuma justificativa, um sistema paralelo que
+duplique um domínio já existente. Isso inclui:
+
+```text
+- Uma Engine nova de pagamento ou recompensa
+- Uma Wallet nova (a atual é o slot/loyalty ledger)
+- Um Auth novo (a atual é o Supabase Auth)
+- Um Admin paralelo (a atual é o painel /admin)
+- Um sistema de Feature Flag diferente
+- Outro sistema de recompensa ou moeda
+
+Tudo reutiliza os domínios já existentes. Se precisa de comportamento novo, a
+função é: estender o domínio existente, não criar um novo.
+```
+
+---
+
 > Princípio norteador: o objetivo do 6DNX não é acumular funcionalidades. É
 > construir uma plataforma coesa, onde cada novo módulo fortalece a arquitetura,
 > reutiliza componentes, preserva a história do usuário e reduz o trabalho
 > operacional. Antes de implementar qualquer solução, pergunte: ela torna a
 > plataforma mais simples, mais consistente e mais valiosa daqui a cinco anos?
 > Se a resposta for não, proponha um caminho melhor antes de escrever código.
+
