@@ -54,11 +54,17 @@ type FeatherStyle = CSSProperties & {
 type CinematicCompanionsProps = {
   mode?: "full" | "beams-only";
   scene?: "page" | "products";
+  aurasEnabled?: boolean;
+  pointerEffectsEnabled?: boolean;
+  smokeEnabled?: boolean;
 };
 
 export function CinematicCompanions({
   mode = "full",
   scene = "page",
+  aurasEnabled = true,
+  pointerEffectsEnabled = true,
+  smokeEnabled = true,
 }: CinematicCompanionsProps) {
   const beamsOnly = mode === "beams-only";
   const productScene = scene === "products";
@@ -310,7 +316,7 @@ export function CinematicCompanions({
           }
         }
 
-        if (!finePointer) return;
+        if (!finePointer || !pointerEffectsEnabled) return;
 
         const operatorReactive = operatorReactiveRef.current;
         const angelReactive = angelReactiveRef.current;
@@ -485,7 +491,7 @@ export function CinematicCompanions({
     );
 
     return () => mm.revert();
-  }, [beamsOnly, productScene]);
+  }, [aurasEnabled, beamsOnly, pointerEffectsEnabled, productScene, smokeEnabled]);
 
   return (
     <>
@@ -493,6 +499,7 @@ export function CinematicCompanions({
         ref={beamLayerRef}
         className="cinematic-pointer-overlay"
         data-cinematic-scene={scene}
+        data-cinematic-pointer={pointerEffectsEnabled ? "on" : "off"}
         aria-hidden
       >
         <span
@@ -514,6 +521,9 @@ export function CinematicCompanions({
         className="cinematic-companions"
         data-cinematic-mode={mode}
         data-cinematic-scene={scene}
+        data-cinematic-auras={aurasEnabled ? "on" : "off"}
+        data-cinematic-pointer={pointerEffectsEnabled ? "on" : "off"}
+        data-cinematic-smoke={smokeEnabled ? "on" : "off"}
         aria-hidden
       >
         <div

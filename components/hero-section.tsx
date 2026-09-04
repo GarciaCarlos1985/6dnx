@@ -5,6 +5,11 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import type { StorefrontContent } from "@/lib/storefront-content/types";
+import { experienceBackgroundStyle } from "@/lib/site-experience/presentation";
+import type {
+  ExperienceBackground,
+  HomeCinematicControls,
+} from "@/lib/site-experience/types";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -33,7 +38,24 @@ type ParticleStyle = CSSProperties & {
   "--particle-drift": string;
 };
 
-export function HeroSection({ content }: { content: StorefrontContent }) {
+export function HeroSection({
+  content,
+  background,
+  cinematic,
+}: {
+  content: StorefrontContent;
+  background: ExperienceBackground;
+  cinematic: HomeCinematicControls;
+}) {
+  const {
+    aurasEnabled,
+    charactersEnabled,
+    eyeEnabled,
+    logoEffectsEnabled,
+    logoEnabled,
+    pointerEffectsEnabled,
+    smokeEnabled,
+  } = cinematic;
   const sceneRef = useRef<HTMLElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
   const leftActorRef = useRef<HTMLDivElement>(null);
@@ -60,10 +82,13 @@ export function HeroSection({ content }: { content: StorefrontContent }) {
     const eyeVisibility = { hover: 0, scroll: 0 };
     const renderEyeOpacity = () => {
       if (eyeElement) {
-        eyeElement.style.opacity = Math.min(
-          0.46,
-          eyeVisibility.hover + eyeVisibility.scroll,
-        ).toFixed(3);
+        eyeElement.style.opacity =
+          eyeEnabled && logoEnabled
+            ? Math.min(
+                0.46,
+                eyeVisibility.hover + eyeVisibility.scroll,
+              ).toFixed(3)
+            : "0";
       }
     };
 
@@ -360,6 +385,8 @@ export function HeroSection({ content }: { content: StorefrontContent }) {
         if (
           !motion ||
           !finePointer ||
+          !logoEnabled ||
+          !logoEffectsEnabled ||
           !hitArea ||
           !logo ||
           !eye ||
@@ -584,6 +611,8 @@ export function HeroSection({ content }: { content: StorefrontContent }) {
         const rightBeam = rightActorBeamRef.current;
 
         if (
+          !charactersEnabled ||
+          !pointerEffectsEnabled ||
           !motion ||
           !finePointer ||
           !scene ||
@@ -778,7 +807,15 @@ export function HeroSection({ content }: { content: StorefrontContent }) {
       mm.revert();
       eyeElement?.style.removeProperty("opacity");
     };
-  }, []);
+  }, [
+    aurasEnabled,
+    charactersEnabled,
+    eyeEnabled,
+    logoEffectsEnabled,
+    logoEnabled,
+    pointerEffectsEnabled,
+    smokeEnabled,
+  ]);
 
   return (
     <section
@@ -786,27 +823,27 @@ export function HeroSection({ content }: { content: StorefrontContent }) {
       ref={sceneRef}
       className="hero-apocalypse relative flex w-full items-center justify-center overflow-hidden bg-transparent"
       aria-label="6DNX"
+      data-cinematic-logo={logoEnabled ? "on" : "off"}
+      data-cinematic-eye={eyeEnabled ? "on" : "off"}
+      data-cinematic-logo-effects={logoEffectsEnabled ? "on" : "off"}
+      data-cinematic-characters={charactersEnabled ? "on" : "off"}
+      data-cinematic-auras={aurasEnabled ? "on" : "off"}
+      data-cinematic-pointer={pointerEffectsEnabled ? "on" : "off"}
+      data-cinematic-smoke={smokeEnabled ? "on" : "off"}
     >
       <div
         ref={backdropRef}
         className="hero-apocalypse-stage pointer-events-none absolute inset-0"
         aria-hidden
+        style={experienceBackgroundStyle(background)}
       >
-        <Image
-          src="/hero-apocalypse.jpg"
-          alt=""
-          fill
-          preload
-          sizes="100vw"
-          className="hero-apocalypse-stage__image"
-        />
         <span className="hero-apocalypse-stage__grade" />
       </div>
 
       <>
         <div
           ref={auraRef}
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[130svh] w-[130svh] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-0 will-change-transform"
+          className="hero-apocalypse__ambient-aura pointer-events-none absolute left-1/2 top-1/2 h-[130svh] w-[130svh] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-0 will-change-transform"
           style={{
             background:
               "radial-gradient(circle, oklch(0.55 0.22 25 / 0.5) 0%, oklch(0.55 0.22 25 / 0.12) 42%, transparent 68%)",
@@ -984,7 +1021,7 @@ export function HeroSection({ content }: { content: StorefrontContent }) {
 
         <div
           ref={transformationFlashRef}
-          className="pointer-events-none absolute inset-0 z-[9] opacity-0 will-change-transform"
+          className="hero-apocalypse-transformation-flash pointer-events-none absolute inset-0 z-[9] opacity-0 will-change-transform"
           style={{
             background:
               "radial-gradient(ellipse at 20% 62%, oklch(0.68 0.24 25 / 0.7), transparent 35%), radial-gradient(ellipse at 80% 58%, oklch(0.68 0.24 25 / 0.72), transparent 36%)",

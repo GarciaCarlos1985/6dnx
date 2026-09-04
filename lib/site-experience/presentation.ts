@@ -1,5 +1,9 @@
 import type { CSSProperties } from "react";
-import type { ExperienceFontId, ExperienceTheme } from "@/lib/site-experience/types";
+import type {
+  ExperienceBackground,
+  ExperienceFontId,
+  ExperienceTheme,
+} from "@/lib/site-experience/types";
 
 const FONT_VARIABLES: Record<ExperienceFontId, string> = {
   "archivo-black": "var(--font-display)",
@@ -16,7 +20,10 @@ export type ExperienceStyle = CSSProperties & {
   "--experience-body-font": string;
 };
 
-export function experienceThemeStyle(theme: ExperienceTheme): ExperienceStyle {
+export function experienceThemeStyle(
+  theme: ExperienceTheme,
+  background?: ExperienceBackground,
+): ExperienceStyle {
   return {
     "--experience-bg": theme.backgroundColor,
     "--experience-surface": theme.surfaceColor,
@@ -25,5 +32,23 @@ export function experienceThemeStyle(theme: ExperienceTheme): ExperienceStyle {
     "--experience-body": theme.bodyColor,
     "--experience-display-font": FONT_VARIABLES[theme.displayFont],
     "--experience-body-font": FONT_VARIABLES[theme.bodyFont],
+    ...experienceBackgroundStyle(background ?? { imageUrl: null }),
+  };
+}
+
+/**
+ * The URL has already passed the strict Studio validator. Keep the grade with
+ * the artwork so an editor cannot accidentally trade readable copy for a
+ * beautiful but unusable banner.
+ */
+export function experienceBackgroundStyle(
+  background: ExperienceBackground,
+): CSSProperties | undefined {
+  if (!background.imageUrl) return undefined;
+  return {
+    backgroundImage: `linear-gradient(180deg, rgb(0 0 0 / 0.35), rgb(0 0 0 / 0.78)), url("${background.imageUrl}")`,
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
   };
 }

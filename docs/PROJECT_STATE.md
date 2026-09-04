@@ -1,6 +1,35 @@
 # 6DNX project state
 
-Last updated: 2026-08-28
+Last updated: 2026-09-04
+
+## Em validação isolada: Estúdio Visual — fundos e cena cinematográfica — 2026-09-04
+
+- Branch isolada `codex/admin-visual-controls`: o Estúdio passa a oferecer uma
+  imagem de fundo por página (Início, Minha Conta e Slot) e, na página inicial,
+  interruptores reversíveis para logo, olho ocular, efeitos da marca,
+  personagens do topo, personagens da vitrine/rodapé, auras/círculos, reações
+  de luz do cursor e fumaça. O padrão visual continua ativo até que o
+  administrador altere explicitamente um campo; ocultar uma região de
+  personagens também remove seus efeitos dependentes.
+- As imagens não aceitam URL externa, CSS ou HTML: o upload exige sessão de
+  administrador, tipo de imagem reconhecido pelo servidor, máximo de 5 MB e
+  grava somente sob `product-assets/site-experience/`. A apresentação preserva
+  um gradiente de contraste sobre a arte para manter textos e ações legíveis.
+- A autorização server-side por `app_metadata.role = admin` permanece; nenhum
+  e-mail foi codificado como atalho de privilégio. Rascunho, publicação e
+  restauração continuam respeitando os controles de acesso e os requisitos AAL2
+  já existentes.
+- A migration nova e direcionada
+  `20260904120000_add_site_experience_background_and_cinematic_controls.sql`
+  apenas amplia e normaliza o documento do Estúdio para schema v2. Ela não toca
+  catálogo, pedidos, PIX, carteiras, recompensas ou lógica da Slot.
+- Estado deste checkpoint: implementação, testes, build e validação visual
+  concluídos no worktree isolado e autorizados para publicação na `main`. A
+  migration v2 continua **não aplicada em Produção**. Enquanto o banco conservar
+  um documento v1, o site público mantém a aparência existente e o painel mostra
+  a prévia, mas bloqueia explicitamente salvar, publicar e enviar fundos; não há
+  falha silenciosa nem escrita incompatível. A ativação persistente dos novos
+  controles exige uma autorização separada para a migration direcionada.
 
 ## Correção local: apresentação de produtos e convite permanente — 2026-08-28
 

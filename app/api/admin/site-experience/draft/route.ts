@@ -3,7 +3,11 @@ import { requireAdminApi } from "@/lib/admin/auth";
 import { databaseErrorResponse, noStoreJson, rejectCrossOriginMutation } from "@/lib/admin/api";
 import { BoundedJsonError, readBoundedJson } from "@/lib/http/read-bounded-json";
 import { saveSiteExperienceDraft } from "@/lib/site-experience/repository";
-import { parseSiteExperienceMutation } from "@/lib/site-experience/validation";
+import {
+  isAllowedSiteExperienceBackgroundImage,
+  parseSiteExperienceMutation,
+} from "@/lib/site-experience/validation";
+import { getPublicSupabaseConfig } from "@/lib/supabase/config";
 
 const MAX_BODY_BYTES = 64 * 1024;
 
@@ -25,6 +29,19 @@ export async function PUT(request: NextRequest) {
   const parsed = parseSiteExperienceMutation(payload);
   if (!parsed.ok) {
     return noStoreJson({ error: "Revise os campos destacados.", errors: parsed.errors }, 400);
+  }
+
+  const supabaseUrl = getPublicSupabaseConfig()?.url;
+  const backgrounds = [
+    parsed.value.config.home.background.imageUrl,
+    parsed.value.config.account.background.imageUrl,
+    parsed.value.config.slot.background.imageUrl,
+  ].filter((image): image is string => Boolean(image));
+  if (backgrounds.length > 0 && (!supabaseUrl || backgrounds.some((image) => !isAllowedSiteExperienceBackgroundImage(image, supabaseUrl)))) {
+    return noStoreJson(
+      { error: "A imagem de fundo não pertence à biblioteca protegida do Estúdio." },
+      400,
+    );
   }
 
   const result = await saveSiteExperienceDraft(auth.supabase, parsed.value);

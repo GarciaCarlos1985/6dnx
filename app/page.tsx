@@ -30,8 +30,19 @@ export default async function HomePage() {
     <main className="site-flow" style={experienceThemeStyle(experience.home.theme)}>
       <SiteAtmosphere effects={experience.home.effects} />
       <SiteNavigation announcementsUrl={announcementsUrl} />
-      <HeroSection content={storefrontContent} />
-      <CinematicCompanions scene="products" />
+      <HeroSection
+        content={storefrontContent}
+        background={experience.home.background}
+        cinematic={experience.home.cinematic}
+      />
+      {experience.home.cinematic.productCharactersEnabled ? (
+        <CinematicCompanions
+          scene="products"
+          aurasEnabled={experience.home.cinematic.aurasEnabled}
+          pointerEffectsEnabled={experience.home.cinematic.pointerEffectsEnabled}
+          smokeEnabled={experience.home.cinematic.smokeEnabled}
+        />
+      ) : null}
       <ProductShowcase
         catalogProducts={catalogProducts}
         checkoutAvailable={checkoutAvailable}

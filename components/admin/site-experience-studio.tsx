@@ -8,6 +8,7 @@ import {
   EXPERIENCE_EFFECT_FAMILIES,
   type ExperienceEffectFamily,
   type ExperiencePageId,
+  type HomeCinematicControls,
   type SiteExperienceAdminRecord,
   type SiteExperienceConfig,
 } from "@/lib/site-experience/types";
@@ -71,6 +72,73 @@ const EFFECT_LABELS: Record<ExperienceEffectFamily, string> = {
   lightning: "Raios discretos",
 };
 
+type CinematicControl = {
+  key: keyof HomeCinematicControls;
+  label: string;
+  support: string;
+};
+
+const CINEMATIC_CONTROL_GROUPS: Array<{
+  label: string;
+  controls: CinematicControl[];
+}> = [
+  {
+    label: "Marca principal",
+    controls: [
+      {
+        key: "logoEnabled",
+        label: "Logo 6DNX",
+        support: "Arte principal com asas no centro do topo",
+      },
+      {
+        key: "eyeEnabled",
+        label: "Olho atrás do logo",
+        support: "Símbolo ocular vermelho que surge atrás da marca",
+      },
+      {
+        key: "logoEffectsEnabled",
+        label: "Efeitos do logo",
+        support: "Expansão, inclinação, brilho e reação ao cursor",
+      },
+    ],
+  },
+  {
+    label: "Personagens por região",
+    controls: [
+      {
+        key: "charactersEnabled",
+        label: "Personagens do topo",
+        support: "Casal Killa e anjo da primeira tela, com suas reações",
+      },
+      {
+        key: "productCharactersEnabled",
+        label: "Personagens da vitrine e rodapé",
+        support: "Personagens dos lados esquerdo e direito nas áreas inferiores",
+      },
+    ],
+  },
+  {
+    label: "Atmosfera compartilhada",
+    controls: [
+      {
+        key: "aurasEnabled",
+        label: "Auras e círculos",
+        support: "Brilhos circulares associados às cenas",
+      },
+      {
+        key: "pointerEffectsEnabled",
+        label: "Riscos de luz do cursor",
+        support: "Feixes e pontos de luz que seguem o mouse",
+      },
+      {
+        key: "smokeEnabled",
+        label: "Fumaças das cenas",
+        support: "Fumaça do topo, transições e personagens",
+      },
+    ],
+  },
+];
+
 async function readApi(response: Response) {
   const payload = (await response.json()) as { record?: Record<string, unknown>; error?: string; errors?: string[]; code?: string };
   if (!response.ok) {
@@ -91,6 +159,7 @@ export function SiteExperienceStudio({
   const [draft, setDraft] = useState(initialRecord.draft);
   const [page, setPage] = useState<ExperiencePageId>("home");
   const [busy, setBusy] = useState<"save" | "publish" | "restore" | null>(null);
+  const [uploadingBackground, setUploadingBackground] = useState(false);
   const [notice, setNotice] = useState<{ tone: "ok" | "error" | "info"; text: string } | null>(null);
   const dirty = JSON.stringify(draft) !== JSON.stringify(record.draft);
   const validation = useMemo(() => parseSiteExperienceConfig(draft), [draft]);
@@ -98,8 +167,8 @@ export function SiteExperienceStudio({
   const persistenceReady = record.state === "ready";
   const persistenceNotice = record.state === "schema-missing"
     ? {
-        title: "Prévia local — rascunho ainda não pode ser salvo.",
-        text: "A migration 20260809220000_add_site_experience_studio.sql ainda não foi aplicada no banco. As alterações desta tela não serão mantidas ao sair.",
+        title: "Atualização do Estúdio pendente — rascunho ainda não pode ser salvo.",
+        text: record.message ?? "O banco ainda não possui a versão necessária do Estúdio. Aplique, após revisão, 20260809220000_add_site_experience_studio.sql e depois 20260904120000_add_site_experience_background_and_cinematic_controls.sql. As alterações desta tela não serão mantidas ao sair.",
       }
     : record.state === "mfa-required"
       ? {
@@ -136,6 +205,57 @@ export function SiteExperienceStudio({
       [page]: { ...previous[page], theme: { ...previous[page].theme, [key]: value } },
     } as SiteExperienceConfig));
     setNotice(null);
+  }
+
+  function updateBackground(imageUrl: string | null) {
+    setDraft((previous) => ({
+      ...previous,
+      [page]: {
+        ...previous[page],
+        background: { imageUrl },
+      },
+    } as SiteExperienceConfig));
+    setNotice(null);
+  }
+
+  function updateCinematic(key: keyof SiteExperienceConfig["home"]["cinematic"], value: boolean) {
+    setDraft((previous) => ({
+      ...previous,
+      home: {
+        ...previous.home,
+        cinematic: { ...previous.home.cinematic, [key]: value },
+      },
+    }));
+    setNotice(null);
+  }
+
+  async function uploadBackground(file: File | null) {
+    if (!file) return;
+    if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
+      setNotice({ tone: "error", text: "Envie uma imagem JPG, PNG, WEBP ou AVIF de até 5 MB." });
+      return;
+    }
+    setUploadingBackground(true);
+    setNotice(null);
+    try {
+      const response = await fetch("/api/admin/assets", {
+        method: "POST",
+        headers: {
+          "content-type": file.type,
+          "x-product-source-key": "site-experience",
+          "x-asset-slot": "site-background",
+        },
+        body: file,
+      });
+      const payload = (await response.json()) as { url?: string; error?: string };
+      if (!response.ok || !payload.url) throw new Error(payload.error ?? "Não foi possível enviar a imagem.");
+      updateBackground(payload.url);
+      setNotice({ tone: "ok", text: "Imagem enviada para o rascunho. Revise a prévia antes de publicar." });
+    } catch (error) {
+      setNotice({ tone: "error", text: error instanceof Error ? error.message : "Não foi possível enviar a imagem." });
+    } finally {
+      setUploadingBackground(false);
+    }
   }
 
   function updateDensity(value: "off" | "light" | "standard") {
@@ -304,10 +424,36 @@ export function SiteExperienceStudio({
               {(["backgroundColor", "surfaceColor", "accentColor", "headingColor", "bodyColor"] as const).map((key) => <label key={key}><span>{({ backgroundColor: "Fundo", surfaceColor: "Superfície", accentColor: "Destaque", headingColor: "Títulos", bodyColor: "Texto" })[key]}</span><input type="color" value={current.theme[key]} onChange={(event) => updateTheme(key, event.target.value.toUpperCase())} /><code>{current.theme[key]}</code></label>)}
             </div><div className="admin-form-grid"><label className="admin-field"><span>Fonte dos títulos</span><select value={current.theme.displayFont} onChange={(event) => updateTheme("displayFont", event.target.value)}><option value="archivo-black">Archivo Black</option><option value="manrope">Manrope</option></select></label><label className="admin-field"><span>Fonte dos textos</span><select value={current.theme.bodyFont} onChange={(event) => updateTheme("bodyFont", event.target.value)}><option value="manrope">Manrope</option><option value="archivo-black">Archivo Black</option></select></label></div></section>
 
+            <section className="admin-form-section">
+              <div className="admin-section-heading"><div><span className="admin-kicker">Imagem de fundo</span><h2>Banner protegido</h2><p>Uma imagem por página. O Estúdio aplica uma camada de contraste e mantém a responsividade sem aceitar links externos.</p></div></div>
+              <div className="admin-background-control">
+                <div>
+                  <strong>{current.background.imageUrl ? "Imagem em revisão" : "Fundo cinematográfico padrão"}</strong>
+                  <p>{current.background.imageUrl ? "A imagem está apenas no rascunho até a publicação." : "Envie uma arte pronta para trocar somente o fundo desta página."}</p>
+                </div>
+                <div className="admin-background-control__actions">
+                  <label className="admin-secondary-button"><input type="file" accept="image/jpeg,image/png,image/webp,image/avif" disabled={uploadingBackground || !persistenceReady} onChange={(event) => { void uploadBackground(event.currentTarget.files?.[0] ?? null); event.currentTarget.value = ""; }} />{uploadingBackground ? "Enviando…" : "Enviar imagem"}</label>
+                  {current.background.imageUrl ? <button type="button" className="admin-secondary-button" onClick={() => updateBackground(null)} disabled={uploadingBackground}>Restaurar padrão</button> : null}
+                </div>
+              </div>
+            </section>
+
+            {page === "home" ? <section className="admin-form-section">
+              <div className="admin-section-heading"><div><span className="admin-kicker">Cena cinematográfica</span><h2>Marca, personagens e atmosfera</h2><p>Cada área pode ser ocultada sem apagar artes ou código. Desligar personagens também retira os efeitos presos a eles.</p></div></div>
+              <div className="admin-cinematic-groups">
+                {CINEMATIC_CONTROL_GROUPS.map((group) => <div className="admin-cinematic-group" key={group.label}>
+                  <h3>{group.label}</h3>
+                  <div className="admin-cinematic-switches">
+                    {group.controls.map(({ key, label, support }) => <label key={key} className="admin-cinematic-switch"><input type="checkbox" checked={draft.home.cinematic[key]} onChange={(event) => updateCinematic(key, event.target.checked)} /><span><strong>{label}</strong><small>{support}</small></span><em>{draft.home.cinematic[key] ? "Ativo" : "Oculto"}</em></label>)}
+                  </div>
+                </div>)}
+              </div>
+            </section> : null}
+
             <section className="admin-form-section"><div className="admin-section-heading"><div><span className="admin-kicker">Efeitos limitados</span><h2>Partículas de fundo</h2><p>Máximo de duas famílias. Até 24 elementos no desktop, 10 no celular e zero com movimento reduzido.</p></div></div><div className="admin-form-grid"><label className="admin-field"><span>Densidade</span><select value={current.effects.density} onChange={(event) => updateDensity(event.target.value as "off" | "light" | "standard")}><option value="off">Desligado</option><option value="light">Leve</option><option value="standard">Padrão seguro</option></select></label></div><div className="admin-effect-options">{EXPERIENCE_EFFECT_FAMILIES.map((family) => <button type="button" key={family} className={current.effects.families.includes(family) ? "is-active" : ""} onClick={() => toggleEffect(family)}>{EFFECT_LABELS[family]}</button>)}</div></section>
           </div>
 
-          <aside className="admin-experience-preview" style={experienceThemeStyle(current.theme)}>
+          <aside className="admin-experience-preview" style={experienceThemeStyle(current.theme, current.background)}>
             <SiteAtmosphere effects={current.effects} />
             <div><span>PRÉVIA · {PAGE_LABELS[page]}</span><h2>{contentRecord[PAGE_FIELDS[page][0].key]}</h2><p>{contentRecord[PAGE_FIELDS[page].find((field) => field.multiline)?.key ?? PAGE_FIELDS[page][1].key]}</p><button type="button">{page === "home" ? contentRecord.heroCtaLabel : page === "slot" ? contentRecord.primaryAction : "Continuar"}</button><small>Produtos, preços, checkout, saldos e regras da Slot são campos protegidos.</small></div>
           </aside>

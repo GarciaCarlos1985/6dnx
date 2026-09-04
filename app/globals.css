@@ -80,6 +80,55 @@ html {
   will-change: transform, opacity;
 }
 
+/* Studio controls hide presentation layers without changing document flow,
+   product content, navigation, or the semantic hero copy. */
+.hero-apocalypse[data-cinematic-characters="off"] .hero-apocalypse-actor,
+.hero-apocalypse[data-cinematic-characters="off"] .hero-apocalypse-pointer-beam,
+.hero-apocalypse[data-cinematic-characters="off"] .hero-apocalypse-pointer-light,
+.hero-apocalypse[data-cinematic-characters="off"]
+  .hero-apocalypse-transformation-flash {
+  display: none;
+}
+
+.hero-apocalypse[data-cinematic-logo="off"] [data-hero-logo-shell],
+.hero-apocalypse[data-cinematic-logo="off"] .hero-blood-eye,
+.hero-apocalypse[data-cinematic-eye="off"] .hero-blood-eye {
+  display: none;
+}
+
+.hero-apocalypse[data-cinematic-logo-effects="off"]
+  .hero-brand-logo-shell::before,
+.hero-apocalypse[data-cinematic-logo-effects="off"]
+  .hero-apocalypse__ambient-aura {
+  display: none;
+}
+
+.hero-apocalypse[data-cinematic-logo-effects="off"]
+  .hero-brand-logo-shell,
+.hero-apocalypse[data-cinematic-logo-effects="off"] .hero-brand-logo {
+  transform: none !important;
+}
+
+.hero-apocalypse[data-cinematic-logo-effects="off"] .hero-brand-logo {
+  filter: none;
+}
+
+.hero-apocalypse[data-cinematic-auras="off"] .hero-apocalypse-actor__aura,
+.hero-apocalypse[data-cinematic-auras="off"] .hero-apocalypse__ambient-aura {
+  display: none;
+}
+
+.hero-apocalypse[data-cinematic-pointer="off"] .hero-apocalypse-pointer-beam,
+.hero-apocalypse[data-cinematic-pointer="off"] .hero-apocalypse-pointer-light {
+  display: none;
+}
+
+.hero-apocalypse[data-cinematic-smoke="off"] .hero-smoke,
+.hero-apocalypse[data-cinematic-smoke="off"] .hero-apocalypse-actor__smoke,
+.hero-apocalypse[data-cinematic-smoke="off"] .hero-apocalypse-seam {
+  display: none;
+}
+
 .hero-apocalypse-stage__image {
   display: none !important;
 }
@@ -983,6 +1032,14 @@ html {
 
 .cinematic-pointer-overlay[data-cinematic-scene="products"] {
   opacity: 0;
+}
+
+.cinematic-pointer-overlay[data-cinematic-pointer="off"],
+.cinematic-companions[data-cinematic-pointer="off"] .cinematic-pointer-light,
+.cinematic-companions[data-cinematic-pointer="off"] .cinematic-pointer-beam,
+.cinematic-companions[data-cinematic-auras="off"] .cinematic-actor__aura,
+.cinematic-companions[data-cinematic-smoke="off"] .cinematic-waist-smoke {
+  display: none;
 }
 
 .cinematic-actor {

@@ -29,7 +29,7 @@ test("site experience rejects unknown fields, oversized documents and unsupporte
   assert.equal(parseSiteExperienceConfig(unknown).ok, false);
 
   const version = cloneDefault() as unknown as Record<string, unknown>;
-  version.schemaVersion = 2;
+  version.schemaVersion = 3;
   assert.equal(parseSiteExperienceConfig(version).ok, false);
 
   const oversized = cloneDefault();
@@ -86,6 +86,66 @@ test("site experience limits particle families and never accepts client instance
   };
   injected.home.effects.instances = 10_000;
   assert.equal(parseSiteExperienceConfig(injected).ok, false);
+});
+
+test("site experience accepts only managed background assets and bounded cinematic switches", () => {
+  const config = cloneDefault();
+  config.home.background.imageUrl = "https://project.supabase.co/storage/v1/object/public/product-assets/site-experience/hero-banner.webp";
+  config.home.cinematic.logoEnabled = false;
+  config.home.cinematic.eyeEnabled = false;
+  config.home.cinematic.charactersEnabled = false;
+  config.home.cinematic.productCharactersEnabled = false;
+  config.home.cinematic.aurasEnabled = false;
+  assert.equal(parseSiteExperienceConfig(config).ok, true);
+
+  for (const image of [
+    "https://example.com/banner.webp",
+    "javascript:alert(1)",
+    "https://project.supabase.co/storage/v1/object/public/product-assets/site-experience/banner.webp?track=1",
+  ]) {
+    const unsafe = cloneDefault();
+    unsafe.home.background.imageUrl = image;
+    assert.equal(parseSiteExperienceConfig(unsafe).ok, false, image);
+  }
+
+  const injected = cloneDefault() as unknown as {
+    home: { cinematic: Record<string, unknown> };
+  };
+  injected.home.cinematic.cursorCount = 10_000;
+  assert.equal(parseSiteExperienceConfig(injected).ok, false);
+});
+
+test("background and cinematic migration upgrades only the isolated Studio document", async () => {
+  const sql = await readFile(
+    new URL("../supabase/migrations/20260904120000_add_site_experience_background_and_cinematic_controls.sql", import.meta.url),
+    "utf8",
+  );
+  assert.match(sql, /rename to site_experience_config_v1_is_valid/i);
+  assert.match(sql, /site_experience_upgrade_to_v2/i);
+  assert.match(sql, /'logoEnabled', 'eyeEnabled', 'logoEffectsEnabled'/i);
+  assert.match(sql, /'charactersEnabled', 'productCharactersEnabled'/i);
+  assert.match(sql, /'aurasEnabled', 'pointerEffectsEnabled', 'smokeEnabled'/i);
+  assert.match(sql, /product-assets\/site-experience/i);
+  assert.match(sql, /update public\.site_experience_(published|drafts|revisions)/i);
+  assert.doesNotMatch(sql, /(insert into|update|delete from) public\.(product_catalog|commerce_|loyalty_)/i);
+  assert.doesNotMatch(sql, /drop table|truncate\s+/i);
+});
+
+test("home presentation separates logo, top actors and lower actors without touching products", async () => {
+  const [page, hero, studio] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../components/hero-section.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../components/admin/site-experience-studio.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(page, /cinematic\.productCharactersEnabled[\s\S]*<CinematicCompanions/);
+  assert.match(hero, /data-cinematic-logo=\{logoEnabled/);
+  assert.match(hero, /data-cinematic-eye=\{eyeEnabled/);
+  assert.match(hero, /data-cinematic-logo-effects=\{logoEffectsEnabled/);
+  assert.match(hero, /data-cinematic-characters=\{charactersEnabled/);
+  assert.match(studio, /Logo 6DNX/);
+  assert.match(studio, /Personagens do topo/);
+  assert.match(studio, /Personagens da vitrine e rodapé/);
 });
 
 test("site experience mutation requires exact optimistic-concurrency revisions", () => {
@@ -188,8 +248,9 @@ test("site experience draft and publish routes preserve their trust boundaries",
 });
 
 test("site experience admin never offers a silent save without persistence", async () => {
-  const [studio, adminCss, coupons] = await Promise.all([
+  const [studio, repository, adminCss, coupons] = await Promise.all([
     readFile(new URL("../components/admin/site-experience-studio.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/site-experience/repository.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/admin.css", import.meta.url), "utf8"),
     readFile(new URL("../components/admin/coupon-manager.tsx", import.meta.url), "utf8"),
   ]);
@@ -197,7 +258,12 @@ test("site experience admin never offers a silent save without persistence", asy
   assert.match(studio, /disabled=\{!dirty \|\| !validation\.ok \|\| Boolean\(busy\) \|\| !persistenceReady\}/);
   assert.match(studio, /Salvar indisponível/);
   assert.match(studio, /20260809220000_add_site_experience_studio\.sql/);
+  assert.match(studio, /20260904120000_add_site_experience_background_and_cinematic_controls\.sql/);
   assert.match(studio, /não serão mantidas ao sair/);
+  assert.match(repository, /siteExperienceSchemaVersion\(raw\.published\) !== 2/);
+  assert.match(repository, /siteExperienceSchemaVersion\(raw\.draft\) !== 2/);
+  assert.match(repository, /state: requiresVisualControlsMigration \? "schema-missing" : "ready"/);
+  assert.match(repository, /20260904120000_add_site_experience_background_and_cinematic_controls\.sql/);
   assert.match(adminCss, /\.admin-field select[\s\S]*color-scheme:\s*dark/);
   assert.match(adminCss, /\.admin-field select option[\s\S]*background-color:\s*#0b0809/);
   assert.match(coupons, /20260809180000_add_commerce_coupons\.sql/);

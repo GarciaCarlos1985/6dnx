@@ -42,6 +42,31 @@ export type ExperienceEffects = {
   families: ExperienceEffectFamily[];
 };
 
+/**
+ * A background is intentionally an asset URL produced by the protected admin
+ * upload endpoint. Arbitrary remote URLs are never accepted by the mutation
+ * boundary, which keeps the public pages free from third-party embeds.
+ */
+export type ExperienceBackground = {
+  imageUrl: string | null;
+};
+
+/**
+ * The cinematic scene is optional presentation, never part of the catalog or
+ * a purchase flow. Keeping each switch separate lets an editor pair a static
+ * banner with as much (or as little) atmosphere as makes sense.
+ */
+export type HomeCinematicControls = {
+  logoEnabled: boolean;
+  eyeEnabled: boolean;
+  logoEffectsEnabled: boolean;
+  charactersEnabled: boolean;
+  productCharactersEnabled: boolean;
+  aurasEnabled: boolean;
+  pointerEffectsEnabled: boolean;
+  smokeEnabled: boolean;
+};
+
 export type AccountExperienceContent = {
   navigationLabel: string;
   anonymousEyebrow: string;
@@ -70,21 +95,25 @@ export type SlotExperienceContent = {
 };
 
 export type SiteExperienceConfig = {
-  schemaVersion: 1;
+  schemaVersion: 1 | 2;
   home: {
     content: StorefrontContent;
     theme: ExperienceTheme;
     effects: ExperienceEffects;
+    background: ExperienceBackground;
+    cinematic: HomeCinematicControls;
   };
   account: {
     content: AccountExperienceContent;
     theme: ExperienceTheme;
     effects: ExperienceEffects;
+    background: ExperienceBackground;
   };
   slot: {
     content: SlotExperienceContent;
     theme: ExperienceTheme;
     effects: ExperienceEffects;
+    background: ExperienceBackground;
   };
 };
 
@@ -99,11 +128,22 @@ const DARK_THEME: ExperienceTheme = {
 };
 
 export const DEFAULT_SITE_EXPERIENCE: SiteExperienceConfig = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   home: {
     content: { ...DEFAULT_STOREFRONT_CONTENT },
     theme: { ...DARK_THEME },
     effects: { density: "standard", families: ["embers", "sparks"] },
+    background: { imageUrl: null },
+    cinematic: {
+      logoEnabled: true,
+      eyeEnabled: true,
+      logoEffectsEnabled: true,
+      charactersEnabled: true,
+      productCharactersEnabled: true,
+      aurasEnabled: true,
+      pointerEffectsEnabled: true,
+      smokeEnabled: true,
+    },
   },
   account: {
     content: {
@@ -126,6 +166,7 @@ export const DEFAULT_SITE_EXPERIENCE: SiteExperienceConfig = {
       accentColor: "#F00836",
     },
     effects: { density: "light", families: ["embers"] },
+    background: { imageUrl: null },
   },
   slot: {
     content: {
@@ -149,6 +190,7 @@ export const DEFAULT_SITE_EXPERIENCE: SiteExperienceConfig = {
       accentColor: "#EF0038",
     },
     effects: { density: "standard", families: ["embers", "sparks"] },
+    background: { imageUrl: null },
   },
 };
 

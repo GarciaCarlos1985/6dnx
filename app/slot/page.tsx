@@ -16,7 +16,7 @@ export default async function SlotPage() {
     <SlotExperience
       content={experience.slot.content}
       effects={experience.slot.effects}
-      themeStyle={experienceThemeStyle(experience.slot.theme)}
+      themeStyle={experienceThemeStyle(experience.slot.theme, experience.slot.background)}
     />
   );
 }

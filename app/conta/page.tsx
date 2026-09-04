@@ -14,7 +14,7 @@ export default async function AccountPage() {
     <AccountDashboard
       content={experience.account.content}
       effects={experience.account.effects}
-      themeStyle={experienceThemeStyle(experience.account.theme)}
+      themeStyle={experienceThemeStyle(experience.account.theme, experience.account.background)}
     />
   );
 }

@@ -30,8 +30,12 @@ export async function POST(request: NextRequest) {
   const declaredType = request.headers.get("content-type")?.toLowerCase();
   const sourceKey = request.headers.get("x-product-source-key");
   const requestedSlot = request.headers.get("x-asset-slot");
+  const isStudioBackground =
+    requestedSlot === "site-background" && sourceKey === "site-experience";
   const assetSlot =
-    requestedSlot === "checkout-banner"
+    isStudioBackground
+      ? "site-background"
+      : requestedSlot === "checkout-banner"
       ? "checkout"
       : requestedSlot === "demo-gallery"
         ? "demo"
@@ -63,7 +67,9 @@ export async function POST(request: NextRequest) {
   const extension = ACCEPTED_IMAGE_TYPES[detectedType];
 
   const safeSourceKey = sourceKey.replace(/[^A-Za-z0-9_-]/g, "-").slice(0, 80);
-  const path = `products/${safeSourceKey || "custom"}/${assetSlot}/${randomUUID()}.${extension}`;
+  const path = isStudioBackground
+    ? `site-experience/${randomUUID()}.${extension}`
+    : `products/${safeSourceKey || "custom"}/${assetSlot}/${randomUUID()}.${extension}`;
   const { error } = await auth.supabase.storage
     .from("product-assets")
     .upload(path, bytes, {

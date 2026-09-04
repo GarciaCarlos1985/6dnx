@@ -8,7 +8,9 @@ import {
   type ExperienceEffectFamily,
   type ExperienceEffects,
   type ExperienceFontId,
+  type ExperienceBackground,
   type ExperienceTheme,
+  type HomeCinematicControls,
   type SiteExperienceConfig,
   type SlotExperienceContent,
 } from "./types.ts";
@@ -24,6 +26,7 @@ const HTML_DELIMITERS = /[<>]/;
 const JAVASCRIPT_LINK = /\]\s*\(\s*javascript\s*:/i;
 const MAX_EFFECT_FAMILIES = 2;
 const MAX_DOCUMENT_BYTES = 48 * 1024;
+const MANAGED_BACKGROUND_ASSET_PATH = "/storage/v1/object/public/product-assets/site-experience/";
 
 const HOME_LIMITS: Record<keyof StorefrontContent, number> = {
   heroHeadlineLead: 40,
@@ -250,12 +253,88 @@ function parseEffects(
   };
 }
 
+/**
+ * Background artwork is uploaded by an authenticated admin to the existing
+ * controlled storage bucket. The browser validator checks its stable storage
+ * shape; the API repeats the check with the current Supabase origin.
+ */
+export function isAllowedSiteExperienceBackgroundImage(
+  image: string,
+  supabaseUrl?: string,
+) {
+  try {
+    const parsed = new URL(image);
+    const expectedOrigin = supabaseUrl ? new URL(supabaseUrl).origin : null;
+    return (
+      parsed.protocol === "https:" &&
+      parsed.username === "" &&
+      parsed.password === "" &&
+      parsed.search === "" &&
+      parsed.hash === "" &&
+      (!expectedOrigin || parsed.origin === expectedOrigin) &&
+      parsed.pathname.startsWith(MANAGED_BACKGROUND_ASSET_PATH) &&
+      parsed.pathname.length > MANAGED_BACKGROUND_ASSET_PATH.length
+    );
+  } catch {
+    return false;
+  }
+}
+
+function parseBackground(
+  value: unknown,
+  fallback: ExperienceBackground,
+  label: string,
+  errors: string[],
+  required: boolean,
+): ExperienceBackground {
+  if (value === undefined && !required) return { ...fallback };
+  if (!isRecord(value)) {
+    errors.push(`${label} é inválido.`);
+    return { ...fallback };
+  }
+  exactKeys(value, ["imageUrl"], label, errors);
+  const imageUrl = value.imageUrl;
+  if (imageUrl === null) return { imageUrl: null };
+  if (typeof imageUrl !== "string" || !isAllowedSiteExperienceBackgroundImage(imageUrl)) {
+    errors.push(`${label}: use somente uma imagem enviada pelo Estúdio Visual.`);
+    return { ...fallback };
+  }
+  return { imageUrl };
+}
+
+function parseCinematic(
+  value: unknown,
+  fallback: HomeCinematicControls,
+  label: string,
+  errors: string[],
+  required: boolean,
+): HomeCinematicControls {
+  if (value === undefined && !required) return { ...fallback };
+  if (!isRecord(value)) {
+    errors.push(`${label} é inválido.`);
+    return { ...fallback };
+  }
+  const keys = Object.keys(fallback) as Array<keyof HomeCinematicControls>;
+  exactKeys(value, keys, label, errors);
+  const output = {} as HomeCinematicControls;
+  for (const key of keys) {
+    if (typeof value[key] !== "boolean") {
+      errors.push(`${label}: ${key} deve ser ligado ou desligado.`);
+      output[key] = fallback[key];
+    } else {
+      output[key] = value[key] as boolean;
+    }
+  }
+  return output;
+}
+
 function parsePage(
   value: unknown,
   fallback: SiteExperienceConfig["home"],
   content: (value: unknown, errors: string[]) => StorefrontContent,
   label: string,
   errors: string[],
+  options: { cinematic: true; requireNewFields: boolean },
 ): SiteExperienceConfig["home"];
 function parsePage(
   value: unknown,
@@ -263,6 +342,7 @@ function parsePage(
   content: (value: unknown, errors: string[]) => AccountExperienceContent,
   label: string,
   errors: string[],
+  options: { cinematic?: false; requireNewFields: boolean },
 ): SiteExperienceConfig["account"];
 function parsePage(
   value: unknown,
@@ -270,6 +350,7 @@ function parsePage(
   content: (value: unknown, errors: string[]) => SlotExperienceContent,
   label: string,
   errors: string[],
+  options: { cinematic?: false; requireNewFields: boolean },
 ): SiteExperienceConfig["slot"];
 function parsePage(
   value: unknown,
@@ -277,17 +358,44 @@ function parsePage(
   content: (value: unknown, errors: string[]) => StorefrontContent | AccountExperienceContent | SlotExperienceContent,
   label: string,
   errors: string[],
+  options: { cinematic?: boolean; requireNewFields: boolean },
 ) {
   if (!isRecord(value)) {
     errors.push(`${label} é inválida.`);
     return structuredClone(fallback);
   }
-  exactKeys(value, ["content", "theme", "effects"], label, errors);
-  return {
+  exactKeys(
+    value,
+    options.cinematic
+      ? ["content", "theme", "effects", "background", "cinematic"]
+      : ["content", "theme", "effects", "background"],
+    label,
+    errors,
+  );
+  const result = {
     content: content(value.content, errors),
     theme: parseTheme(value.theme, fallback.theme, `${label}: aparência`, errors),
     effects: parseEffects(value.effects, fallback.effects, `${label}: efeitos`, errors),
+    background: parseBackground(
+      value.background,
+      fallback.background,
+      `${label}: imagem de fundo`,
+      errors,
+      options.requireNewFields,
+    ),
   };
+  return options.cinematic
+    ? {
+        ...result,
+        cinematic: parseCinematic(
+          value.cinematic,
+          DEFAULT_SITE_EXPERIENCE.home.cinematic,
+          `${label}: cena cinematográfica`,
+          errors,
+          options.requireNewFields,
+        ),
+      }
+    : result;
 }
 
 export function parseSiteExperienceConfig(value: unknown): ValidationResult {
@@ -303,10 +411,13 @@ export function parseSiteExperienceConfig(value: unknown): ValidationResult {
   } catch {
     errors.push("A configuração visual não pode ser serializada.");
   }
-  if (value.schemaVersion !== 1) errors.push("A versão da configuração não é suportada.");
+  const legacyVersion = value.schemaVersion === 1;
+  if (value.schemaVersion !== 1 && value.schemaVersion !== 2) {
+    errors.push("A versão da configuração não é suportada.");
+  }
 
   const parsed: SiteExperienceConfig = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     home: parsePage(
       value.home,
       DEFAULT_SITE_EXPERIENCE.home,
@@ -319,6 +430,7 @@ export function parseSiteExperienceConfig(value: unknown): ValidationResult {
       ),
       "Home",
       errors,
+      { cinematic: true, requireNewFields: !legacyVersion },
     ),
     account: parsePage(
       value.account,
@@ -332,6 +444,7 @@ export function parseSiteExperienceConfig(value: unknown): ValidationResult {
       ),
       "Conta",
       errors,
+      { requireNewFields: !legacyVersion },
     ),
     slot: parsePage(
       value.slot,
@@ -345,6 +458,7 @@ export function parseSiteExperienceConfig(value: unknown): ValidationResult {
       ),
       "Slot",
       errors,
+      { requireNewFields: !legacyVersion },
     ),
   };
   return errors.length ? { ok: false, errors } : { ok: true, value: parsed };

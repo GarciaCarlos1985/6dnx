@@ -32,6 +32,12 @@ function schemaMissing(error: { code?: string; message?: string } | null) {
   );
 }
 
+function siteExperienceSchemaVersion(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const version = (value as Record<string, unknown>).schemaVersion;
+  return typeof version === "number" ? version : null;
+}
+
 async function legacyCompatibleDefaults() {
   const legacyHome = await getStorefrontContent();
   const defaults = cloneSiteExperience(DEFAULT_SITE_EXPERIENCE);
@@ -85,6 +91,9 @@ export async function getAdminSiteExperience(
   }
 
   const raw = result.data as Record<string, unknown>;
+  const requiresVisualControlsMigration =
+    siteExperienceSchemaVersion(raw.published) !== 2 ||
+    siteExperienceSchemaVersion(raw.draft) !== 2;
   const published = parseSiteExperienceConfig(raw.published);
   const draft = parseSiteExperienceConfig(raw.draft);
   if (!published.ok || !draft.ok) {
@@ -120,7 +129,10 @@ export async function getAdminSiteExperience(
     basePublishedRevision: Number(raw.basePublishedRevision),
     updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : null,
     history,
-    state: "ready",
+    state: requiresVisualControlsMigration ? "schema-missing" : "ready",
+    message: requiresVisualControlsMigration
+      ? "A migration 20260904120000_add_site_experience_background_and_cinematic_controls.sql ainda não foi aplicada. A prévia é segura, mas salvar e publicar permanecem bloqueados."
+      : undefined,
   };
 }
 

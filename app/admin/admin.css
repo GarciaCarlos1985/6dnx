@@ -3978,6 +3978,75 @@
 
 .admin-experience-colors code { color: var(--admin-dim); font-size: 0.65rem; }
 
+.admin-background-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--admin-line);
+  background: #080607;
+  padding: 1rem;
+}
+
+.admin-background-control strong,
+.admin-cinematic-switch strong { color: #fff; font-size: 0.72rem; }
+.admin-background-control p { max-width: 42rem; margin: 0.35rem 0 0; color: var(--admin-muted); font-size: 0.68rem; line-height: 1.45; }
+.admin-background-control__actions { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+.admin-background-control__actions label { display: inline-flex; align-items: center; cursor: pointer; }
+.admin-background-control__actions input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.admin-background-control__actions label:has(input:disabled) { cursor: not-allowed; opacity: 0.45; }
+
+.admin-cinematic-groups,
+.admin-cinematic-group {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.admin-cinematic-group + .admin-cinematic-group {
+  border-top: 1px solid var(--admin-line);
+  padding-top: 1rem;
+}
+
+.admin-cinematic-group h3 {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.admin-cinematic-switches {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.admin-cinematic-switch {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: start;
+  border: 1px solid var(--admin-line);
+  background: #080607;
+  padding: 0.9rem;
+  cursor: pointer;
+}
+
+.admin-cinematic-switch:has(input:checked) { border-color: rgb(237 0 44 / 65%); background: rgb(237 0 44 / 7%); }
+.admin-cinematic-switch input { width: 1rem; height: 1rem; margin-top: 0.1rem; accent-color: var(--admin-red-bright); }
+.admin-cinematic-switch span { display: grid; gap: 0.3rem; }
+.admin-cinematic-switch small { color: var(--admin-muted); font-size: 0.62rem; line-height: 1.4; }
+.admin-cinematic-switch em {
+  color: var(--admin-dim);
+  font-size: 0.54rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.admin-cinematic-switch:has(input:checked) em { color: var(--admin-green); }
+
 .admin-effect-options {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -4094,6 +4163,8 @@
   .admin-community-rewards > div:last-child { grid-template-columns: 1fr; }
   .admin-experience-colors,
   .admin-effect-options { grid-template-columns: 1fr 1fr; }
+  .admin-background-control { align-items: stretch; flex-direction: column; }
+  .admin-cinematic-switches { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
