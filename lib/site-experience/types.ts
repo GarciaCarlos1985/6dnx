@@ -51,6 +51,10 @@ export type ExperienceBackground = {
   imageUrl: string | null;
 };
 
+export type HomeExperienceBackground = ExperienceBackground & {
+  catalogImageUrl: string | null;
+};
+
 /**
  * The cinematic scene is optional presentation, never part of the catalog or
  * a purchase flow. Keeping each switch separate lets an editor pair a static
@@ -95,12 +99,12 @@ export type SlotExperienceContent = {
 };
 
 export type SiteExperienceConfig = {
-  schemaVersion: 1 | 2;
+  schemaVersion: 1 | 2 | 3;
   home: {
     content: StorefrontContent;
     theme: ExperienceTheme;
     effects: ExperienceEffects;
-    background: ExperienceBackground;
+    background: HomeExperienceBackground;
     cinematic: HomeCinematicControls;
   };
   account: {
@@ -128,12 +132,12 @@ const DARK_THEME: ExperienceTheme = {
 };
 
 export const DEFAULT_SITE_EXPERIENCE: SiteExperienceConfig = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   home: {
     content: { ...DEFAULT_STOREFRONT_CONTENT },
     theme: { ...DARK_THEME },
     effects: { density: "standard", families: ["embers", "sparks"] },
-    background: { imageUrl: null },
+    background: { imageUrl: null, catalogImageUrl: null },
     cinematic: {
       logoEnabled: true,
       eyeEnabled: true,

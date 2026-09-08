@@ -29,7 +29,7 @@ test("site experience rejects unknown fields, oversized documents and unsupporte
   assert.equal(parseSiteExperienceConfig(unknown).ok, false);
 
   const version = cloneDefault() as unknown as Record<string, unknown>;
-  version.schemaVersion = 3;
+  version.schemaVersion = 4;
   assert.equal(parseSiteExperienceConfig(version).ok, false);
 
   const oversized = cloneDefault();
@@ -91,6 +91,7 @@ test("site experience limits particle families and never accepts client instance
 test("site experience accepts only managed background assets and bounded cinematic switches", () => {
   const config = cloneDefault();
   config.home.background.imageUrl = "https://project.supabase.co/storage/v1/object/public/product-assets/site-experience/hero-banner.webp";
+  config.home.background.catalogImageUrl = "https://project.supabase.co/storage/v1/object/public/product-assets/site-experience/catalog-banner.webp";
   config.home.cinematic.logoEnabled = false;
   config.home.cinematic.eyeEnabled = false;
   config.home.cinematic.charactersEnabled = false;
@@ -104,7 +105,7 @@ test("site experience accepts only managed background assets and bounded cinemat
     "https://project.supabase.co/storage/v1/object/public/product-assets/site-experience/banner.webp?track=1",
   ]) {
     const unsafe = cloneDefault();
-    unsafe.home.background.imageUrl = image;
+    unsafe.home.background.catalogImageUrl = image;
     assert.equal(parseSiteExperienceConfig(unsafe).ok, false, image);
   }
 
@@ -113,6 +114,19 @@ test("site experience accepts only managed background assets and bounded cinemat
   };
   injected.home.cinematic.cursorCount = 10_000;
   assert.equal(parseSiteExperienceConfig(injected).ok, false);
+});
+
+test("home section backgrounds migrate independently without touching commerce", async () => {
+  const sql = await readFile(
+    new URL("../supabase/migrations/20260908100000_add_site_experience_home_section_backgrounds.sql", import.meta.url),
+    "utf8",
+  );
+  assert.match(sql, /rename to site_experience_config_v2_is_valid/i);
+  assert.match(sql, /catalogImageUrl/);
+  assert.match(sql, /site_experience_upgrade_to_v3/i);
+  assert.match(sql, /product-assets\/site-experience/i);
+  assert.doesNotMatch(sql, /(insert into|update|delete from) public\.(product_catalog|commerce_|loyalty_)/i);
+  assert.doesNotMatch(sql, /drop table|truncate\s+/i);
 });
 
 test("background and cinematic migration upgrades only the isolated Studio document", async () => {
@@ -257,13 +271,12 @@ test("site experience admin never offers a silent save without persistence", asy
 
   assert.match(studio, /disabled=\{!dirty \|\| !validation\.ok \|\| Boolean\(busy\) \|\| !persistenceReady\}/);
   assert.match(studio, /Salvar indisponível/);
-  assert.match(studio, /20260809220000_add_site_experience_studio\.sql/);
-  assert.match(studio, /20260904120000_add_site_experience_background_and_cinematic_controls\.sql/);
+  assert.match(studio, /20260908100000_add_site_experience_home_section_backgrounds\.sql/);
   assert.match(studio, /não serão mantidas ao sair/);
-  assert.match(repository, /siteExperienceSchemaVersion\(raw\.published\) !== 2/);
-  assert.match(repository, /siteExperienceSchemaVersion\(raw\.draft\) !== 2/);
+  assert.match(repository, /siteExperienceSchemaVersion\(raw\.published\) !== 3/);
+  assert.match(repository, /siteExperienceSchemaVersion\(raw\.draft\) !== 3/);
   assert.match(repository, /state: requiresVisualControlsMigration \? "schema-missing" : "ready"/);
-  assert.match(repository, /20260904120000_add_site_experience_background_and_cinematic_controls\.sql/);
+  assert.match(repository, /fundos por seção/);
   assert.match(adminCss, /\.admin-field select[\s\S]*color-scheme:\s*dark/);
   assert.match(adminCss, /\.admin-field select option[\s\S]*background-color:\s*#0b0809/);
   assert.match(coupons, /20260809180000_add_commerce_coupons\.sql/);

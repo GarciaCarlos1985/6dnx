@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DiscordMark } from "@/components/discord-mark";
 import { SiteAtmosphere } from "@/components/site-atmosphere";
+import { PUBLIC_FEATURES } from "@/lib/public-features";
 import type { ExperienceStyle } from "@/lib/site-experience/presentation";
 import type {
   AccountExperienceContent,
@@ -174,7 +175,7 @@ export function AccountDashboard({
         </Link>
         <nav className="account-header__nav" aria-label="Atalhos da conta">
           <Link href="/#produtos">Catálogo</Link>
-          <Link href="/slot">Slot 6DNX</Link>
+          {PUBLIC_FEATURES.slot ? <Link href="/slot">Slot 6DNX</Link> : null}
           <a
             className="account-header__support"
             href="/api/redirect"
@@ -326,9 +327,11 @@ function AccountHome({
           </div>
         </div>
         <div className="account-profile-hero__actions">
-          <Link className="account-primary-button" href="/slot">
-            Conhecer o Slot 6DNX
-          </Link>
+          {PUBLIC_FEATURES.slot ? (
+            <Link className="account-primary-button" href="/slot">
+              Conhecer o Slot 6DNX
+            </Link>
+          ) : null}
           <button
             type="button"
             className="account-secondary-button"
@@ -349,14 +352,16 @@ function AccountHome({
             <p>{communityBalance === null ? "A carteira da comunidade ainda não foi homologada." : "Use nas trocas assistidas pelo ticket 6DNX."}</p>
           </div>
         </article>
-        <article className="account-metric account-metric--gold">
-          <span className="account-metric__icon"><AccountIcon name="coins" /></span>
-          <div>
-            <span className="account-metric__label">Moedas da Slot</span>
-            <strong>{slotBalance === null ? "Em preparação" : slotBalance.toLocaleString("pt-BR")}</strong>
-            <p>{slotBalance === null ? "O saldo será exibido quando a carteira da Slot for homologada." : "Saldo fechado e exclusivo das experiências 6DNX."}</p>
-          </div>
-        </article>
+        {PUBLIC_FEATURES.slot ? (
+          <article className="account-metric account-metric--gold">
+            <span className="account-metric__icon"><AccountIcon name="coins" /></span>
+            <div>
+              <span className="account-metric__label">Moedas da Slot</span>
+              <strong>{slotBalance === null ? "Em preparação" : slotBalance.toLocaleString("pt-BR")}</strong>
+              <p>{slotBalance === null ? "O saldo será exibido quando a carteira da Slot for homologada." : "Saldo fechado e exclusivo das experiências 6DNX."}</p>
+            </div>
+          </article>
+        ) : null}
         <article className="account-metric">
           <span className="account-metric__icon"><AccountIcon name="orders" /></span>
           <div>
@@ -395,37 +400,39 @@ function AccountHome({
             </li>
             <li className="account-journey__item">
               <span>03</span>
-              <div><strong>Ganhe recompensas separadas</strong><p>6DNX Coins e Moedas da Slot possuem saldos e usos independentes.</p></div>
+              <div><strong>Ganhe recompensas da comunidade</strong><p>As 6DNX Coins acompanham as trocas assistidas pelo atendimento.</p></div>
             </li>
             <li className="account-journey__item">
               <span>04</span>
-              <div><strong>Acesse experiências 6DNX</strong><p>Slot, missões e recompensas serão liberados por etapas.</p></div>
+              <div><strong>Acesse experiências 6DNX</strong><p>Missões e recompensas serão liberadas por etapas.</p></div>
             </li>
           </ol>
         </article>
 
-        <article className="account-panel account-slot-card">
-          <div className="account-slot-card__image">
-            <Image
-              src="/slot/dragon-excited-v2.png"
-              alt="Dragão mascote do Slot 6DNX"
-              fill
-              loading="eager"
-              sizes="(max-width: 900px) 90vw, 360px"
-            />
-          </div>
-          <div className="account-slot-card__copy">
-            <span className="account-kicker">{content.slotCardEyebrow}</span>
-            <h2>{content.slotCardTitle}</h2>
-            <p>
-              Uma experiência de fidelidade com moeda interna, resultado
-              decidido no servidor e recompensas assistidas pelo Discord.
-            </p>
-            <Link className="account-primary-button" href="/slot">
-              Abrir apresentação
-            </Link>
-          </div>
-        </article>
+        {PUBLIC_FEATURES.slot ? (
+          <article className="account-panel account-slot-card">
+            <div className="account-slot-card__image">
+              <Image
+                src="/slot/dragon-excited-v2.png"
+                alt="Dragão mascote do Slot 6DNX"
+                fill
+                loading="eager"
+                sizes="(max-width: 900px) 90vw, 360px"
+              />
+            </div>
+            <div className="account-slot-card__copy">
+              <span className="account-kicker">{content.slotCardEyebrow}</span>
+              <h2>{content.slotCardTitle}</h2>
+              <p>
+                Uma experiência de fidelidade com moeda interna, resultado
+                decidido no servidor e recompensas assistidas pelo Discord.
+              </p>
+              <Link className="account-primary-button" href="/slot">
+                Abrir apresentação
+              </Link>
+            </div>
+          </article>
+        ) : null}
       </section>
 
       <section className="account-panel account-orders-panel">

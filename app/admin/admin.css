@@ -4047,6 +4047,14 @@
 }
 .admin-cinematic-switch:has(input:checked) em { color: var(--admin-green); }
 
+.admin-mfa { margin-block: 1.5rem; }
+.admin-mfa p { color: #d7d7db; max-width: 70ch; line-height: 1.6; margin-block: 0.75rem; }
+.admin-mfa form { display: grid; gap: 1rem; max-width: 24rem; margin-top: 1rem; }
+.admin-mfa input { font-size: 1rem; }
+.admin-mfa-setup img { background: white; padding: 0.5rem; max-width: 100%; }
+.admin-mfa-setup code { overflow-wrap: anywhere; }
+.admin-mfa summary { cursor: pointer; padding-block: 0.75rem; }
+
 .admin-effect-options {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

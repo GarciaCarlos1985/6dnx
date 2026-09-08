@@ -38,6 +38,8 @@ import {
   youtubeNoCookieEmbedUrl,
   youtubeWatchUrl,
 } from "@/lib/media/youtube";
+import { experienceBackgroundStyle } from "@/lib/site-experience/presentation";
+import type { HomeExperienceBackground } from "@/lib/site-experience/types";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -1237,12 +1239,14 @@ export function ProductShowcase({
   paymentTestAvailable,
   developerCreditUrl,
   content,
+  background,
 }: {
   catalogProducts: Product[];
   checkoutAvailable: boolean;
   paymentTestAvailable: boolean;
   developerCreditUrl: string | null;
   content: StorefrontContent;
+  background: HomeExperienceBackground;
 }) {
   if (catalogProducts.length === 0) {
     return (
@@ -1286,6 +1290,7 @@ export function ProductShowcase({
       paymentTestAvailable={paymentTestAvailable}
       developerCreditUrl={developerCreditUrl}
       content={content}
+      background={background}
     />
   );
 }
@@ -1296,12 +1301,14 @@ function ProductCatalogShowcase({
   paymentTestAvailable,
   developerCreditUrl,
   content,
+  background,
 }: {
   catalogProducts: Product[];
   checkoutAvailable: boolean;
   paymentTestAvailable: boolean;
   developerCreditUrl: string | null;
   content: StorefrontContent;
+  background: HomeExperienceBackground;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const filteredCatalogProducts = useMemo(
@@ -1820,6 +1827,7 @@ function ProductCatalogShowcase({
       data-catalog-transitioning={pageTransitioning ? "true" : "false"}
       aria-busy={pageTransitioning}
       className="product-showcase-experience relative"
+      style={experienceBackgroundStyle({ imageUrl: background.catalogImageUrl })}
     >
       <section
         id="produtos"

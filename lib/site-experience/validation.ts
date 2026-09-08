@@ -9,6 +9,7 @@ import {
   type ExperienceEffects,
   type ExperienceFontId,
   type ExperienceBackground,
+  type HomeExperienceBackground,
   type ExperienceTheme,
   type HomeCinematicControls,
   type SiteExperienceConfig,
@@ -282,24 +283,51 @@ export function isAllowedSiteExperienceBackgroundImage(
 
 function parseBackground(
   value: unknown,
-  fallback: ExperienceBackground,
+  fallback: ExperienceBackground | HomeExperienceBackground,
   label: string,
   errors: string[],
   required: boolean,
-): ExperienceBackground {
+  catalogRequired = false,
+): ExperienceBackground | HomeExperienceBackground {
   if (value === undefined && !required) return { ...fallback };
   if (!isRecord(value)) {
     errors.push(`${label} é inválido.`);
     return { ...fallback };
   }
-  exactKeys(value, ["imageUrl"], label, errors);
+  const supportsCatalog = "catalogImageUrl" in fallback;
+  exactKeys(
+    value,
+    supportsCatalog && catalogRequired
+      ? ["imageUrl", "catalogImageUrl"]
+      : ["imageUrl"],
+    label,
+    errors,
+  );
   const imageUrl = value.imageUrl;
-  if (imageUrl === null) return { imageUrl: null };
-  if (typeof imageUrl !== "string" || !isAllowedSiteExperienceBackgroundImage(imageUrl)) {
+  const parsedImageUrl = imageUrl === null
+    ? null
+    : typeof imageUrl === "string" && isAllowedSiteExperienceBackgroundImage(imageUrl)
+      ? imageUrl
+      : undefined;
+  if (parsedImageUrl === undefined) {
     errors.push(`${label}: use somente uma imagem enviada pelo Estúdio Visual.`);
     return { ...fallback };
   }
-  return { imageUrl };
+  if (!supportsCatalog) return { imageUrl: parsedImageUrl };
+
+  const catalogImageUrl = value.catalogImageUrl;
+  const parsedCatalogImageUrl = !catalogRequired && catalogImageUrl === undefined
+    ? null
+    : catalogImageUrl === null
+      ? null
+      : typeof catalogImageUrl === "string" && isAllowedSiteExperienceBackgroundImage(catalogImageUrl)
+        ? catalogImageUrl
+        : undefined;
+  if (parsedCatalogImageUrl === undefined) {
+    errors.push(`${label}: o fundo da vitrine deve ser uma imagem enviada pelo Estúdio Visual.`);
+    return { ...fallback };
+  }
+  return { imageUrl: parsedImageUrl, catalogImageUrl: parsedCatalogImageUrl };
 }
 
 function parseCinematic(
@@ -334,7 +362,7 @@ function parsePage(
   content: (value: unknown, errors: string[]) => StorefrontContent,
   label: string,
   errors: string[],
-  options: { cinematic: true; requireNewFields: boolean },
+  options: { cinematic: true; requireNewFields: boolean; requireCatalogBackground: boolean },
 ): SiteExperienceConfig["home"];
 function parsePage(
   value: unknown,
@@ -358,7 +386,7 @@ function parsePage(
   content: (value: unknown, errors: string[]) => StorefrontContent | AccountExperienceContent | SlotExperienceContent,
   label: string,
   errors: string[],
-  options: { cinematic?: boolean; requireNewFields: boolean },
+  options: { cinematic?: boolean; requireNewFields: boolean; requireCatalogBackground?: boolean },
 ) {
   if (!isRecord(value)) {
     errors.push(`${label} é inválida.`);
@@ -376,17 +404,18 @@ function parsePage(
     content: content(value.content, errors),
     theme: parseTheme(value.theme, fallback.theme, `${label}: aparência`, errors),
     effects: parseEffects(value.effects, fallback.effects, `${label}: efeitos`, errors),
-    background: parseBackground(
-      value.background,
-      fallback.background,
-      `${label}: imagem de fundo`,
-      errors,
-      options.requireNewFields,
-    ),
   };
   return options.cinematic
     ? {
         ...result,
+        background: parseBackground(
+          value.background,
+          fallback.background,
+          `${label}: imagem de fundo`,
+          errors,
+          options.requireNewFields,
+          options.requireCatalogBackground ?? false,
+        ) as HomeExperienceBackground,
         cinematic: parseCinematic(
           value.cinematic,
           DEFAULT_SITE_EXPERIENCE.home.cinematic,
@@ -395,7 +424,16 @@ function parsePage(
           options.requireNewFields,
         ),
       }
-    : result;
+    : {
+        ...result,
+        background: parseBackground(
+          value.background,
+          fallback.background,
+          `${label}: imagem de fundo`,
+          errors,
+          options.requireNewFields,
+        ) as ExperienceBackground,
+      };
 }
 
 export function parseSiteExperienceConfig(value: unknown): ValidationResult {
@@ -412,12 +450,13 @@ export function parseSiteExperienceConfig(value: unknown): ValidationResult {
     errors.push("A configuração visual não pode ser serializada.");
   }
   const legacyVersion = value.schemaVersion === 1;
-  if (value.schemaVersion !== 1 && value.schemaVersion !== 2) {
+  const requiresSectionBackground = value.schemaVersion === 3;
+  if (value.schemaVersion !== 1 && value.schemaVersion !== 2 && value.schemaVersion !== 3) {
     errors.push("A versão da configuração não é suportada.");
   }
 
   const parsed: SiteExperienceConfig = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     home: parsePage(
       value.home,
       DEFAULT_SITE_EXPERIENCE.home,
@@ -430,7 +469,11 @@ export function parseSiteExperienceConfig(value: unknown): ValidationResult {
       ),
       "Home",
       errors,
-      { cinematic: true, requireNewFields: !legacyVersion },
+      {
+        cinematic: true,
+        requireNewFields: !legacyVersion,
+        requireCatalogBackground: requiresSectionBackground,
+      },
     ),
     account: parsePage(
       value.account,

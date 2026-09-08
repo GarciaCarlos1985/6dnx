@@ -415,6 +415,8 @@
   gap: 1rem;
 }
 
+.account-content-grid:has(> :only-child) { grid-template-columns: minmax(0, 1fr); }
+
 .account-panel { border-radius: 1.15rem; padding: clamp(1.25rem, 3vw, 2rem); }
 .account-panel__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.3rem; }
 .account-panel h2 { margin: 0; font-family: var(--font-display); font-size: clamp(1.25rem, 2.5vw, 2rem); }

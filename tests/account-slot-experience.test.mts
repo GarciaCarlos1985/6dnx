@@ -103,10 +103,6 @@ test("slot preserves the supplied references and renders transparent reaction dr
       "utf8",
     ),
   ]);
-  const nav = await readFile(
-    new URL("../components/site-navigation.tsx", import.meta.url),
-    "utf8",
-  );
   assert.match(slot, /\/slot\/dragon-excited-v2\.png/);
   assert.match(stage, /\/slot\/dragon-idle-v2\.png/);
   assert.match(stage, /\/slot\/dragon-excited-v2\.png/);
@@ -117,7 +113,20 @@ test("slot preserves the supplied references and renders transparent reaction dr
   assert.doesNotMatch(stage, /roundRect\(38, 92, 285, 360/);
   assert.doesNotMatch(slot, /src="\/slot\/slot-layout\.png"/);
   assert.doesNotMatch(stage, /\/slot\/slot-layout\.png/);
-  assert.match(nav, /href="\/slot"/);
+});
+
+test("slot remains implemented but is hidden from every public entry point", async () => {
+  const [features, nav, account, route] = await Promise.all([
+    readFile(new URL("../lib/public-features.ts", import.meta.url), "utf8"),
+    readFile(new URL("../components/site-navigation.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../components/account-dashboard.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/slot/page.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(features, /slot:\s*false/);
+  assert.match(nav, /PUBLIC_FEATURES\.slot\s*\?/);
+  assert.match(account, /PUBLIC_FEATURES\.slot\s*\?/);
+  assert.match(route, /if \(!PUBLIC_FEATURES\.slot\) notFound\(\)/);
 });
 
 test("slot loads PixiJS only inside the machine and keeps a deterministic reel contract", async () => {

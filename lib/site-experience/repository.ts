@@ -92,8 +92,8 @@ export async function getAdminSiteExperience(
 
   const raw = result.data as Record<string, unknown>;
   const requiresVisualControlsMigration =
-    siteExperienceSchemaVersion(raw.published) !== 2 ||
-    siteExperienceSchemaVersion(raw.draft) !== 2;
+    siteExperienceSchemaVersion(raw.published) !== 3 ||
+    siteExperienceSchemaVersion(raw.draft) !== 3;
   const published = parseSiteExperienceConfig(raw.published);
   const draft = parseSiteExperienceConfig(raw.draft);
   if (!published.ok || !draft.ok) {
@@ -131,7 +131,7 @@ export async function getAdminSiteExperience(
     history,
     state: requiresVisualControlsMigration ? "schema-missing" : "ready",
     message: requiresVisualControlsMigration
-      ? "A migration 20260904120000_add_site_experience_background_and_cinematic_controls.sql ainda não foi aplicada. A prévia é segura, mas salvar e publicar permanecem bloqueados."
+      ? "A migration de fundos por seção ainda não foi aplicada. A prévia é segura, mas salvar e publicar permanecem bloqueados."
       : undefined,
   };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AdminSecondFactor } from "@/components/admin/admin-second-factor";
 import { useEffect, useMemo, useState } from "react";
 import { SiteAtmosphere } from "@/components/site-atmosphere";
 import { experienceThemeStyle } from "@/lib/site-experience/presentation";
@@ -158,6 +159,7 @@ export function SiteExperienceStudio({
   const [record, setRecord] = useState(initialRecord);
   const [draft, setDraft] = useState(initialRecord.draft);
   const [page, setPage] = useState<ExperiencePageId>("home");
+  const [backgroundPreview, setBackgroundPreview] = useState<"page" | "catalog">("page");
   const [busy, setBusy] = useState<"save" | "publish" | "restore" | null>(null);
   const [uploadingBackground, setUploadingBackground] = useState(false);
   const [notice, setNotice] = useState<{ tone: "ok" | "error" | "info"; text: string } | null>(null);
@@ -168,7 +170,7 @@ export function SiteExperienceStudio({
   const persistenceNotice = record.state === "schema-missing"
     ? {
         title: "Atualização do Estúdio pendente — rascunho ainda não pode ser salvo.",
-        text: record.message ?? "O banco ainda não possui a versão necessária do Estúdio. Aplique, após revisão, 20260809220000_add_site_experience_studio.sql e depois 20260904120000_add_site_experience_background_and_cinematic_controls.sql. As alterações desta tela não serão mantidas ao sair.",
+        text: record.message ?? "O banco ainda não possui a versão necessária do Estúdio. Aplique, após revisão, 20260908100000_add_site_experience_home_section_backgrounds.sql. As alterações desta tela não serão mantidas ao sair.",
       }
     : record.state === "mfa-required"
       ? {
@@ -207,12 +209,15 @@ export function SiteExperienceStudio({
     setNotice(null);
   }
 
-  function updateBackground(imageUrl: string | null) {
+  function updateBackground(imageUrl: string | null, target: "page" | "catalog" = "page") {
+    setBackgroundPreview(target);
     setDraft((previous) => ({
       ...previous,
       [page]: {
         ...previous[page],
-        background: { imageUrl },
+        background: page === "home" && target === "catalog"
+          ? { ...previous.home.background, catalogImageUrl: imageUrl }
+          : { ...previous[page].background, imageUrl },
       },
     } as SiteExperienceConfig));
     setNotice(null);
@@ -229,7 +234,7 @@ export function SiteExperienceStudio({
     setNotice(null);
   }
 
-  async function uploadBackground(file: File | null) {
+  async function uploadBackground(file: File | null, target: "page" | "catalog" = "page") {
     if (!file) return;
     if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
       setNotice({ tone: "error", text: "Envie uma imagem JPG, PNG, WEBP ou AVIF de até 5 MB." });
@@ -249,7 +254,7 @@ export function SiteExperienceStudio({
       });
       const payload = (await response.json()) as { url?: string; error?: string };
       if (!response.ok || !payload.url) throw new Error(payload.error ?? "Não foi possível enviar a imagem.");
-      updateBackground(payload.url);
+      updateBackground(payload.url, target);
       setNotice({ tone: "ok", text: "Imagem enviada para o rascunho. Revise a prévia antes de publicar." });
     } catch (error) {
       setNotice({ tone: "error", text: error instanceof Error ? error.message : "Não foi possível enviar a imagem." });
@@ -378,6 +383,8 @@ export function SiteExperienceStudio({
   }
 
   const contentRecord = current.content as unknown as Record<string, string>;
+  const previewingCatalog = page === "home" && backgroundPreview === "catalog";
+  const previewImageUrl = previewingCatalog ? draft.home.background.catalogImageUrl : current.background.imageUrl;
 
   return (
     <main className="admin-content-page admin-experience-page">
@@ -410,6 +417,8 @@ export function SiteExperienceStudio({
         {notice ? <div className={`admin-notice admin-notice--${notice.tone}`} role={notice.tone === "error" ? "alert" : "status"}><span>{notice.tone === "ok" ? "✓" : notice.tone === "error" ? "!" : "i"}</span><p>{notice.text}</p></div> : null}
         {!validation.ok ? <div className="admin-notice admin-notice--error"><span>!</span><p><strong>Publicação bloqueada por segurança.</strong><br />{validation.errors.slice(0, 4).join(" ")}</p></div> : null}
 
+        <AdminSecondFactor onVerified={() => setNotice({ tone: "ok", text: "Segundo fator confirmado. Seu rascunho foi preservado; tente a publicação novamente." })} />
+
         <nav className="admin-experience-tabs" aria-label="Páginas do Estúdio">
           {(Object.keys(PAGE_LABELS) as ExperiencePageId[]).map((item) => <button type="button" key={item} className={page === item ? "is-active" : ""} onClick={() => setPage(item)}>{PAGE_LABELS[item]}</button>)}
         </nav>
@@ -425,17 +434,27 @@ export function SiteExperienceStudio({
             </div><div className="admin-form-grid"><label className="admin-field"><span>Fonte dos títulos</span><select value={current.theme.displayFont} onChange={(event) => updateTheme("displayFont", event.target.value)}><option value="archivo-black">Archivo Black</option><option value="manrope">Manrope</option></select></label><label className="admin-field"><span>Fonte dos textos</span><select value={current.theme.bodyFont} onChange={(event) => updateTheme("bodyFont", event.target.value)}><option value="manrope">Manrope</option><option value="archivo-black">Archivo Black</option></select></label></div></section>
 
             <section className="admin-form-section">
-              <div className="admin-section-heading"><div><span className="admin-kicker">Imagem de fundo</span><h2>Banner protegido</h2><p>Uma imagem por página. O Estúdio aplica uma camada de contraste e mantém a responsividade sem aceitar links externos.</p></div></div>
+              <div className="admin-section-heading"><div><span className="admin-kicker">Imagem de fundo</span><h2>Banners protegidos</h2><p>{page === "home" ? "Hero e vitrine possuem fundos independentes." : "Uma imagem para esta página."} O Estúdio aplica contraste e responsividade sem aceitar links externos.</p></div></div>
               <div className="admin-background-control">
                 <div>
-                  <strong>{current.background.imageUrl ? "Imagem em revisão" : "Fundo cinematográfico padrão"}</strong>
+                  <strong>{page === "home" ? "Hero principal" : "Fundo da página"} · {current.background.imageUrl ? "imagem em revisão" : "padrão cinematográfico"}</strong>
                   <p>{current.background.imageUrl ? "A imagem está apenas no rascunho até a publicação." : "Envie uma arte pronta para trocar somente o fundo desta página."}</p>
                 </div>
                 <div className="admin-background-control__actions">
-                  <label className="admin-secondary-button"><input type="file" accept="image/jpeg,image/png,image/webp,image/avif" disabled={uploadingBackground || !persistenceReady} onChange={(event) => { void uploadBackground(event.currentTarget.files?.[0] ?? null); event.currentTarget.value = ""; }} />{uploadingBackground ? "Enviando…" : "Enviar imagem"}</label>
-                  {current.background.imageUrl ? <button type="button" className="admin-secondary-button" onClick={() => updateBackground(null)} disabled={uploadingBackground}>Restaurar padrão</button> : null}
+                  <label className="admin-secondary-button"><input type="file" accept="image/jpeg,image/png,image/webp,image/avif" disabled={uploadingBackground || !persistenceReady} onChange={(event) => { void uploadBackground(event.currentTarget.files?.[0] ?? null, "page"); event.currentTarget.value = ""; }} />{uploadingBackground ? "Enviando…" : "Enviar imagem"}</label>
+                  {current.background.imageUrl ? <button type="button" className="admin-secondary-button" onClick={() => updateBackground(null, "page")} disabled={uploadingBackground}>Restaurar padrão</button> : null}
                 </div>
               </div>
+              {page === "home" ? <div className="admin-background-control">
+                <div>
+                  <strong>Vitrine e seções inferiores · {draft.home.background.catalogImageUrl ? "imagem em revisão" : "padrão cinematográfico"}</strong>
+                  <p>{draft.home.background.catalogImageUrl ? "A imagem está apenas no rascunho até a publicação." : "Envie outra arte para o catálogo sem alterar o hero."}</p>
+                </div>
+                <div className="admin-background-control__actions">
+                  <label className="admin-secondary-button"><input type="file" accept="image/jpeg,image/png,image/webp,image/avif" disabled={uploadingBackground || !persistenceReady} onChange={(event) => { void uploadBackground(event.currentTarget.files?.[0] ?? null, "catalog"); event.currentTarget.value = ""; }} />{uploadingBackground ? "Enviando…" : "Enviar imagem"}</label>
+                  {draft.home.background.catalogImageUrl ? <button type="button" className="admin-secondary-button" onClick={() => updateBackground(null, "catalog")} disabled={uploadingBackground}>Restaurar padrão</button> : null}
+                </div>
+              </div> : null}
             </section>
 
             {page === "home" ? <section className="admin-form-section">
@@ -453,9 +472,16 @@ export function SiteExperienceStudio({
             <section className="admin-form-section"><div className="admin-section-heading"><div><span className="admin-kicker">Efeitos limitados</span><h2>Partículas de fundo</h2><p>Máximo de duas famílias. Até 24 elementos no desktop, 10 no celular e zero com movimento reduzido.</p></div></div><div className="admin-form-grid"><label className="admin-field"><span>Densidade</span><select value={current.effects.density} onChange={(event) => updateDensity(event.target.value as "off" | "light" | "standard")}><option value="off">Desligado</option><option value="light">Leve</option><option value="standard">Padrão seguro</option></select></label></div><div className="admin-effect-options">{EXPERIENCE_EFFECT_FAMILIES.map((family) => <button type="button" key={family} className={current.effects.families.includes(family) ? "is-active" : ""} onClick={() => toggleEffect(family)}>{EFFECT_LABELS[family]}</button>)}</div></section>
           </div>
 
-          <aside className="admin-experience-preview" style={experienceThemeStyle(current.theme, current.background)}>
+          <aside className="admin-experience-preview" style={experienceThemeStyle(current.theme, { imageUrl: previewImageUrl })}>
             <SiteAtmosphere effects={current.effects} />
-            <div><span>PRÉVIA · {PAGE_LABELS[page]}</span><h2>{contentRecord[PAGE_FIELDS[page][0].key]}</h2><p>{contentRecord[PAGE_FIELDS[page].find((field) => field.multiline)?.key ?? PAGE_FIELDS[page][1].key]}</p><button type="button">{page === "home" ? contentRecord.heroCtaLabel : page === "slot" ? contentRecord.primaryAction : "Continuar"}</button><small>Produtos, preços, checkout, saldos e regras da Slot são campos protegidos.</small></div>
+            <div>
+              {page === "home" ? <label className="admin-field"><span>Área da prévia</span><select value={backgroundPreview} onChange={(event) => setBackgroundPreview(event.target.value === "catalog" ? "catalog" : "page")}><option value="page">Hero principal</option><option value="catalog">Vitrine e seções inferiores</option></select></label> : null}
+              <span>PRÉVIA · {previewingCatalog ? "VITRINE" : PAGE_LABELS[page]}</span>
+              <h2>{previewingCatalog ? contentRecord.catalogTitle : contentRecord[PAGE_FIELDS[page][0].key]}</h2>
+              <p>{previewingCatalog ? contentRecord.catalogDescription : contentRecord[PAGE_FIELDS[page].find((field) => field.multiline)?.key ?? PAGE_FIELDS[page][1].key]}</p>
+              <button type="button">{previewingCatalog ? "Ver detalhes" : page === "home" ? contentRecord.heroCtaLabel : page === "slot" ? contentRecord.primaryAction : "Continuar"}</button>
+              <small>Produtos, preços, checkout, saldos e regras da Slot são campos protegidos.</small>
+            </div>
           </aside>
         </div>
 

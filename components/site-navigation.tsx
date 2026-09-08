@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { DiscordMark } from "@/components/discord-mark";
 import { HeroAuth } from "@/components/hero-auth";
+import { PUBLIC_FEATURES } from "@/lib/public-features";
 
 const navigation = [
   { href: "#inicio", label: "Início" },
@@ -43,9 +44,11 @@ export function SiteNavigation({
           >
             Anúncios
           </a>
-          <Link href="/slot" className="site-navigation__link">
-            Slot <small>prévia</small>
-          </Link>
+          {PUBLIC_FEATURES.slot ? (
+            <Link href="/slot" className="site-navigation__link">
+              Slot <small>prévia</small>
+            </Link>
+          ) : null}
           <a
             href="/api/redirect"
             className="site-navigation__link site-navigation__link--support"

@@ -1,6 +1,73 @@
 # 6DNX project state
 
-Last updated: 2026-09-04
+Last updated: 2026-09-08
+
+## Validação real do Estúdio e separação de fundos — 2026-09-08
+
+- A migration v2
+  `20260904120000_add_site_experience_background_and_cinematic_controls.sql`
+  foi aplicada de forma direcionada no projeto Supabase de Produção autorizado.
+  A leitura posterior confirmou `schemaVersion = 2` tanto no publicado quanto no
+  rascunho, inicialmente com o fundo da Home em `null`.
+- O primeiro teste real foi concluído no painel autenticado: uma imagem foi
+  enviada para o Hero, o rascunho foi salvo e, em seguida, o padrão foi
+  restaurado e salvo novamente. O registro publicado não foi alterado; o fundo
+  do rascunho voltou a `null`.
+- Esse teste revelou que o schema v2 oferecia um único fundo para toda a Home,
+  embora a apresentação aplicasse esse campo somente ao Hero. Para cumprir a
+  edição independente solicitada, o schema v3 separa `imageUrl` (Hero) de
+  `catalogImageUrl` (vitrine e seções inferiores), mantendo os mesmos limites de
+  upload e a mesma validação de URL gerenciada pelo Storage.
+- A migration v3
+  `20260908100000_add_site_experience_home_section_backgrounds.sql` foi validada
+  em PostgreSQL 17 descartável e sem rede. Passaram preservação do conteúdo,
+  rejeição de configurações nulas/malformadas, salvamento, conflito de revisão,
+  bloqueio de não administrador e AAL1, publicação AAL2, restauração e grants.
+  Após autorização humana específica, ela foi aplicada de forma direcionada em
+  Produção. Publicado e rascunho estão em schema 3, com validador retornando
+  `true`; nenhuma outra migration pendente foi executada nessa operação.
+  A versão `20260908100000` também foi registrada no histórico remoto sem
+  reaplicar SQL. A v2 foi aplicada manualmente e ainda não consta naquele
+  histórico: não executar um `db push` genérico para tentar reconciliá-la.
+- Os dois testes reais do schema v3 passaram pelo painel autenticado: upload do
+  Hero, salvar e recarregar; upload independente da vitrine, salvar e recarregar.
+  A consulta SQL confirmou duas URLs distintas no rascunho. Depois, ambos os
+  controles foram restaurados e salvos: publicado e rascunho voltaram a
+  `imageUrl = null` e `catalogImageUrl = null`. Nenhum fundo de teste foi publicado.
+  Os arquivos enviados permanecem no Storage, sem referência no visual ativo.
+- A prévia do Estúdio agora alterna entre Hero e vitrine, com texto da região
+  selecionada, e acompanha automaticamente o upload. A interface foi conferida
+  no desktop (1280 px) e no celular (390 px), sem overflow horizontal.
+- Validação do lote: 89/89 testes, ESLint, TypeScript e build de 35 rotas com
+  variáveis carregadas somente no processo aprovados; a alteração
+  final da prévia passou na verificação interativa desktop/mobile. O detector
+  visual apontou apenas a grade decorativa antiga em `admin.css:64`, fora deste
+  lote; ela foi preservada.
+- A navegação pública, a conta e a rota `/slot` agora respeitam a flag central
+  `PUBLIC_FEATURES.slot = false`. A Slot fica invisível e responde 404, mas seu
+  código, dados e configuração administrativa foram preservados para reativação.
+  Nenhum card, preço, mídia de produto, catálogo, checkout ou PIX foi alterado.
+- Os dois containers de laboratório 6DNX foram interrompidos e removidos após os
+  testes. Eles eram exclusivamente locais; o Maycon não precisa de Docker nem de
+  qualquer ferramenta de desenvolvimento para usar o painel publicado.
+
+## Correção do desbloqueio do Estúdio — 2026-09-07
+
+- O painel local atualizado está no worktree `6dnx-MayconFernandes-admin-visual-controls`,
+  porta 3128. A porta 3127 pertence à pasta principal antiga, com mudanças de
+  terceiros preservadas. O servidor 3128 carrega o `.env.local` da pasta principal
+  somente no processo, sem copiar nem versionar segredos.
+- O Estúdio agora oferece consulta dos fatores existentes, cadastro TOTP explícito
+  e confirmação do código no próprio editor, preservando o rascunho em memória.
+  Nenhum fator existente é removido; segredo e QR ficam somente no estado do
+  componente. A API e o SQL continuam exigindo administrador e AAL2 para publicar.
+- A migration v2 foi corrigida para rejeitar campos ausentes/nulos e validada em
+  PostgreSQL 17 descartável, sem rede, com `tests/site-experience-v2-lab.sql`.
+  Passaram preservação do conteúdo, rejeição de configurações incompletas, salvar,
+  conflito de revisão, recusa de usuário comum/AAL1, publicação AAL2 e restauração.
+- Naquele checkpoint, a configuração real ainda era v1 e nenhuma migration havia
+  sido aplicada. Esse estado histórico foi superado pela aplicação direcionada
+  da v2 e pelo primeiro teste real descritos na seção de 2026-09-08.
 
 ## Em validação isolada: Estúdio Visual — fundos e cena cinematográfica — 2026-09-04
 
@@ -23,13 +90,9 @@ Last updated: 2026-09-04
   `20260904120000_add_site_experience_background_and_cinematic_controls.sql`
   apenas amplia e normaliza o documento do Estúdio para schema v2. Ela não toca
   catálogo, pedidos, PIX, carteiras, recompensas ou lógica da Slot.
-- Estado deste checkpoint: implementação, testes, build e validação visual
-  concluídos no worktree isolado e autorizados para publicação na `main`. A
-  migration v2 continua **não aplicada em Produção**. Enquanto o banco conservar
-  um documento v1, o site público mantém a aparência existente e o painel mostra
-  a prévia, mas bloqueia explicitamente salvar, publicar e enviar fundos; não há
-  falha silenciosa nem escrita incompatível. A ativação persistente dos novos
-  controles exige uma autorização separada para a migration direcionada.
+- Estado daquele checkpoint: implementação, testes, build e validação visual
+  concluídos no worktree isolado. A migration v2 foi aplicada posteriormente,
+  em 2026-09-08, conforme o registro operacional acima.
 
 ## Correção local: apresentação de produtos e convite permanente — 2026-08-28
 

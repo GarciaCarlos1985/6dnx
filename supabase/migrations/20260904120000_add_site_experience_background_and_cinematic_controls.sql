@@ -13,7 +13,7 @@ language sql
 immutable
 set search_path = ''
 as $$
-  select
+  select coalesce((
     pg_catalog.jsonb_typeof(p_config) = 'object'
     and (p_config ->> 'schemaVersion') = '2'
     and public.site_experience_config_v1_is_valid(
@@ -28,17 +28,18 @@ as $$
     and not exists (
       select 1
       from (values ('home'), ('account'), ('slot')) as pages(page_key)
-      where pg_catalog.jsonb_typeof(p_config #> array[pages.page_key, 'background']) <> 'object'
+      where pg_catalog.jsonb_typeof(p_config #> array[pages.page_key, 'background']) is distinct from 'object'
          or exists (
            select 1
            from pg_catalog.jsonb_object_keys(
-             p_config #> array[pages.page_key, 'background']
+             case when pg_catalog.jsonb_typeof(p_config #> array[pages.page_key, 'background']) = 'object'
+               then p_config #> array[pages.page_key, 'background'] else '{}'::jsonb end
            ) as keys(key_name)
            where key_name <> 'imageUrl'
          )
-         or pg_catalog.jsonb_typeof(
+         or coalesce(pg_catalog.jsonb_typeof(
            p_config #> array[pages.page_key, 'background', 'imageUrl']
-         ) not in ('null', 'string')
+         ), 'missing') not in ('null', 'string')
          or (
            pg_catalog.jsonb_typeof(
              p_config #> array[pages.page_key, 'background', 'imageUrl']
@@ -52,7 +53,8 @@ as $$
     and pg_catalog.jsonb_typeof(p_config #> '{home,cinematic}') = 'object'
     and not exists (
       select 1
-      from pg_catalog.jsonb_object_keys(p_config #> '{home,cinematic}') as keys(key_name)
+      from pg_catalog.jsonb_object_keys(case when pg_catalog.jsonb_typeof(p_config #> '{home,cinematic}') = 'object'
+        then p_config #> '{home,cinematic}' else '{}'::jsonb end) as keys(key_name)
       where key_name not in (
         'logoEnabled', 'eyeEnabled', 'logoEffectsEnabled',
         'charactersEnabled', 'productCharactersEnabled',
@@ -61,7 +63,8 @@ as $$
     )
     and (
       select pg_catalog.count(*)
-      from pg_catalog.jsonb_object_keys(p_config #> '{home,cinematic}')
+      from pg_catalog.jsonb_object_keys(case when pg_catalog.jsonb_typeof(p_config #> '{home,cinematic}') = 'object'
+        then p_config #> '{home,cinematic}' else '{}'::jsonb end)
     ) = 8
     and not exists (
       select 1
@@ -72,8 +75,9 @@ as $$
       ) as controls(control_key)
       where pg_catalog.jsonb_typeof(
         p_config #> array['home', 'cinematic', controls.control_key]
-      ) <> 'boolean'
-    );
+      ) is distinct from 'boolean'
+    )
+  ), false);
 $$;
 
 revoke all on function public.site_experience_config_is_valid(jsonb)

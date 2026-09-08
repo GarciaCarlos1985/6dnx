@@ -49,6 +49,7 @@ export default async function HomePage() {
         paymentTestAvailable={paymentTestAvailable}
         developerCreditUrl={developerCreditUrl}
         content={storefrontContent}
+        background={experience.home.background}
       />
       <div className="hidden">
         <Suspense fallback={<NewsRadarSkeleton />}>
