@@ -757,19 +757,6 @@ function Card({
           className="product-card__art object-cover transition duration-700 group-hover:scale-[1.055]"
         />
 
-        <div
-          aria-hidden
-          className="product-card__angel absolute -bottom-[18%] right-1 z-[3] h-[112%] w-[34%] min-w-[6.25rem] max-w-[8.2rem]"
-        >
-          <Image
-            src="/anjo1-premium.webp"
-            alt=""
-            fill
-            sizes="132px"
-            className="object-contain object-bottom"
-          />
-        </div>
-
         <div className="absolute inset-x-4 top-4 z-[4] flex flex-wrap items-center gap-2">
           <span className="border border-accent/40 bg-black/70 px-2 py-1 text-[0.6rem] font-bold uppercase tracking-wider text-accent backdrop-blur-sm">
             {productStatusLabel(product.status)}
