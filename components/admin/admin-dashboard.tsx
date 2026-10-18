@@ -25,13 +25,9 @@ import {
   type Variant,
 } from "@/lib/products";
 import { normalizeYouTubeVideoId } from "@/lib/media/youtube";
+import { productPagePath } from "@/lib/catalog/games";
 
-type EditorTab =
-  | "basic"
-  | "visual"
-  | "content"
-  | "variants"
-  | "publication";
+type EditorTab = "basic" | "visual" | "content" | "variants" | "publication";
 
 const tabs: Array<{
   id: EditorTab;
@@ -111,7 +107,9 @@ function ProductPreview({ item }: { item: CatalogAdminItem }) {
     >
       <div
         className="admin-product-preview__image"
-        style={{ backgroundImage: `url("${product.image.replaceAll('"', "%22")}")` }}
+        style={{
+          backgroundImage: `url("${product.image.replaceAll('"', "%22")}")`,
+        }}
         role="img"
         aria-label={`Prévia da imagem de ${product.title}`}
       >
@@ -137,7 +135,10 @@ function ProductPreview({ item }: { item: CatalogAdminItem }) {
               key={`${variant.name}-${index}`}
               style={
                 variant.accentColor
-                  ? { borderColor: variant.accentColor, color: variant.accentColor }
+                  ? {
+                      borderColor: variant.accentColor,
+                      color: variant.accentColor,
+                    }
                   : undefined
               }
             >
@@ -181,11 +182,7 @@ function FeatureEditor({
   items: ProductFeature[];
   onChange: (items: ProductFeature[]) => void;
 }) {
-  const update = (
-    index: number,
-    key: keyof ProductFeature,
-    value: string,
-  ) => {
+  const update = (index: number, key: keyof ProductFeature, value: string) => {
     const next = [...items];
     next[index] = { ...next[index], [key]: value };
     onChange(next);
@@ -370,13 +367,24 @@ function VariantEditor({
       </div>
 
       <div className="admin-variant-summary" role="note">
-        <strong>{variants.length}/{MAX_PRODUCT_VARIANTS} opções cadastradas</strong>
+        <strong>
+          {variants.length}/{MAX_PRODUCT_VARIANTS} opções cadastradas
+        </strong>
         <span>
-          {variants.filter((variant) => variant.availability !== "archived").length}{" "}
+          {
+            variants.filter((variant) => variant.availability !== "archived")
+              .length
+          }{" "}
           aparecem no card ·{" "}
-          {variants.filter((variant) => variant.availability === "sold-out").length}{" "}
+          {
+            variants.filter((variant) => variant.availability === "sold-out")
+              .length
+          }{" "}
           esgotadas ·{" "}
-          {variants.filter((variant) => variant.availability === "archived").length}{" "}
+          {
+            variants.filter((variant) => variant.availability === "archived")
+              .length
+          }{" "}
           arquivadas
         </span>
       </div>
@@ -505,7 +513,9 @@ function VariantEditor({
                     })
                   }
                 >
-                  {variant.availability === "archived" ? "Reativar" : "Arquivar"}
+                  {variant.availability === "archived"
+                    ? "Reativar"
+                    : "Arquivar"}
                 </button>
                 <button
                   type="button"
@@ -557,22 +567,27 @@ export function AdminDashboard({
   initialMessage,
   user,
   demoMode = false,
+  initialSelectedId,
 }: {
   initialItems: CatalogAdminItem[];
   initialState: CatalogBootstrapState;
   initialMessage?: string;
   user: { id: string; email: string; role: "admin" };
   demoMode?: boolean;
+  initialSelectedId?: string;
 }) {
   const router = useRouter();
   const [items, setItems] = useState(initialItems);
   const [catalogState, setCatalogState] = useState(initialState);
-  const [selectedId, setSelectedId] = useState(initialItems[0]?.id ?? null);
+  const initialItem =
+    initialItems.find((item) => item.id === initialSelectedId) ??
+    initialItems[0];
+  const [selectedId, setSelectedId] = useState(initialItem?.id ?? null);
   const [draft, setDraft] = useState<CatalogAdminItem | null>(
-    initialItems[0] ? cloneItem(initialItems[0]) : null,
+    initialItem ? cloneItem(initialItem) : null,
   );
   const [savedFingerprint, setSavedFingerprint] = useState(
-    fingerprint(initialItems[0] ?? null),
+    fingerprint(initialItem ?? null),
   );
   const [tab, setTab] = useState<EditorTab>("basic");
   const [query, setQuery] = useState("");
@@ -609,8 +624,8 @@ export function AdminDashboard({
   );
   const editingRustFamily = Boolean(
     draft &&
-      (draft.sourceKey === RUST_SOURCE_CATALOG_KEY ||
-        isRustCloneCatalogKey(draft.sourceKey)),
+    (draft.sourceKey === RUST_SOURCE_CATALOG_KEY ||
+      isRustCloneCatalogKey(draft.sourceKey)),
   );
 
   const filteredItems = useMemo(() => {
@@ -623,6 +638,7 @@ export function AdminDashboard({
         [
           item.product.title,
           item.product.category,
+          item.product.gameName ?? "",
           item.product.slug,
         ].some((value) =>
           value.toLocaleLowerCase("pt-BR").includes(normalized),
@@ -722,7 +738,9 @@ export function AdminDashboard({
         }),
       );
       setItems((current) =>
-        current.map((item) => (item.id === payload.item.id ? payload.item : item)),
+        current.map((item) =>
+          item.id === payload.item.id ? payload.item : item,
+        ),
       );
       setDraft(cloneItem(payload.item));
       setSavedFingerprint(fingerprint(payload.item));
@@ -804,7 +822,9 @@ export function AdminDashboard({
     if (demoMode || busy) return;
     const item = items.find((candidate) => candidate.id === itemId);
     if (!item || item.publicationState !== "published") {
-      throw new Error("Este card não está publicado e não pode ser arquivado aqui.");
+      throw new Error(
+        "Este card não está publicado e não pode ser arquivado aqui.",
+      );
     }
 
     setBusy("catalog-publication");
@@ -951,7 +971,10 @@ export function AdminDashboard({
 
     const restoring = draft.publicationState === "archived";
     if (draft.publicationState === "draft") {
-      announce("Este card já está fora da vitrine porque é um rascunho.", "info");
+      announce(
+        "Este card já está fora da vitrine porque é um rascunho.",
+        "info",
+      );
       return;
     }
 
@@ -1107,10 +1130,7 @@ export function AdminDashboard({
     const images = [...(draft.product.demoImages ?? [])];
     const destination = index + offset;
     if (destination < 0 || destination >= images.length) return;
-    [images[index], images[destination]] = [
-      images[destination],
-      images[index],
-    ];
+    [images[index], images[destination]] = [images[destination], images[index]];
     updateProduct("demoImages", images);
   };
 
@@ -1168,8 +1188,8 @@ export function AdminDashboard({
           <span className="admin-kicker">Configuração necessária</span>
           <h1>O painel está pronto. Falta preparar o banco.</h1>
           <p>
-            Nenhuma alteração foi feita no Supabase. Para manter a segurança,
-            a migração precisa ser revisada e aplicada manualmente antes do
+            Nenhuma alteração foi feita no Supabase. Para manter a segurança, a
+            migração precisa ser revisada e aplicada manualmente antes do
             primeiro uso.
           </p>
           <ol>
@@ -1212,13 +1232,12 @@ export function AdminDashboard({
           <span className="admin-kicker">Primeira inicialização</span>
           <h1>Leve o catálogo atual para o painel.</h1>
           <p>
-            A importação copia os produtos existentes para o Supabase sem
-            apagar o arquivo original. O site continua com fallback automático.
+            A importação copia os produtos existentes para o Supabase sem apagar
+            o arquivo original. O site continua com fallback automático.
           </p>
           <div className="admin-setup__facts">
             <span>
-              <strong>Reversível</strong>
-              O catálogo estático permanece intacto
+              <strong>Reversível</strong>O catálogo estático permanece intacto
             </span>
             <span>
               <strong>Publicado</strong>
@@ -1254,7 +1273,11 @@ export function AdminDashboard({
   return (
     <main className="admin-shell">
       <header className="admin-topbar">
-        <Link href="/" className="admin-topbar__brand" aria-label="Ir para o site">
+        <Link
+          href="/"
+          className="admin-topbar__brand"
+          aria-label="Ir para o site"
+        >
           <span>6</span>
           <div>
             <strong>6DNX</strong>
@@ -1271,7 +1294,9 @@ export function AdminDashboard({
           </span>
         </div>
         <div className="admin-topbar__actions">
-          {demoMode ? <span className="admin-demo-badge">Modo demonstração</span> : null}
+          {demoMode ? (
+            <span className="admin-demo-badge">Modo demonstração</span>
+          ) : null}
           <Link href="/" target="_blank" rel="noreferrer">
             Ver site <span aria-hidden>↗</span>
           </Link>
@@ -1329,6 +1354,37 @@ export function AdminDashboard({
             <small>Arrastar e ordenar os cards com confirmação</small>
           </p>
         </button>
+        <Link
+          href={
+            demoMode ? "/admin/demo?view=orientacoes" : "/admin/orientacoes"
+          }
+          className="admin-content-entry admin-guidance-entry"
+          onClick={(event) => {
+            if (
+              dirty &&
+              !window.confirm(
+                "Há alterações não salvas neste produto. Sair mesmo assim?",
+              )
+            )
+              event.preventDefault();
+          }}
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            aria-hidden="true"
+          >
+            <path d="M4 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-3H4zM20 4h-4a3 3 0 0 0-3 3v14a4 4 0 0 1 4-3h3z" />
+          </svg>
+          <p>
+            <strong>Jogos e orientações</strong>
+            <small>Organizar soluções e preparar guias após a compra</small>
+          </p>
+        </Link>
         <Link href="/admin/estudio" className="admin-content-entry">
           <span aria-hidden>✎</span>
           <p>
@@ -1418,9 +1474,7 @@ export function AdminDashboard({
                     <span className="admin-unsaved-chip">Não salvo</span>
                   ) : null}
                 </div>
-                <p>
-                  Edite com calma. Nada muda no site até você salvar.
-                </p>
+                <p>Edite com calma. Nada muda no site até você salvar.</p>
               </div>
               <div className="admin-editor-header__actions">
                 {editingRustFamily && rustMissingCount > 0 ? (
@@ -1505,7 +1559,13 @@ export function AdminDashboard({
                 className={`admin-notice admin-notice--${noticeTone}`}
                 role={noticeTone === "error" ? "alert" : "status"}
               >
-                <span>{noticeTone === "ok" ? "✓" : noticeTone === "error" ? "!" : "i"}</span>
+                <span>
+                  {noticeTone === "ok"
+                    ? "✓"
+                    : noticeTone === "error"
+                      ? "!"
+                      : "i"}
+                </span>
                 <p>{notice}</p>
                 <button
                   type="button"
@@ -1517,6 +1577,39 @@ export function AdminDashboard({
               </div>
             ) : null}
 
+            <nav
+              className="admin-product-destinations"
+              aria-label="Páginas deste produto"
+            >
+              {draft.publicationState === "published" ? (
+                <Link
+                  href={productPagePath(draft.product)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Abrir página pública <small>Versão salva</small>
+                </Link>
+              ) : null}
+              <Link
+                href={
+                  demoMode
+                    ? "/admin/demo?view=guia"
+                    : `/admin/orientacoes/${draft.id}`
+                }
+                onClick={(event) => {
+                  if (
+                    dirty &&
+                    !window.confirm(
+                      "Salve primeiro para manter suas alterações. Sair para o guia mesmo assim?",
+                    )
+                  )
+                    event.preventDefault();
+                }}
+              >
+                Preparar guia após a compra{" "}
+                <small>Área exclusiva dos compradores</small>
+              </Link>
+            </nav>
             <nav className="admin-editor-tabs" aria-label="Etapas da edição">
               {tabs.map((item) => (
                 <button
@@ -1546,7 +1639,9 @@ export function AdminDashboard({
                         deixam o card mais fácil de entender.
                       </p>
                     </div>
-                    <span className="admin-help-pill">Etapa mais importante</span>
+                    <span className="admin-help-pill">
+                      Etapa mais importante
+                    </span>
                   </div>
                   <div className="admin-form-grid">
                     <label className="admin-field admin-field--wide">
@@ -1561,7 +1656,7 @@ export function AdminDashboard({
                       <small>{draft.product.title.length}/100 caracteres</small>
                     </label>
                     <label className="admin-field">
-                      <span>Categoria</span>
+                      <span>Categoria comercial</span>
                       <input
                         value={draft.product.category}
                         maxLength={80}
@@ -1570,6 +1665,37 @@ export function AdminDashboard({
                         }
                         placeholder="Ex.: DayZ"
                       />
+                    </label>
+                    <label className="admin-field admin-field--wide">
+                      <span>Jogo ou universo</span>
+                      <input
+                        value={draft.product.gameName ?? ""}
+                        maxLength={80}
+                        list="catalog-game-names"
+                        disabled={!Object.hasOwn(draft.product, "gameName")}
+                        onChange={(event) =>
+                          updateProduct("gameName", event.target.value || null)
+                        }
+                        placeholder="Ex.: Arc Raiders, DayZ, Steam"
+                      />
+                      <datalist id="catalog-game-names">
+                        {[
+                          ...new Set(
+                            items
+                              .map((item) => item.product.gameName)
+                              .filter((name): name is string => Boolean(name)),
+                          ),
+                        ]
+                          .sort()
+                          .map((name) => (
+                            <option value={name} key={name} />
+                          ))}
+                      </datalist>
+                      <small>
+                        {Object.hasOwn(draft.product, "gameName")
+                          ? "Soluções com o mesmo jogo aparecem juntas. Deixe vazio para itens que não pertencem a um jogo."
+                          : "A equipe técnica precisa ativar o agrupamento por jogo neste ambiente."}
+                      </small>
                     </label>
                     <label className="admin-field">
                       <span>Status comercial</span>
@@ -1597,7 +1723,9 @@ export function AdminDashboard({
                         }
                         placeholder="Explique o produto em uma frase"
                       />
-                      <small>{draft.product.tagline.length}/160 caracteres</small>
+                      <small>
+                        {draft.product.tagline.length}/160 caracteres
+                      </small>
                     </label>
                     <label className="admin-field admin-field--wide">
                       <span>Descrição completa</span>
@@ -1662,7 +1790,9 @@ export function AdminDashboard({
                         onClick={() => fileInputRef.current?.click()}
                         disabled={demoMode || Boolean(busy)}
                       >
-                        {busy === "upload-card" ? "Enviando…" : "Substituir imagem"}
+                        {busy === "upload-card"
+                          ? "Enviando…"
+                          : "Substituir imagem"}
                       </button>
                       <label className="admin-field">
                         <span>Endereço da imagem</span>
@@ -1713,7 +1843,9 @@ export function AdminDashboard({
                         <button
                           type="button"
                           className="admin-secondary-button"
-                          onClick={() => checkoutBannerInputRef.current?.click()}
+                          onClick={() =>
+                            checkoutBannerInputRef.current?.click()
+                          }
                           disabled={demoMode || Boolean(busy)}
                         >
                           {busy === "upload-checkout"
@@ -1724,7 +1856,9 @@ export function AdminDashboard({
                           <button
                             type="button"
                             className="admin-secondary-button admin-secondary-button--quiet"
-                            onClick={() => updateProduct("checkoutBanner", null)}
+                            onClick={() =>
+                              updateProduct("checkoutBanner", null)
+                            }
                             disabled={demoMode || Boolean(busy)}
                           >
                             Usar thumbnail do card
@@ -1746,10 +1880,15 @@ export function AdminDashboard({
                       </label>
                     </div>
                   </div>
-                  <section className="admin-demo-gallery" aria-labelledby="demo-gallery-title">
+                  <section
+                    className="admin-demo-gallery"
+                    aria-labelledby="demo-gallery-title"
+                  >
                     <div className="admin-demo-gallery__heading">
                       <div>
-                        <span className="admin-kicker">Popup de apresentação</span>
+                        <span className="admin-kicker">
+                          Popup de apresentação
+                        </span>
                         <h3 id="demo-gallery-title">Galeria demonstrativa</h3>
                         <p>
                           Adicione até cinco artes. No site elas avançam
@@ -1778,49 +1917,57 @@ export function AdminDashboard({
 
                     {(draft.product.demoImages ?? []).length ? (
                       <ol className="admin-demo-gallery__grid">
-                        {(draft.product.demoImages ?? []).map((image, index) => (
-                          <li key={`${image}-${index}`}>
-                            <div
-                              className="admin-demo-gallery__preview"
-                              style={{
-                                backgroundImage: `url("${image.replaceAll('"', "%22")}")`,
-                              }}
-                              role="img"
-                              aria-label={`Imagem demonstrativa ${index + 1}`}
-                            >
-                              <span>{String(index + 1).padStart(2, "0")}</span>
-                            </div>
-                            <div className="admin-demo-gallery__controls">
-                              <button
-                                type="button"
-                                onClick={() => moveDemoImage(index, -1)}
-                                disabled={demoMode || Boolean(busy) || index === 0}
-                                aria-label={`Mover imagem ${index + 1} para trás`}
+                        {(draft.product.demoImages ?? []).map(
+                          (image, index) => (
+                            <li key={`${image}-${index}`}>
+                              <div
+                                className="admin-demo-gallery__preview"
+                                style={{
+                                  backgroundImage: `url("${image.replaceAll('"', "%22")}")`,
+                                }}
+                                role="img"
+                                aria-label={`Imagem demonstrativa ${index + 1}`}
                               >
-                                ←
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => removeDemoImage(index)}
-                                disabled={demoMode || Boolean(busy)}
-                              >
-                                Remover
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => moveDemoImage(index, 1)}
-                                disabled={
-                                  demoMode ||
-                                  Boolean(busy) ||
-                                  index === (draft.product.demoImages ?? []).length - 1
-                                }
-                                aria-label={`Mover imagem ${index + 1} para frente`}
-                              >
-                                →
-                              </button>
-                            </div>
-                          </li>
-                        ))}
+                                <span>
+                                  {String(index + 1).padStart(2, "0")}
+                                </span>
+                              </div>
+                              <div className="admin-demo-gallery__controls">
+                                <button
+                                  type="button"
+                                  onClick={() => moveDemoImage(index, -1)}
+                                  disabled={
+                                    demoMode || Boolean(busy) || index === 0
+                                  }
+                                  aria-label={`Mover imagem ${index + 1} para trás`}
+                                >
+                                  ←
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => removeDemoImage(index)}
+                                  disabled={demoMode || Boolean(busy)}
+                                >
+                                  Remover
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => moveDemoImage(index, 1)}
+                                  disabled={
+                                    demoMode ||
+                                    Boolean(busy) ||
+                                    index ===
+                                      (draft.product.demoImages ?? []).length -
+                                        1
+                                  }
+                                  aria-label={`Mover imagem ${index + 1} para frente`}
+                                >
+                                  →
+                                </button>
+                              </div>
+                            </li>
+                          ),
+                        )}
                       </ol>
                     ) : (
                       <div className="admin-demo-gallery__empty">
@@ -1860,8 +2007,8 @@ export function AdminDashboard({
                       <strong>Paleta oficial protegida</strong>
                       <p>
                         Cores de fundo, texto e destaque não podem ser alteradas
-                        aqui. Assim, nenhum clique acidental compromete contraste
-                        ou identidade visual.
+                        aqui. Assim, nenhum clique acidental compromete
+                        contraste ou identidade visual.
                       </p>
                     </div>
                   </div>
@@ -1901,8 +2048,8 @@ export function AdminDashboard({
                         placeholder="Cole o link do YouTube ou o ID do vídeo"
                       />
                       <small>
-                        Aceita o link completo ou o ID. O vídeo aparece no
-                        popup de apresentação, sem iniciar áudio sozinho.
+                        Aceita o link completo ou o ID. O vídeo aparece no popup
+                        de apresentação, sem iniciar áudio sozinho.
                       </small>
                     </label>
                     <label className="admin-field">
@@ -1912,8 +2059,7 @@ export function AdminDashboard({
                         onChange={(event) =>
                           updateProduct(
                             "videoOrientation",
-                            event.target
-                              .value as Product["videoOrientation"],
+                            event.target.value as Product["videoOrientation"],
                           )
                         }
                       >
@@ -1954,7 +2100,9 @@ export function AdminDashboard({
                             .filter(Boolean),
                         )
                       }
-                      placeholder={"Um passo por linha\nO painel numera automaticamente"}
+                      placeholder={
+                        "Um passo por linha\nO painel numera automaticamente"
+                      }
                     />
                     <small>Use uma linha para cada passo.</small>
                   </label>
@@ -1984,41 +2132,52 @@ export function AdminDashboard({
                         exatamente como estavam.
                       </p>
                     </div>
-                    <span className="admin-help-pill">Estrutura controlada</span>
+                    <span className="admin-help-pill">
+                      Estrutura controlada
+                    </span>
                   </div>
                   <div className="admin-protection-grid">
                     <article>
                       <span aria-hidden>01</span>
                       <p>
                         <strong>
-                          Continua {draft.publicationState === "published"
+                          Continua{" "}
+                          {draft.publicationState === "published"
                             ? "publicado"
                             : draft.publicationState === "archived"
                               ? "arquivado"
                               : "como rascunho"}
                         </strong>
-                        <small>Salvar não coloca nem retira o card do site.</small>
+                        <small>
+                          Salvar não coloca nem retira o card do site.
+                        </small>
                       </p>
                     </article>
                     <article>
                       <span aria-hidden>02</span>
                       <p>
                         <strong>Rota e posição intactas</strong>
-                        <small>Links e ordem do carrossel não podem mudar.</small>
+                        <small>
+                          Links e ordem do carrossel não podem mudar.
+                        </small>
                       </p>
                     </article>
                     <article>
                       <span aria-hidden>03</span>
                       <p>
                         <strong>Planos preservados</strong>
-                        <small>É possível editar os dados, não apagar opções.</small>
+                        <small>
+                          É possível editar os dados, não apagar opções.
+                        </small>
                       </p>
                     </article>
                     <article>
                       <span aria-hidden>04</span>
                       <p>
                         <strong>Versão anterior guardada</strong>
-                        <small>O histórico registra cada gravação automaticamente.</small>
+                        <small>
+                          O histórico registra cada gravação automaticamente.
+                        </small>
                       </p>
                     </article>
                   </div>
@@ -2039,9 +2198,9 @@ export function AdminDashboard({
                     <div>
                       <strong>Proteção contra erros ativada</strong>
                       <p>
-                        A revisão {draft.revision} será guardada. Se outra pessoa
-                        salvar primeiro ou alguém tentar alterar a estrutura, o
-                        servidor interrompe a gravação.
+                        A revisão {draft.revision} será guardada. Se outra
+                        pessoa salvar primeiro ou alguém tentar alterar a
+                        estrutura, o servidor interrompe a gravação.
                       </p>
                     </div>
                   </div>
@@ -2055,7 +2214,9 @@ export function AdminDashboard({
                     />
                     <span aria-hidden />
                     <p>
-                      <strong>Conferi a prévia e os preços deste produto.</strong>
+                      <strong>
+                        Conferi a prévia e os preços deste produto.
+                      </strong>
                       <small>
                         Esta confirmação libera somente o salvamento dos campos
                         seguros exibidos pelo painel.
@@ -2091,9 +2252,9 @@ export function AdminDashboard({
             <div className="admin-preview-panel__guidance">
               <span aria-hidden>◎</span>
               <p>
-                <strong>Você está vendo uma simulação.</strong>
-                O card público usa a mesma informação, preservando os efeitos e
-                a responsividade do site.
+                <strong>Você está vendo uma simulação.</strong>O card público
+                usa a mesma informação, preservando os efeitos e a
+                responsividade do site.
               </p>
             </div>
             <dl className="admin-preview-panel__meta">
@@ -2156,9 +2317,7 @@ export function AdminDashboard({
                   <span>#{revision.revision}</span>
                   <div>
                     <strong>{revision.snapshot.product.title}</strong>
-                    <p>
-                      {revision.changeNote || "Alteração sem nota"}
-                    </p>
+                    <p>{revision.changeNote || "Alteração sem nota"}</p>
                     <small>
                       {new Intl.DateTimeFormat("pt-BR", {
                         dateStyle: "medium",

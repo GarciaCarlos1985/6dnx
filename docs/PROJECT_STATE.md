@@ -1,6 +1,44 @@
 # 6DNX project state
 
-Last updated: 2026-09-08
+Last updated: 2026-10-18
+
+## Upgrade de jogos e orientação — validação do lote em 2026-10-18
+
+- Pedido autorizado: aproveitar o editor existente, organizar soluções por
+  jogo, oferecer páginas completas e reencontrar a orientação na compra.
+  O usuário confirmou apresentação pública e guia adicional após a compra.
+- Worktree `6dnx-maycon-upgrade`, branch `codex/maycon-self-service`, base
+  `0521dad36b6eb7b2d0aeeaee32973f7daa64d1f1`. Outros worktrees e suas
+  alterações foram preservados. Commit e push na `main` autorizados pelo usuário;
+  a ativação do schema remoto é uma etapa separada.
+- Rotas `/jogos`, `/jogos/[slug]` e `/produtos/[slug]`; jogo é um campo
+  explícito e opcional. A vitrine e os popups foram preservados, com atalhos
+  para as páginas completas. Apresentação e compra compartilham componentes.
+- Central `/admin/orientacoes` e editor por solução com prévia, rascunho,
+  publicação, retirada de publicação e proteção de alterações não salvas.
+  O rascunho mantém a orientação publicada até uma nova publicação explícita.
+- Guia privado em `/conta/pedidos/[id]/guia`: validação no servidor de usuário,
+  proprietário e estado confirmado do pedido antes de ler somente o publicado.
+  Usa `product_source_key`, mantendo a correspondência após mudança de nome
+  ou arquivamento. Pedidos pendentes, cancelados e reembolsados não liberam guia.
+- Migration direcionada `20261018061604_solution_self_service.sql` adiciona
+  `game_name`, prepara `demo_images` se ausente e cria guias/histórico/RPC/RLS.
+  Foi aplicada apenas em laboratório descartável PostgreSQL 17, sem rede.
+  Não altera preços, ofertas, estados financeiros ou flags de checkout.
+- 95/95 testes, lint e tipos aprovados. Laboratório comprovou RLS, validação,
+  rascunho/publicação, histórico, preservação comercial e concorrência real.
+  O navegador local foi liberado após reiniciar o aplicativo. Capturas reais
+  da central e da solução em 1440/390 px foram conferidas, incluindo busca e
+  filtros. O Chrome autorizado concluiu editor/prévia em desktop/mobile. O teste
+  do aviso nativo de saída ficou sem comprovação visual. A revisão independente
+  pediu miniaturas e contraste; a rodada de veredito resolveu ambos e retornou
+  `ship`, limitada a esses itens. O fluxo autenticado real depende de ambiente
+  Supabase de teste. Consulte o documento do lote para evidências e limites.
+- Guia de operação atualizado em `GUIA_ADMIN_MAYCON.md`; ativação e limites em
+  `UPGRADE_AUTOSSERVICO.md`. Nenhuma migration remota ou credencial live usada
+  para executar esta implementação. Produção requer validação humana.
+- O usuário autorizou commit e push na `main` após concluir a revisão. Essa
+  autorização de Git não registra uma aplicação da migration remota.
 
 ## Validação real do Estúdio e separação de fundos — 2026-09-08
 

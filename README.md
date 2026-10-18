@@ -11,6 +11,11 @@ O mapa de variáveis e escopos da Vercel está em
 O painel administrativo e sua ativação segura estão documentados em
 [`docs/ADMIN.md`](docs/ADMIN.md).
 
+O upgrade de jogos, páginas de soluções e guias após a compra está em
+[`docs/UPGRADE_AUTOSSERVICO.md`](docs/UPGRADE_AUTOSSERVICO.md), com o escopo,
+as verificações concluídas e os passos de ativação do banco sujeitos à validação
+humana.
+
 ## Estado atual
 
 - Hero estático cinematográfico e uma narrativa GSAP independente na vitrine: o casal Killa

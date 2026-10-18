@@ -33,7 +33,10 @@ const products: Product[] = [
 test("product discovery ignores accents and casing", () => {
   assert.equal(productMatchesSearch(products[0], "antban"), true);
   assert.equal(productMatchesSearch(products[0], "ARENA 30 DIAS"), true);
-  assert.equal(productMatchesSearch(products[1], "suporte especializado"), true);
+  assert.equal(
+    productMatchesSearch(products[1], "suporte especializado"),
+    true,
+  );
 });
 
 test("product discovery matches categories and keeps the admin order", () => {
@@ -45,7 +48,7 @@ test("product discovery matches categories and keeps the admin order", () => {
   assert.deepEqual(filterProductShortcuts(products, "inexistente"), []);
 });
 
-test("storefront keeps only search visible and filters the real catalog", async () => {
+test("storefront search filters the real catalog and preserves the popup presentation", async () => {
   const source = await readFile(
     new URL("../components/product-showcase.tsx", import.meta.url),
     "utf8",
@@ -53,7 +56,10 @@ test("storefront keeps only search visible and filters the real catalog", async 
 
   assert.match(source, /const SHOW_PRODUCT_SHORTCUT_DIRECTORY = false/);
   assert.match(source, /const SHOW_ROW_CAROUSEL_CONTROLS = false/);
-  assert.match(source, /filterProductShortcuts\(catalogProducts, searchQuery\)/);
+  assert.match(
+    source,
+    /filterProductShortcuts\(catalogProducts, searchQuery\)/,
+  );
   assert.match(source, /buildProductCatalogLayout\(\s*filteredCatalogProducts/);
   assert.match(source, /aria-controls="product-catalog-results"/);
   assert.match(source, /id="product-catalog-results"/);
@@ -65,6 +71,12 @@ test("storefront keeps only search visible and filters the real catalog", async 
   assert.doesNotMatch(source, /max-h-32 space-y-1\.5 overflow-y-auto/);
   assert.match(source, /product-popup--info-left absolute/);
   assert.match(source, /data-product-modal-root[\s\S]*overflow-y-auto/);
-  assert.match(source, /tracking-\[0\.18em\] text-white"/);
+  const detail = await readFile(
+    new URL("../components/product-detail-content.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(detail, /tracking-\[0\.18em\] text-white"/);
+  assert.match(source, /href="\/jogos"/);
+  assert.match(source, /productPagePath\(product\)/);
   assert.match(source, /data-product-card-trigger/);
 });

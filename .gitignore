@@ -39,6 +39,14 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Supabase CLI cache
+/supabase/.temp/
+
+# Local visual review evidence
+/.impeccable/review/*.png
+/.impeccable/review/*.jpg
+/.impeccable/review/detector.json
+
 # machine-local agent permissions
 .claude/settings.local.json
 

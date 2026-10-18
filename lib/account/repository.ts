@@ -2,6 +2,8 @@ import "server-only";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { isMissingDatabaseRelation } from "@/lib/account/errors";
+import { resolvePurchasedGuide } from "@/lib/guides/access";
+import { parseGuide } from "@/lib/guides/validation";
 
 type DatabaseConfig = {
   supabaseUrl: string;
@@ -47,6 +49,46 @@ export class AccountRepository {
     });
   }
 
+  async getPurchasedGuide(userId: string, orderId: string) {
+    return resolvePurchasedGuide(userId, orderId, {
+      findOrder: async (id, ownerId) => {
+        const { data, error } = await this.client
+          .from("commerce_orders")
+          .select(
+            "id,user_id,status,product_source_key,product_slug,product_title,variant_name",
+          )
+          .eq("id", id)
+          .eq("user_id", ownerId)
+          .maybeSingle();
+        if (error) throw databaseError("guide-order", error);
+        return data
+          ? {
+              id: data.id,
+              userId: data.user_id,
+              status: data.status,
+              productSourceKey: data.product_source_key,
+              productSlug: data.product_slug,
+              productTitle: data.product_title,
+              variantName: data.variant_name,
+            }
+          : null;
+      },
+      findPublishedGuide: async (sourceKey) => {
+        const { data, error } = await this.client
+          .from("product_solution_guides")
+          .select("published")
+          .eq("product_source_key", sourceKey)
+          .maybeSingle();
+        if (isMissingDatabaseRelation(error)) return null;
+        if (error) throw databaseError("published-guide", error);
+        if (!data?.published) return null;
+        const parsed = parseGuide(data.published);
+        if (!parsed.ok) throw databaseError("invalid-guide", null);
+        return parsed.value;
+      },
+    });
+  }
+
   /** Pedidos do usuário, do mais recente para o mais antigo. */
   async listOrdersByUser(userId: string): Promise<AccountOrder[]> {
     const result = await this.client
@@ -75,7 +117,9 @@ export class AccountRepository {
    * ausência como indisponibilidade (`null`) em vez de falhar a tela toda ou
    * inventar um saldo zero.
    */
-  async getRewardBalances(userId: string): Promise<AccountRewardBalances | null> {
+  async getRewardBalances(
+    userId: string,
+  ): Promise<AccountRewardBalances | null> {
     const result = await this.client
       .from("loyalty_balances")
       .select("wallet, balance")

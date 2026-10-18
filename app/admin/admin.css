@@ -4185,3 +4185,109 @@
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Jogos e orientações: extensão do editor do catálogo. */
+.admin-guidance-entry {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.8rem;
+  border: 1px solid var(--admin-line);
+  padding: 0.9rem;
+  color: var(--admin-ink);
+  text-decoration: none;
+}
+.admin-guidance-entry:hover { border-color: var(--admin-red-bright); }
+.admin-guidance-entry small { color: #b9aeb3; line-height: 1.5; }
+.admin-product-destinations { display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; margin-top: 0.75rem; }
+.admin-product-destinations a,
+.admin-guidance-row-actions > a:not(.admin-primary-button),
+.admin-guide-check > a { color: #ff9aad; text-underline-offset: 0.2em; }
+.admin-product-destinations a:hover,
+.admin-guidance-row-actions > a:not(.admin-primary-button):hover,
+.admin-guide-check > a:hover { color: #fff; }
+.admin-guidance-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; margin-bottom: 1.4rem; }
+.admin-guidance-heading h1 { margin: 0; font-size: 1.8rem; line-height: 1.2; }
+.admin-guidance-heading p { max-width: 65ch; margin: 0.6rem 0 0; color: #b9aeb3; line-height: 1.65; }
+.admin-guidance-heading > a { flex: 0 0 auto; }
+.admin-guidance-checklist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.admin-guidance-checklist > div { padding: 1.25rem; border: 1px solid var(--admin-line); background: var(--admin-panel-2); }
+.admin-guidance-checklist strong { font-size: 1rem; }
+.admin-guidance-checklist p { max-width: 60ch; margin: 0.6rem 0; color: #b9aeb3; font-size: 0.85rem; line-height: 1.65; }
+.admin-guidance-checklist button { min-height: 44px; }
+.admin-guidance-filters { display: grid; grid-template-columns: minmax(15rem, 1fr) minmax(12rem, 18rem) auto; align-items: end; gap: 1rem; margin: 1.6rem 0; }
+.admin-guidance-filters .admin-field { margin: 0; }
+.admin-guidance-filters > span { padding-bottom: 0.9rem; color: #b9aeb3; font-size: 0.8rem; }
+.admin-guidance-list-head,
+.admin-guidance-row { display: grid; grid-template-columns: minmax(12rem, 1.5fr) minmax(9rem, 1fr) minmax(10rem, 1fr) minmax(11rem, 1fr); align-items: center; gap: 1.25rem; }
+.admin-guidance-list-head { border-bottom: 1px solid var(--admin-line); padding: 0.8rem 1.25rem; color: #b9aeb3; font-size: 0.72rem; }
+.admin-guidance-row { border-bottom: 1px solid var(--admin-line); padding: 1.5rem 1.25rem; }
+.admin-guidance-row:hover { background: rgb(255 255 255 / 2%); }
+.admin-guidance-row h2 { overflow-wrap: anywhere; margin: 0; font-size: 1rem; line-height: 1.5; }
+.admin-guidance-row p { margin: 0.35rem 0; color: #b9aeb3; font-size: 0.85rem; }
+.admin-guidance-row small { color: #b9aeb3; font-size: 0.75rem; }
+.admin-guidance-public { display: grid; gap: 0.5rem; color: #b9aeb3; font-size: 0.8rem; }
+.admin-guidance-row-actions { display: grid; justify-items: start; gap: 0.75rem; font-size: 0.8rem; }
+.admin-guidance-row-actions a { min-height: 2.5rem; display: inline-flex; align-items: center; }
+.admin-guide-state { display: inline-block; border: 1px solid var(--admin-line); padding: 0.45rem 0.65rem; color: #c9c0c4; font-size: 0.75rem; line-height: 1.5; }
+.admin-guide-state.is-published { border-color: rgb(85 224 120 / 30%); color: #a2ecb4; background: rgb(85 224 120 / 6%); }
+.admin-guide-explanation { max-width: 75ch; color: #b9aeb3; line-height: 1.7; }
+.admin-guide-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; margin: 1.5rem 0; border-block: 1px solid var(--admin-line); padding: 1rem 0; }
+.admin-guide-toolbar > div { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem; }
+.admin-guide-toolbar > div:first-child { display: grid; }
+.admin-guide-toolbar small { color: #b9aeb3; font-size: 0.8rem; }
+.admin-guide-toolbar button { min-height: 44px; font-size: 0.8rem; letter-spacing: 0.04em; }
+.admin-guide-editor .admin-field small { color: #b9aeb3; font-size: 0.75rem; line-height: 1.6; }
+.admin-guidance-page input::placeholder,
+.admin-guide-editor :is(input, textarea)::placeholder { color: #a69da0; }
+.admin-guide-form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 17rem; align-items: start; gap: 2rem; }
+.admin-guide-fields { min-width: 0; margin: 0; border: 0; padding: 0; }
+.admin-guide-fields:disabled { opacity: 0.7; }
+.admin-guide-section-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+.admin-guide-section-heading h2 { margin: 0; }
+.admin-guide-section-heading p,
+.admin-guide-empty { max-width: 65ch; color: #b9aeb3; font-size: 0.85rem; line-height: 1.65; }
+.admin-guide-section-heading > button { flex-shrink: 0; }
+.admin-guide-step { padding-block: 0.9rem; border-top: 1px solid var(--admin-line); }
+.admin-guide-step-actions { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+.admin-guide-step-actions button,
+.admin-guide-question button { min-height: 44px; }
+.admin-guide-question { min-width: 0; margin: 1.25rem 0; border: 1px solid var(--admin-line); padding: 1rem; }
+.admin-guide-question legend { padding-inline: 0.5rem; color: #c9c0c4; font-size: 0.85rem; }
+.admin-guide-check { position: sticky; top: 1.5rem; border-left: 1px solid var(--admin-line); padding-left: 1.25rem; }
+.admin-guide-check h2 { margin-top: 0; font-size: 1rem; }
+.admin-guide-check ul { padding-left: 1.2rem; }
+.admin-guide-check li,
+.admin-guide-check p { color: #b9aeb3; font-size: 0.85rem; line-height: 1.7; }
+.admin-guide-check li + li { margin-top: 0.55rem; }
+.admin-guide-check > a { display: inline-flex; align-items: center; min-height: 44px; font-size: 0.85rem; }
+.admin-guide-check > button { display: block; margin-top: 1rem; min-height: 44px; }
+.admin-guide-preview.solution-page { min-height: 0; padding: 1.5rem; border: 1px solid var(--admin-line); }
+.admin-guide-preview > h2 { margin-top: 0; font-size: 1.6rem; overflow-wrap: anywhere; }
+.admin-guide-preview-label { margin-bottom: 1.5rem; color: #b9aeb3; font-size: 0.85rem; }
+.admin-guide-preview > button { margin-top: 1.5rem; }
+
+@media (max-width: 1100px) {
+  .admin-guidance-list-head { display: none; }
+  .admin-guidance-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-guide-form-layout { grid-template-columns: minmax(0, 1fr); }
+  .admin-guide-check { position: static; border-left: 0; border-top: 1px solid var(--admin-line); padding: 1.25rem 0 0; }
+  .admin-guide-toolbar { align-items: start; flex-direction: column; }
+}
+@media (max-width: 650px) {
+  .admin-guidance-heading,
+  .admin-guide-section-heading { flex-direction: column; }
+  .admin-guidance-heading h1 { font-size: 1.5rem; }
+  .admin-guidance-checklist { gap: 0.6rem; margin: 0.75rem 0; }
+  .admin-guidance-checklist > div { padding: 0.75rem; }
+  .admin-guidance-checklist strong { font-size: 0.85rem; }
+  .admin-guidance-checklist p { display: none; }
+  .admin-guidance-checklist button { font-size: 0.72rem; line-height: 1.5; text-align: left; }
+  .admin-guidance-filters { grid-template-columns: minmax(0, 1fr); gap: 0.6rem; margin: 0.75rem 0; }
+  .admin-guidance-row { padding: 1.25rem 0; gap: 0.6rem 0.8rem; }
+  .admin-guidance-row > div:first-child { grid-column: 1 / -1; }
+  .admin-guidance-row-actions { display: flex; flex-wrap: wrap; grid-column: 1 / -1; gap: 0.25rem 1rem; }
+  .admin-guidance-filters > span { padding-bottom: 0; }
+  .admin-guide-toolbar > div:last-child { display: grid; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+  .admin-guide-toolbar > div:last-child button:first-child { grid-column: 1 / -1; }
+  .admin-guide-preview.solution-page { padding: 1rem; }
+}

@@ -6,8 +6,7 @@ import {
   parseCouponMutation,
 } from "../lib/coupons/validation.ts";
 
-const read = (path: string) =>
-  readFile(new URL(path, import.meta.url), "utf8");
+const read = (path: string) => readFile(new URL(path, import.meta.url), "utf8");
 
 test("coupon codes are normalized and bounded before reaching the database", () => {
   assert.equal(normalizeCouponCode("  bem vindo-10 "), "BEMVINDO-10");
@@ -57,12 +56,18 @@ test("coupon SQL derives every price from the approved offer and records an immu
 
   assert.doesNotMatch(migration, /p_amount(?:_cents)?\b/i);
   assert.match(migration, /where id = p_offer_id and status = 'approved'/i);
-  assert.match(migration, /v_offer\.amount_cents \* v_coupon\.discount_percent/i);
+  assert.match(
+    migration,
+    /v_offer\.amount_cents \* v_coupon\.discount_percent/i,
+  );
   assert.match(migration, /insert into public\.commerce_order_discounts/i);
   assert.match(migration, /pg_advisory_xact_lock/i);
   assert.match(migration, /enable row level security/i);
   assert.match(migration, /Admins manage commerce coupons/i);
-  assert.match(migration, /revoke all on function public\.quote_commerce_coupon/i);
+  assert.match(
+    migration,
+    /revoke all on function public\.quote_commerce_coupon/i,
+  );
 });
 
 test("checkout accepts only an optional coupon code and never a client amount", async () => {
@@ -107,7 +112,7 @@ test("demo gallery migration is additive and capped at five images", async () =>
 
 test("admin and public gallery implement five-image upload, autoplay and infinite manual navigation", async () => {
   const dashboard = await read("../components/admin/admin-dashboard.tsx");
-  const showcase = await read("../components/product-showcase.tsx");
+  const showcase = await read("../components/product-detail-content.tsx");
   const validation = await read("../lib/catalog/validation.ts");
 
   assert.match(dashboard, /MAX_PRODUCT_DEMO_IMAGES/);

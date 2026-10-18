@@ -8,6 +8,7 @@ import { PUBLIC_FEATURES } from "@/lib/public-features";
 const navigation = [
   { href: "#inicio", label: "Início" },
   { href: "#produtos", label: "Produtos" },
+  { href: "/jogos", label: "Jogos" },
   { href: "/conta", label: "Minha conta" },
 ] as const;
 
@@ -19,18 +20,30 @@ export function SiteNavigation({
   return (
     <header className="site-navigation-shell">
       <nav className="site-navigation" aria-label="Navegação principal">
-        <a className="site-navigation__brand" href="#inicio" aria-label="6DNX — início">
+        <a
+          className="site-navigation__brand"
+          href="#inicio"
+          aria-label="6DNX — início"
+        >
           <span>6</span>
           <strong>6DNX</strong>
         </a>
         <div className="site-navigation__links">
           {navigation.map((item) =>
             item.href.startsWith("#") ? (
-              <a key={item.href} href={item.href} className="site-navigation__link">
+              <a
+                key={item.href}
+                href={item.href}
+                className="site-navigation__link"
+              >
                 {item.label}
               </a>
             ) : (
-              <Link key={item.href} href={item.href} className="site-navigation__link">
+              <Link
+                key={item.href}
+                href={item.href}
+                className="site-navigation__link"
+              >
                 {item.label}
               </Link>
             ),

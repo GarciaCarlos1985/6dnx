@@ -7,8 +7,7 @@ import {
   youtubeWatchUrl,
 } from "../lib/media/youtube.ts";
 
-const read = (path: string) =>
-  readFile(new URL(path, import.meta.url), "utf8");
+const read = (path: string) => readFile(new URL(path, import.meta.url), "utf8");
 
 test("YouTube media accepts the ID and common HTTPS link formats", () => {
   const videoId = "BqPwa1SXowE";
@@ -57,7 +56,7 @@ test("embed and fallback links are generated only from a validated ID", () => {
 test("admin accepts full links and the storefront renders approved media safely", async () => {
   const dashboard = await read("../components/admin/admin-dashboard.tsx");
   const validation = await read("../lib/catalog/validation.ts");
-  const showcase = await read("../components/product-showcase.tsx");
+  const showcase = await read("../components/product-detail-content.tsx");
   const page = await read("../app/page.tsx");
   const discord = await read("../lib/discord.ts");
 

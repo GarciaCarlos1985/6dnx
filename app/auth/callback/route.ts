@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { safeAccountReturn } from "@/lib/account/return-path";
 
 // Exchange the OAuth authorization code for a real Supabase session.
 // Supabase redirects the browser here with ?code=... after the user
@@ -8,7 +9,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
+  const next = safeAccountReturn(searchParams.get("next"), "/");
 
   if (code) {
     const supabase = await createSupabaseServerClient();

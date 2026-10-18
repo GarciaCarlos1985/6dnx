@@ -21,7 +21,10 @@ function isPublicIndexablePath(pathname: string) {
   return (
     pathname === "/" ||
     pathname.startsWith("/noticias") ||
-    pathname.startsWith("/produtos")
+    pathname === "/produtos" ||
+    pathname.startsWith("/produtos/") ||
+    pathname === "/jogos" ||
+    pathname.startsWith("/jogos/")
   );
 }
 
@@ -30,13 +33,11 @@ function applySecurityHeaders(
   request: NextRequest,
   privateReview = false,
 ) {
-  const socialPreviewImage = isSocialPreviewImagePath(
-    request.nextUrl.pathname,
-  );
+  const socialPreviewImage = isSocialPreviewImagePath(request.nextUrl.pathname);
 
-  const indexable = isPublicCrawlerResourcePath(request.nextUrl.pathname) || isPublicIndexablePath(
-    request.nextUrl.pathname,
-  );
+  const indexable =
+    isPublicCrawlerResourcePath(request.nextUrl.pathname) ||
+    isPublicIndexablePath(request.nextUrl.pathname);
   if (indexable) {
     response.headers.delete("X-Robots-Tag");
   } else {
@@ -58,7 +59,12 @@ function applySecurityHeaders(
   if (request.nextUrl.protocol === "https:") {
     response.headers.set("Strict-Transport-Security", "max-age=31536000");
   }
-  if (privateReview) {
+  if (
+    privateReview ||
+    request.nextUrl.pathname === "/conta" ||
+    request.nextUrl.pathname.startsWith("/conta/") ||
+    request.nextUrl.pathname.startsWith("/api/account")
+  ) {
     response.headers.set("Cache-Control", "private, no-store");
   }
 
@@ -145,9 +151,14 @@ function restrictedResponse(
 }
 
 function usesAdminSession(pathname: string) {
-  return pathname === "/admin" ||
+  return (
+    pathname === "/conta" ||
+    pathname.startsWith("/conta/") ||
+    pathname.startsWith("/api/account") ||
+    pathname === "/admin" ||
     pathname.startsWith("/admin/") ||
-    pathname.startsWith("/api/admin/");
+    pathname.startsWith("/api/admin/")
+  );
 }
 
 async function nextResponse(request: NextRequest) {

@@ -16,6 +16,7 @@ import {
   type CatalogPublicationState,
 } from "@/lib/catalog/types";
 import { normalizeYouTubeVideoId } from "@/lib/media/youtube";
+import { gameSlug } from "./games.ts";
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
@@ -53,8 +54,7 @@ function parseDemoImages(value: unknown, errors: string[]) {
 type RecordLike = Record<string, unknown>;
 
 export type ValidationResult<T> =
-  | { ok: true; value: T }
-  | { ok: false; errors: string[] };
+  { ok: true; value: T } | { ok: false; errors: string[] };
 
 function isRecord(value: unknown): value is RecordLike {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -162,114 +162,114 @@ function parseVariants(value: unknown, errors: string[]): Variant[] {
     return [];
   }
   if (value.length > MAX_PRODUCT_VARIANTS) {
-    errors.push(
-      `São permitidas no máximo ${MAX_PRODUCT_VARIANTS} variações.`,
-    );
+    errors.push(`São permitidas no máximo ${MAX_PRODUCT_VARIANTS} variações.`);
   }
 
   const seenNames = new Set<string>();
-  const variants = value.slice(0, MAX_PRODUCT_VARIANTS).flatMap((entry, index) => {
-    if (!isRecord(entry)) {
-      errors.push(`Variação ${index + 1} inválida.`);
-      return [];
-    }
-
-    const itemErrors: string[] = [];
-    const name = requiredText(
-      entry.name,
-      `Nome da variação ${index + 1}`,
-      80,
-      itemErrors,
-    );
-    const normalizedName = name.toLocaleLowerCase("pt-BR");
-    if (normalizedName && seenNames.has(normalizedName)) {
-      itemErrors.push(`A variação “${name}” está duplicada.`);
-    }
-    seenNames.add(normalizedName);
-
-    let priceBRL: number | undefined;
-    if (
-      entry.priceBRL !== undefined &&
-      entry.priceBRL !== null &&
-      entry.priceBRL !== ""
-    ) {
-      const numericPrice = Number(entry.priceBRL);
-      if (
-        !Number.isFinite(numericPrice) ||
-        numericPrice < 0 ||
-        numericPrice > 1_000_000
-      ) {
-        itemErrors.push(
-          `Preço da variação ${index + 1} deve estar entre R$ 0,00 e R$ 1.000.000,00.`,
-        );
-      } else {
-        priceBRL = Math.round(numericPrice * 100) / 100;
+  const variants = value
+    .slice(0, MAX_PRODUCT_VARIANTS)
+    .flatMap((entry, index) => {
+      if (!isRecord(entry)) {
+        errors.push(`Variação ${index + 1} inválida.`);
+        return [];
       }
-    }
 
-    let availability: Variant["availability"];
-    if (entry.availability !== undefined) {
-      if (
-        typeof entry.availability !== "string" ||
-        !variantAvailabilityStates.includes(
-          entry.availability as NonNullable<Variant["availability"]>,
-        )
-      ) {
-        itemErrors.push(
-          `Disponibilidade da variação ${index + 1} é inválida.`,
-        );
-      } else {
-        availability = entry.availability as NonNullable<
-          Variant["availability"]
-        >;
-      }
-    }
-
-    let highlighted: boolean | undefined;
-    if (entry.highlighted !== undefined) {
-      if (typeof entry.highlighted !== "boolean") {
-        itemErrors.push(`Destaque da variação ${index + 1} é inválido.`);
-      } else if (entry.highlighted) {
-        highlighted = true;
-      }
-    }
-
-    const accentColor = optionalText(
-      entry.accentColor,
-      `Cor da variação ${index + 1}`,
-      7,
-      itemErrors,
-    );
-    if (accentColor && !HEX_COLOR_PATTERN.test(accentColor)) {
-      itemErrors.push(
-        `Cor da variação ${index + 1} deve usar o formato #RRGGBB.`,
+      const itemErrors: string[] = [];
+      const name = requiredText(
+        entry.name,
+        `Nome da variação ${index + 1}`,
+        80,
+        itemErrors,
       );
-    }
+      const normalizedName = name.toLocaleLowerCase("pt-BR");
+      if (normalizedName && seenNames.has(normalizedName)) {
+        itemErrors.push(`A variação “${name}” está duplicada.`);
+      }
+      seenNames.add(normalizedName);
 
-    const variant: Variant = {
-      name,
-      note: optionalText(
-        entry.note,
-        `Observação da variação ${index + 1}`,
-        180,
+      let priceBRL: number | undefined;
+      if (
+        entry.priceBRL !== undefined &&
+        entry.priceBRL !== null &&
+        entry.priceBRL !== ""
+      ) {
+        const numericPrice = Number(entry.priceBRL);
+        if (
+          !Number.isFinite(numericPrice) ||
+          numericPrice < 0 ||
+          numericPrice > 1_000_000
+        ) {
+          itemErrors.push(
+            `Preço da variação ${index + 1} deve estar entre R$ 0,00 e R$ 1.000.000,00.`,
+          );
+        } else {
+          priceBRL = Math.round(numericPrice * 100) / 100;
+        }
+      }
+
+      let availability: Variant["availability"];
+      if (entry.availability !== undefined) {
+        if (
+          typeof entry.availability !== "string" ||
+          !variantAvailabilityStates.includes(
+            entry.availability as NonNullable<Variant["availability"]>,
+          )
+        ) {
+          itemErrors.push(
+            `Disponibilidade da variação ${index + 1} é inválida.`,
+          );
+        } else {
+          availability = entry.availability as NonNullable<
+            Variant["availability"]
+          >;
+        }
+      }
+
+      let highlighted: boolean | undefined;
+      if (entry.highlighted !== undefined) {
+        if (typeof entry.highlighted !== "boolean") {
+          itemErrors.push(`Destaque da variação ${index + 1} é inválido.`);
+        } else if (entry.highlighted) {
+          highlighted = true;
+        }
+      }
+
+      const accentColor = optionalText(
+        entry.accentColor,
+        `Cor da variação ${index + 1}`,
+        7,
         itemErrors,
-      ),
-      priceBRL,
-      badge: optionalText(
-        entry.badge,
-        `Selo da variação ${index + 1}`,
-        40,
-        itemErrors,
-      ),
-      ...(availability ? { availability } : {}),
-      ...(highlighted ? { highlighted } : {}),
-      ...(accentColor && HEX_COLOR_PATTERN.test(accentColor)
-        ? { accentColor: accentColor.toLowerCase() }
-        : {}),
-    };
-    errors.push(...itemErrors);
-    return itemErrors.length ? [] : [variant];
-  });
+      );
+      if (accentColor && !HEX_COLOR_PATTERN.test(accentColor)) {
+        itemErrors.push(
+          `Cor da variação ${index + 1} deve usar o formato #RRGGBB.`,
+        );
+      }
+
+      const variant: Variant = {
+        name,
+        note: optionalText(
+          entry.note,
+          `Observação da variação ${index + 1}`,
+          180,
+          itemErrors,
+        ),
+        priceBRL,
+        badge: optionalText(
+          entry.badge,
+          `Selo da variação ${index + 1}`,
+          40,
+          itemErrors,
+        ),
+        ...(availability ? { availability } : {}),
+        ...(highlighted ? { highlighted } : {}),
+        ...(accentColor && HEX_COLOR_PATTERN.test(accentColor)
+          ? { accentColor: accentColor.toLowerCase() }
+          : {}),
+      };
+      errors.push(...itemErrors);
+      return itemErrors.length ? [] : [variant];
+    });
 
   if (variants.filter((variant) => variant.highlighted).length > 1) {
     errors.push("Somente uma variação pode ficar em destaque por card.");
@@ -350,28 +350,22 @@ export function parseProduct(value: unknown): ValidationResult<Product> {
 
   const slug = requiredText(value.slug, "Rota do produto", 96, errors);
   if (slug && !SLUG_PATTERN.test(slug)) {
-    errors.push(
-      "A rota aceita apenas letras, números e hífens, sem espaços.",
-    );
+    errors.push("A rota aceita apenas letras, números e hífens, sem espaços.");
   }
 
   const image = requiredText(value.image, "Thumbnail", 500, errors);
-  if (
-    image &&
-    !image.startsWith("/") &&
-    !image.startsWith("https://")
-  ) {
+  if (image && !image.startsWith("/") && !image.startsWith("https://")) {
     errors.push("Thumbnail deve ser um caminho do site ou uma URL HTTPS.");
   }
 
   const hasCheckoutBanner = Object.hasOwn(value, "checkoutBanner");
   const checkoutBanner = hasCheckoutBanner
-    ? optionalText(
+    ? (optionalText(
         value.checkoutBanner,
         "Banner vertical do checkout",
         500,
         errors,
-      ) ?? null
+      ) ?? null)
     : undefined;
   if (
     checkoutBanner &&
@@ -406,10 +400,12 @@ export function parseProduct(value: unknown): ValidationResult<Product> {
     errors,
   );
   const youtubeId = youtubeInput
-    ? normalizeYouTubeVideoId(youtubeInput) ?? undefined
+    ? (normalizeYouTubeVideoId(youtubeInput) ?? undefined)
     : undefined;
   if (youtubeInput && !youtubeId) {
-    errors.push("Cole um link HTTPS válido do YouTube ou o ID de 11 caracteres.");
+    errors.push(
+      "Cole um link HTTPS válido do YouTube ou o ID de 11 caracteres.",
+    );
   }
 
   const videoOrientation =
@@ -426,6 +422,13 @@ export function parseProduct(value: unknown): ValidationResult<Product> {
     slug,
     title: requiredText(value.title, "Título", 100, errors),
     category: requiredText(value.category, "Categoria", 80, errors),
+    ...(Object.hasOwn(value, "gameName")
+      ? {
+          gameName:
+            optionalText(value.gameName, "Jogo ou universo", 80, errors) ??
+            null,
+        }
+      : {}),
     tagline: requiredText(value.tagline, "Subtítulo", 160, errors),
     description: boundedText(value.description, "Descrição", 4_000, errors),
     features: parseFeatureList(value.features, "Recursos", errors),
@@ -445,6 +448,16 @@ export function parseProduct(value: unknown): ValidationResult<Product> {
     videoOrientation,
     theme: parseTheme(value.theme, errors),
   };
+
+  if (
+    product.gameName &&
+    (!gameSlug(product.gameName) ||
+      /[<>\u0000-\u001f\u007f]/.test(product.gameName))
+  ) {
+    errors.push(
+      "Informe um nome de jogo legível, sem HTML ou caracteres de controle.",
+    );
+  }
 
   return errors.length ? { ok: false, errors } : { ok: true, value: product };
 }
@@ -509,18 +522,14 @@ export function parseCatalogMutation(
   };
 }
 
-export function isAllowedProductImage(
-  image: string,
-  supabaseUrl?: string,
-) {
+export function isAllowedProductImage(image: string, supabaseUrl?: string) {
   if (image.startsWith("/") && !image.startsWith("//")) return true;
 
   try {
     const parsed = new URL(image);
     if (!supabaseUrl) return false;
     const expectedOrigin = new URL(supabaseUrl).origin;
-    const productAssetsPath =
-      "/storage/v1/object/public/product-assets/";
+    const productAssetsPath = "/storage/v1/object/public/product-assets/";
 
     return (
       parsed.protocol === "https:" &&

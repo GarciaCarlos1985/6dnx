@@ -517,3 +517,54 @@ apagar preço ou configuração. Ao reativar, o estado comercial anterior volta.
 - decidir quando o volume justifica automação;
 - fornecer a documentação oficial e o sandbox da carteira antes da integração;
 - manter uma conta administrativa própria, sem compartilhar a senha.
+
+## Jogos e guias dos compradores — upgrade preparado
+
+Esta seção descreve o upgrade preparado em 18/10/2026. A equipe técnica precisa
+ativar o schema do banco para permitir organizar jogos e salvar/publicar guias.
+
+### Organizar as soluções por jogo
+
+1. Entre no painel e abra **Jogos e orientações**.
+2. Use a busca para encontrar a solução e clique em **Editar produto e jogo**.
+3. Em **Jogo**, informe o nome real do jogo. Use a sugestão existente para
+   manter a mesma grafia nos produtos relacionados.
+4. Confira o produto, a prévia e os preços e salve pelo fluxo habitual.
+5. Abra **Ver navegação pública** para conferir o agrupamento.
+
+**Categoria** continua sendo o tipo comercial do produto; **Jogo** controla a
+navegação. Um produto sem jogo continua na lista de todas as soluções. Nenhum
+jogo é escolhido automaticamente com base no título ou na categoria.
+
+### Preparar o guia exclusivo da solução
+
+1. Na central **Jogos e orientações**, encontre o produto e abra **Editar guia**.
+2. Preencha título, pré-requisitos e passos específicos daquela solução.
+   O vídeo de orientação e as dúvidas frequentes são opcionais.
+3. Use **Conferir prévia** e revise como o comprador vai ler o material.
+4. Clique em **Salvar rascunho**. Isso guarda o trabalho sem trocar a versão
+   que os compradores já acessam.
+5. Depois de conferir as instruções, clique em **Publicar guia** e confirme.
+
+O vídeo demonstrativo e os passos públicos continuam no editor do produto.
+O guia exclusivo é outro conteúdo: nenhum tutorial genérico é copiado para ele.
+São permitidos até 80 passos, 15 dúvidas e um vídeo de orientação do YouTube.
+A página exige uma compra confirmada, mas o vídeo hospedado no YouTube segue
+as configurações de privacidade do próprio YouTube.
+
+Se outra pessoa alterar o mesmo guia, o painel avisa o conflito e preserva o
+texto que está aberto. Guarde esse texto antes de recarregar e revisar a versão
+mais recente. Para interromper temporariamente o acesso, use **Retirar guia do
+acesso**; o rascunho continua salvo e pode ser publicado novamente.
+
+### Onde o cliente encontra a orientação
+
+O cliente deve entrar na conta **antes de comprar**. Depois da confirmação,
+abre **Minha conta**, localiza o pedido e usa **Acessar orientação da compra**.
+Se o guia ainda não foi publicado, a página informa que ele está em preparação
+e oferece o suporte. Compras sem login não são vinculadas automaticamente depois.
+
+Esse upgrade não confirma pagamentos nem entrega o produto por conta própria.
+O pedido precisa estar associado à conta e confirmado no fluxo comercial
+existente. Um pedido de outra pessoa, pendente, cancelado ou reembolsado não
+libera a orientação.

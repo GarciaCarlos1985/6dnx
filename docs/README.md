@@ -10,6 +10,12 @@ Este diretório é a fonte central de documentação do projeto. O `README.md` d
 raiz continua sendo a apresentação e o guia rápido; os documentos abaixo
 guardam arquitetura, regras, decisões, auditorias e fontes históricas.
 
+Checkpoint validado de 18/10/2026: consulte
+[`UPGRADE_AUTOSSERVICO.md`](UPGRADE_AUTOSSERVICO.md) para navegação por jogo,
+páginas de soluções e orientação exclusiva vinculada a pedidos confirmados.
+O código tem commit/push na `main` autorizado. A migration de produção e o fluxo
+autenticado real continuam sujeitos à validação do ambiente de destino.
+
 ## Ordem recomendada de leitura
 
 1. [`CODEX.md`](CODEX.md)

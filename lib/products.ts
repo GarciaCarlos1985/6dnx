@@ -49,6 +49,8 @@ export type Product = {
   catalogKey?: string;
   title: string;
   category: string;
+  /** Agrupamento editorial explícito; categoria comercial não identifica jogo. */
+  gameName?: string | null;
   tagline: string;
   description: string;
   features?: ProductFeature[];

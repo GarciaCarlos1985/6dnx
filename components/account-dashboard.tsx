@@ -13,6 +13,8 @@ import type {
   ExperienceEffects,
 } from "@/lib/site-experience/types";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { GUIDE_ORDER_STATES } from "@/lib/guides/access";
+import { HeroAuth } from "@/components/hero-auth";
 
 type AccountOrder = {
   id: string;
@@ -38,7 +40,9 @@ type AccountState =
   | { status: "error"; message: string }
   | { status: "ready"; data: AccountData };
 
-async function fetchAccountState(signal?: AbortSignal): Promise<AccountState | null> {
+async function fetchAccountState(
+  signal?: AbortSignal,
+): Promise<AccountState | null> {
   try {
     const response = await fetch("/api/account", {
       cache: "no-store",
@@ -54,7 +58,8 @@ async function fetchAccountState(signal?: AbortSignal): Promise<AccountState | n
     const data = (await response.json()) as AccountData;
     return { status: "ready", data };
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") return null;
+    if (error instanceof DOMException && error.name === "AbortError")
+      return null;
     return {
       status: "error",
       message: "Não foi possível sincronizar sua conta.",
@@ -129,10 +134,12 @@ export function AccountDashboard({
   content,
   effects,
   themeStyle,
+  returnTo = "/conta",
 }: {
   content: AccountExperienceContent;
   effects: ExperienceEffects;
   themeStyle: ExperienceStyle;
+  returnTo?: string;
 }) {
   const router = useRouter();
   const [state, setState] = useState<AccountState>({ status: "loading" });
@@ -191,7 +198,9 @@ export function AccountDashboard({
 
       <section className="account-stage" aria-live="polite">
         {state.status === "loading" ? <AccountLoading /> : null}
-        {state.status === "anon" ? <AnonymousAccount content={content} /> : null}
+        {state.status === "anon" ? (
+          <AnonymousAccount content={content} returnTo={returnTo} />
+        ) : null}
         {state.status === "error" ? (
           <AccountError
             message={state.message}
@@ -229,7 +238,13 @@ function AccountLoading() {
   );
 }
 
-function AnonymousAccount({ content }: { content: AccountExperienceContent }) {
+function AnonymousAccount({
+  content,
+  returnTo,
+}: {
+  content: AccountExperienceContent;
+  returnTo: string;
+}) {
   return (
     <section className="account-state-card">
       <div className="account-state-card__copy">
@@ -237,9 +252,7 @@ function AnonymousAccount({ content }: { content: AccountExperienceContent }) {
         <h1>{content.anonymousTitle}</h1>
         <p>{content.anonymousSupport}</p>
         <div className="account-actions">
-          <Link className="account-primary-button" href="/#inicio">
-            Entrar com Google ou Discord
-          </Link>
+          <HeroAuth returnTo={returnTo} />
           <Link className="account-secondary-button" href="/#produtos">
             Continuar sem login
           </Link>
@@ -276,7 +289,11 @@ function AccountError({
           exibição quando não consegue confirmar a sessão com segurança.
         </p>
         <div className="account-actions">
-          <button className="account-primary-button" type="button" onClick={onRetry}>
+          <button
+            className="account-primary-button"
+            type="button"
+            onClick={onRetry}
+          >
             Tentar novamente
           </button>
           <Link className="account-secondary-button" href="/">
@@ -303,7 +320,8 @@ function AccountHome({
   signingOut: boolean;
 }) {
   const completedOrders = useMemo(
-    () => data.orders.filter((order) => COMPLETED_ORDER_STATES.has(order.status)),
+    () =>
+      data.orders.filter((order) => COMPLETED_ORDER_STATES.has(order.status)),
     [data.orders],
   );
   const totalSpent = useMemo(
@@ -319,7 +337,9 @@ function AccountHome({
     <>
       <section className="account-profile-hero">
         <div className="account-profile-hero__identity">
-          <span className="account-avatar" aria-hidden>{initial}</span>
+          <span className="account-avatar" aria-hidden>
+            {initial}
+          </span>
           <div>
             <span className="account-kicker">Conta conectada e protegida</span>
             <h1>Olá, {firstName}.</h1>
@@ -345,25 +365,47 @@ function AccountHome({
 
       <section className="account-metrics" aria-label="Resumo da conta">
         <article className="account-metric account-metric--community">
-          <span className="account-metric__icon"><AccountIcon name="coins" /></span>
+          <span className="account-metric__icon">
+            <AccountIcon name="coins" />
+          </span>
           <div>
             <span className="account-metric__label">6DNX Coins</span>
-            <strong>{communityBalance === null ? "Em preparação" : communityBalance.toLocaleString("pt-BR")}</strong>
-            <p>{communityBalance === null ? "A carteira da comunidade ainda não foi homologada." : "Use nas trocas assistidas pelo ticket 6DNX."}</p>
+            <strong>
+              {communityBalance === null
+                ? "Em preparação"
+                : communityBalance.toLocaleString("pt-BR")}
+            </strong>
+            <p>
+              {communityBalance === null
+                ? "A carteira da comunidade ainda não foi homologada."
+                : "Use nas trocas assistidas pelo ticket 6DNX."}
+            </p>
           </div>
         </article>
         {PUBLIC_FEATURES.slot ? (
           <article className="account-metric account-metric--gold">
-            <span className="account-metric__icon"><AccountIcon name="coins" /></span>
+            <span className="account-metric__icon">
+              <AccountIcon name="coins" />
+            </span>
             <div>
               <span className="account-metric__label">Moedas da Slot</span>
-              <strong>{slotBalance === null ? "Em preparação" : slotBalance.toLocaleString("pt-BR")}</strong>
-              <p>{slotBalance === null ? "O saldo será exibido quando a carteira da Slot for homologada." : "Saldo fechado e exclusivo das experiências 6DNX."}</p>
+              <strong>
+                {slotBalance === null
+                  ? "Em preparação"
+                  : slotBalance.toLocaleString("pt-BR")}
+              </strong>
+              <p>
+                {slotBalance === null
+                  ? "O saldo será exibido quando a carteira da Slot for homologada."
+                  : "Saldo fechado e exclusivo das experiências 6DNX."}
+              </p>
             </div>
           </article>
         ) : null}
         <article className="account-metric">
-          <span className="account-metric__icon"><AccountIcon name="orders" /></span>
+          <span className="account-metric__icon">
+            <AccountIcon name="orders" />
+          </span>
           <div>
             <span className="account-metric__label">Compras confirmadas</span>
             <strong>{completedOrders.length}</strong>
@@ -371,7 +413,9 @@ function AccountHome({
           </div>
         </article>
         <article className="account-metric">
-          <span className="account-metric__icon"><AccountIcon name="shield" /></span>
+          <span className="account-metric__icon">
+            <AccountIcon name="shield" />
+          </span>
           <div>
             <span className="account-metric__label">Histórico confirmado</span>
             <strong>{formatBRL(totalSpent)}</strong>
@@ -392,19 +436,36 @@ function AccountHome({
           <ol className="account-journey">
             <li className="account-journey__item account-journey__item--active">
               <span>01</span>
-              <div><strong>Identidade conectada</strong><p>Google ou Discord protegem o acesso ao seu histórico.</p></div>
+              <div>
+                <strong>Identidade conectada</strong>
+                <p>Google ou Discord protegem o acesso ao seu histórico.</p>
+              </div>
             </li>
             <li className="account-journey__item">
               <span>02</span>
-              <div><strong>Compre enquanto estiver logado</strong><p>Novos pedidos podem ser ligados automaticamente à sua conta.</p></div>
+              <div>
+                <strong>Compre enquanto estiver logado</strong>
+                <p>
+                  Novos pedidos podem ser ligados automaticamente à sua conta.
+                </p>
+              </div>
             </li>
             <li className="account-journey__item">
               <span>03</span>
-              <div><strong>Ganhe recompensas da comunidade</strong><p>As 6DNX Coins acompanham as trocas assistidas pelo atendimento.</p></div>
+              <div>
+                <strong>Ganhe recompensas da comunidade</strong>
+                <p>
+                  As 6DNX Coins acompanham as trocas assistidas pelo
+                  atendimento.
+                </p>
+              </div>
             </li>
             <li className="account-journey__item">
               <span>04</span>
-              <div><strong>Acesse experiências 6DNX</strong><p>Missões e recompensas serão liberadas por etapas.</p></div>
+              <div>
+                <strong>Acesse experiências 6DNX</strong>
+                <p>Missões e recompensas serão liberadas por etapas.</p>
+              </div>
             </li>
           </ol>
         </article>
@@ -441,7 +502,9 @@ function AccountHome({
             <span className="account-kicker">{content.ordersEyebrow}</span>
             <h2>{content.ordersTitle}</h2>
           </div>
-          <span className="account-pill">{data.orders.length} registro{data.orders.length === 1 ? "" : "s"}</span>
+          <span className="account-pill">
+            {data.orders.length} registro{data.orders.length === 1 ? "" : "s"}
+          </span>
         </div>
         {data.orders.length === 0 ? (
           <div className="account-empty-state">
@@ -450,22 +513,50 @@ function AccountHome({
               Compras feitas antes do login permanecem anônimas. Entre na sua
               conta antes das próximas compras para acompanhá-las aqui.
             </p>
-            <Link className="account-secondary-button" href="/#produtos">Explorar catálogo</Link>
+            <Link className="account-secondary-button" href="/#produtos">
+              Explorar catálogo
+            </Link>
           </div>
         ) : (
           <div className="account-orders">
             <div className="account-orders__row account-orders__row--head">
-              <span>Produto</span><span>Valor</span><span>Status</span><span>Data</span>
+              <span>Produto</span>
+              <span>Valor</span>
+              <span>Status</span>
+              <span>Data</span>
             </div>
             {data.orders.map((order) => (
               <div className="account-orders__row" key={order.id}>
                 <span className="account-orders__product">
                   <strong>{order.productTitle}</strong>
-                  <small>{order.variantName} · #{order.externalId.slice(-8).toUpperCase()}</small>
+                  <small>
+                    {order.variantName} · #
+                    {order.externalId.slice(-8).toUpperCase()}
+                  </small>
+                  {GUIDE_ORDER_STATES.some(
+                    (status) => status === order.status,
+                  ) ? (
+                    <Link
+                      className="account-order-guide-link"
+                      href={`/conta/pedidos/${order.id}/guia`}
+                    >
+                      Acessar orientação da compra
+                    </Link>
+                  ) : null}
                 </span>
-                <span className="account-orders__amount">{formatBRL(order.amountCents)}</span>
-                <span><span className={`account-status account-status--${order.status}`}>{STATUS_LABEL[order.status] ?? order.status}</span></span>
-                <span className="account-orders__date">{formatDate(order.createdAt)}</span>
+                <span className="account-orders__amount">
+                  {formatBRL(order.amountCents)}
+                </span>
+                <span>
+                  <span
+                    className={`account-status account-status--${order.status}`}
+                  >
+                    {STATUS_LABEL[order.status] ?? order.status}
+                  </span>
+                </span>
+                <span className="account-orders__date">
+                  {formatDate(order.createdAt)}
+                </span>
               </div>
             ))}
           </div>

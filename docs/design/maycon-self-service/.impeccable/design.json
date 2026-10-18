@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-18T12:20:23.570Z",
+  "title": "Design System: 6DNX — extensão local de autosserviço",
+  "extensions": {
+    "colorMeta": {
+      "admin-red": {
+        "role": "primary",
+        "displayName": "Carmesim administrativo"
+      },
+      "solution-accent": {
+        "role": "primary",
+        "displayName": "Acento público"
+      },
+      "solution-bg": {
+        "role": "neutral",
+        "displayName": "Preto público"
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Título público",
+        "purpose": "Título de solução e compra."
+      },
+      "body": {
+        "displayName": "Corpo e interface",
+        "purpose": "Manrope herdada do aplicativo."
+      }
+    },
+    "shadows": [
+      {
+        "name": "admin-primary-glow",
+        "value": "0 0.8rem 2.4rem rgb(227 6 44 / 18%)",
+        "purpose": "Primário administrativo."
+      },
+      {
+        "name": "admin-field-focus",
+        "value": "0 0 0 3px rgb(227 6 44 / 9%)",
+        "purpose": "Halo de campo em foco."
+      }
+    ],
+    "motion": [
+      {
+        "name": "admin-state",
+        "value": "160ms ease",
+        "purpose": "Controles administrativos."
+      },
+      {
+        "name": "solution-row",
+        "value": "180ms ease",
+        "purpose": "Fundo da linha pública."
+      },
+      {
+        "name": "directory-art",
+        "value": "200ms ease",
+        "purpose": "Opacidade da imagem do diretório."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "admin-compact",
+        "value": "1100px"
+      },
+      {
+        "name": "public-linear",
+        "value": "900px"
+      },
+      {
+        "name": "admin-mobile",
+        "value": "650px"
+      },
+      {
+        "name": "public-mobile",
+        "value": "600px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primário administrativo",
+      "kind": "button",
+      "refersTo": "admin-primary",
+      "description": "Ação principal da central; publicação usa os ajustes da barra do editor.",
+      "html": "<button class=\"ds-primary\">Editar guia</button>",
+      "css": ".ds-primary{font-family:var(--font-body, Manrope),system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.8rem;min-height:2.85rem;border:1px solid;padding:.72rem 1.1rem;font-size:.68rem;font-weight:900;letter-spacing:.11em;text-decoration:none;text-transform:uppercase;cursor:pointer;transition:transform 160ms ease,background 160ms ease,border-color 160ms ease,color 160ms ease,opacity 160ms ease;border-color:#e3062c;color:white;background:#e3062c;box-shadow:0 .8rem 2.4rem rgb(227 6 44 / 18%)}.ds-primary:hover:not(:disabled){background:#ff2349;transform:translateY(-1px)}.ds-primary:disabled{cursor:not-allowed;opacity:.42}.ds-primary:focus-visible,.ds-secondary:focus-visible{outline:2px solid #ff2349;outline-offset:2px}@media(prefers-reduced-motion:reduce){.ds-primary{transition-duration:.01ms}}"
+    },
+    {
+      "name": "Secundário administrativo",
+      "kind": "button",
+      "refersTo": "admin-secondary",
+      "description": "Ação de retorno e conferência.",
+      "html": "<button class=\"ds-secondary\">Voltar aos produtos</button>",
+      "css": ".ds-secondary{font-family:var(--font-body, Manrope),system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.8rem;min-height:2.85rem;border:1px solid;padding:.72rem 1.1rem;font-size:.68rem;font-weight:900;letter-spacing:.11em;text-decoration:none;text-transform:uppercase;cursor:pointer;transition:transform 160ms ease,background 160ms ease,border-color 160ms ease,color 160ms ease,opacity 160ms ease;border-color:rgb(255 255 255 / 9%);color:#f8f5f6;background:rgb(255 255 255 / 3%)}.ds-secondary:hover:not(:disabled){border-color:rgb(227 6 44 / 42%);color:white;background:rgb(227 6 44 / 7%)}.ds-secondary:disabled{cursor:not-allowed;opacity:.42}.ds-primary:focus-visible,.ds-secondary:focus-visible{outline:2px solid #ff2349;outline-offset:2px}@media(prefers-reduced-motion:reduce){.ds-secondary{transition-duration:.01ms}}"
+    },
+    {
+      "name": "Busca da central",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Campo rotulado com placeholder e foco observados.",
+      "html": "<label class=\"ds-field\"><span>Buscar solução ou jogo</span><input type=\"search\" placeholder=\"Nome, jogo ou opção…\"></label>",
+      "css": ".ds-field{font-family:var(--font-body, Manrope),system-ui,sans-serif;display:grid;gap:.55rem;min-width:0}.ds-field>span{color:#d8d1d3;font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.ds-field input{font:inherit;width:100%;min-height:3rem;border:1px solid rgb(255 255 255 / 9%);border-radius:0;color:#f8f5f6;background:rgb(0 0 0 / 26%);padding:.8rem .9rem;transition:border-color 160ms ease,box-shadow 160ms ease,background 160ms ease}.ds-field input::placeholder{color:#a69da0}.ds-field input:hover{border-color:rgb(255 255 255 / 18%)}.ds-field input:focus{border-color:#e3062c;background:rgb(227 6 44 / 4%);box-shadow:0 0 0 3px rgb(227 6 44 / 9%);outline:none}@media(prefers-reduced-motion:reduce){.ds-field input{transition-duration:.01ms}}"
+    },
+    {
+      "name": "Pendência da central",
+      "kind": "card",
+      "description": "Contêiner tonal de pendência; trecho sem ação para isolar o contêiner.",
+      "html": "<div class=\"ds-check\"><strong>Jogos organizados</strong><p>O jogo reúne soluções na navegação. Categoria continua sendo o tipo de produto.</p></div>",
+      "css": ".ds-check{font-family:var(--font-body, Manrope),system-ui,sans-serif;padding:1.25rem;border:1px solid rgb(255 255 255 / 9%);background:#121011;color:#f8f5f6}.ds-check strong{font-size:1rem}.ds-check p{max-width:60ch;margin:.6rem 0;color:#b9aeb3;font-size:.85rem;line-height:1.65}@media(max-width:650px){.ds-check{padding:.75rem}.ds-check strong{font-size:.85rem}.ds-check p{display:none}}"
+    },
+    {
+      "name": "Estado publicado",
+      "kind": "chip",
+      "description": "Estado textual não interativo; verde suplementa a legenda.",
+      "html": "<span class=\"ds-state\">Publicado para compradores</span>",
+      "css": ".ds-state{font-family:var(--font-body, Manrope),system-ui,sans-serif;display:inline-block;border:1px solid rgb(85 224 120 / 30%);padding:.45rem .65rem;color:#a2ecb4;background:rgb(85 224 120 / 6%);font-size:.75rem;line-height:1.5}"
+    },
+    {
+      "name": "Sumário do guia",
+      "kind": "nav",
+      "description": "Sumário condicionado às seções; amostra de passos e suporte.",
+      "html": "<nav class=\"ds-toc\" aria-label=\"Conteúdo do guia\"><strong>Neste guia</strong><a href=\"#passos-guia\">Passo a passo</a><a href=\"/api/redirect\" target=\"_blank\" rel=\"noreferrer\">Falar com o suporte</a></nav>",
+      "css": ".ds-toc{font-family:var(--font-body, Manrope),system-ui,sans-serif;display:flex;flex-direction:column;gap:1rem;align-self:start;position:sticky;top:2rem;font-size:.85rem;color:#d0c7cb}.ds-toc strong{font-weight:800;color:#fff;margin-bottom:.5rem}.ds-toc a{color:inherit;text-decoration:none}.ds-toc a:hover{color:#ff3658}.ds-toc a:focus-visible{outline:2px solid #ff3658;outline-offset:5px}@media(max-width:900px){.ds-toc{position:static;flex-direction:row;flex-wrap:wrap;gap:.8rem 1.5rem}.ds-toc strong{flex-basis:100%}}"
+    },
+    {
+      "name": "Pergunta do leitor",
+      "kind": "custom",
+      "description": "details/summary nativo; texto de exemplo extraído dos rótulos existentes.",
+      "html": "<details class=\"ds-question\"><summary>Pergunta do cliente</summary><p>Resposta</p></details>",
+      "css": ".ds-question{font-family:var(--font-body, Manrope),system-ui,sans-serif;max-width:72ch;line-height:1.9;color:#d2cbce;border-bottom:1px solid #433039;padding:1rem 0}.ds-question summary{cursor:pointer;font-weight:700;color:#fff}.ds-question summary:focus-visible{outline:2px solid #ff3658;outline-offset:5px}.ds-question p{white-space:pre-wrap;padding-top:1rem}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Midnight tactical club",
+    "overview": "Registro local da extensão entregue, subordinado a [../../DESIGN.md](../../DESIGN.md). Reutiliza o caráter aprovado da 6DNX; não substitui a identidade global nem define novas decisões criativas. O acabamento operacional observado reduz o espetáculo em favor da leitura e da edição.",
+    "keyCharacteristics": [
+      "Superfícies escuras, carmesim nas ações e texto claro.",
+      "Listas com divisórias e estados nomeados.",
+      "Formulário, checklist e leitura reorganizados por largura."
+    ],
+    "rules": [],
+    "dos": [
+      "Do preservar nomes textuais de publicação e salvamento junto da cor.",
+      "Do reutilizar o mesmo leitor na prévia e no guia do comprador.",
+      "Do manter sumário, checklist e ações na ordem responsiva implementada."
+    ],
+    "donts": [
+      "Don't tratar este registro local como substituição de docs/DESIGN.md.",
+      "Don't representar rascunho ou prévia como orientação já publicada."
+    ]
+  }
+}

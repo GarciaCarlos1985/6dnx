@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { DiscordMark } from "@/components/discord-mark";
+import { safeAccountReturn } from "@/lib/account/return-path";
 
 function GoogleMark({ className = "" }: { className?: string }) {
   return (
@@ -32,7 +33,7 @@ type AuthState =
   | { status: "anonymous" }
   | { status: "authed"; name: string };
 
-export function HeroAuth() {
+export function HeroAuth({ returnTo = "/" }: { returnTo?: string }) {
   const [state, setState] = useState<AuthState>({ status: "loading" });
   const [error, setError] = useState<string | null>(null);
 
@@ -76,10 +77,11 @@ export function HeroAuth() {
     setError(null);
     try {
       const supabase = createSupabaseBrowserClient();
+      const destination = safeAccountReturn(returnTo, "/");
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback${destination === "/" ? "" : `?next=${encodeURIComponent(destination)}`}`,
         },
       });
       if (error) {
@@ -117,11 +119,7 @@ export function HeroAuth() {
         <span className="hero-auth__welcome">
           Olá, <strong>{state.name}</strong>
         </span>
-        <button
-          type="button"
-          className="hero-auth__ghost"
-          onClick={signOut}
-        >
+        <button type="button" className="hero-auth__ghost" onClick={signOut}>
           Sair
         </button>
       </div>

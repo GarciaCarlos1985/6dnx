@@ -501,3 +501,7 @@
   .account-primary-button,
   .account-secondary-button { transition: none; }
 }
+
+.account-order-guide-link { display: inline-flex; align-items: center; min-height: 44px; color: #ff98ad; text-decoration: underline; text-underline-offset: 4px; font-size: 0.8rem; }
+.account-order-guide-link:hover { color: #fff; }
+.account-order-guide-link:focus-visible { outline: 2px solid #ff4568; outline-offset: 3px; }

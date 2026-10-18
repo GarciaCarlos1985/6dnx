@@ -25,6 +25,8 @@ export const PRODUCT_CATALOG_CACHE_TAG = "product-catalog";
 function revalidatePublicCatalog() {
   revalidateTag(PRODUCT_CATALOG_CACHE_TAG, { expire: 0 });
   revalidatePath("/");
+  revalidatePath("/jogos", "layout");
+  revalidatePath("/produtos", "layout");
 }
 
 type CatalogRow = {
@@ -33,6 +35,7 @@ type CatalogRow = {
   slug: string;
   title: string;
   category: string;
+  game_name?: string | null;
   tagline: string;
   description: string;
   features: unknown;
@@ -70,6 +73,7 @@ function rowProductCandidate(row: CatalogRow) {
     slug: row.slug,
     title: row.title,
     category: row.category,
+    ...(row.game_name !== undefined ? { gameName: row.game_name } : {}),
     tagline: row.tagline,
     description: row.description,
     features: row.features,
@@ -89,7 +93,9 @@ function rowProductCandidate(row: CatalogRow) {
   };
 }
 
-export function catalogRowToAdminItem(row: CatalogRow): CatalogAdminItem | null {
+export function catalogRowToAdminItem(
+  row: CatalogRow,
+): CatalogAdminItem | null {
   const parsed = parseProduct(rowProductCandidate(row));
   if (!parsed.ok) return null;
 
@@ -120,6 +126,9 @@ export function catalogMutationColumns(
     slug: product.slug,
     title: product.title,
     category: product.category,
+    ...(Object.hasOwn(product, "gameName")
+      ? { game_name: product.gameName ?? null }
+      : {}),
     tagline: product.tagline,
     description: product.description,
     features: product.features ?? [],
@@ -151,9 +160,9 @@ export function catalogMutationColumns(
 function isSchemaMissing(error: { code?: string; message?: string } | null) {
   return Boolean(
     error &&
-      (error.code === "42P01" ||
-        error.code === "PGRST205" ||
-        error.message?.includes("product_catalog")),
+    (error.code === "42P01" ||
+      error.code === "PGRST205" ||
+      error.message?.includes("product_catalog")),
   );
 }
 
@@ -209,9 +218,7 @@ export async function getPublishedCatalog(): Promise<Product[]> {
   }
 }
 
-export async function listAdminCatalog(
-  supabase: SupabaseClient,
-): Promise<{
+export async function listAdminCatalog(supabase: SupabaseClient): Promise<{
   state: CatalogBootstrapState;
   items: CatalogAdminItem[];
   message?: string;
@@ -246,10 +253,9 @@ export async function reorderPublishedCatalog(
   supabase: SupabaseClient,
   orderedIds: string[],
 ) {
-  const { error } = await supabase.rpc(
-    "reorder_published_product_catalog",
-    { p_ordered_ids: orderedIds },
-  );
+  const { error } = await supabase.rpc("reorder_published_product_catalog", {
+    p_ordered_ids: orderedIds,
+  });
   if (error) return { items: [], error };
 
   revalidatePublicCatalog();
@@ -259,8 +265,7 @@ export async function reorderPublishedCatalog(
       items: refreshed.items,
       error: {
         code: "CATALOG_UNAVAILABLE",
-        message:
-          refreshed.message ?? "O catálogo não pôde ser recarregado.",
+        message: refreshed.message ?? "O catálogo não pôde ser recarregado.",
       },
     };
   }
@@ -268,10 +273,7 @@ export async function reorderPublishedCatalog(
   return { items: refreshed.items, error: null };
 }
 
-export async function getAdminProduct(
-  supabase: SupabaseClient,
-  id: string,
-) {
+export async function getAdminProduct(supabase: SupabaseClient, id: string) {
   const { data, error } = await supabase
     .from("product_catalog")
     .select("*")
@@ -298,9 +300,7 @@ export async function updateAdminProduct(
     query = query.eq("revision", mutation.expectedRevision);
   }
 
-  const { data, error } = await query
-    .select("*")
-    .maybeSingle();
+  const { data, error } = await query.select("*").maybeSingle();
   if (error) return { item: null, error, conflict: false };
   if (!data) {
     return {
@@ -390,8 +390,7 @@ export async function bootstrapAdminCatalog(supabase: SupabaseClient) {
       items: [],
       error: {
         code: "CATALOG_INVALID",
-        message:
-          "O catálogo estático possui dados incompatíveis com o painel.",
+        message: "O catálogo estático possui dados incompatíveis com o painel.",
       },
     };
   }

@@ -21,6 +21,7 @@ export function productMatchesSearch(product: Product, query: string) {
     [
       product.title,
       product.category,
+      product.gameName ?? "",
       product.tagline,
       product.description,
       ...product.variants.flatMap((variant) => [
