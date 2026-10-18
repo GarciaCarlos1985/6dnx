@@ -16,6 +16,10 @@ páginas de soluções e orientação exclusiva vinculada a pedidos confirmados.
 O código tem commit/push na `main` autorizado. A migration de produção e o fluxo
 autenticado real continuam sujeitos à validação do ambiente de destino.
 
+Complemento de 18/10/2026: [`CADASTRO_PRODUTOS.md`](CADASTRO_PRODUTOS.md)
+documenta o cadastro genérico, duplicação, salvamento de rascunho e publicação
+explícita no editor existente, incluindo as provas locais e a ativação pendente.
+
 ## Ordem recomendada de leitura
 
 1. [`CODEX.md`](CODEX.md)

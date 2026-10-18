@@ -46,6 +46,7 @@ yarn-error.log*
 /.impeccable/review/*.png
 /.impeccable/review/*.jpg
 /.impeccable/review/detector.json
+/.impeccable/review/authoring-detector.json
 
 # machine-local agent permissions
 .claude/settings.local.json

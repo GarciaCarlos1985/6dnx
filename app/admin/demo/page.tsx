@@ -9,14 +9,14 @@ import "@/app/produtos/products.css";
 export default async function AdminDemoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string }>;
+  searchParams: Promise<{ view?: string; novo?: string }>;
 }) {
   if (process.env.NODE_ENV !== "development") notFound();
-  const { view } = await searchParams;
+  const { view, novo } = await searchParams;
 
   const now = new Date().toISOString();
   const items = products.slice(0, 10).map((product, index) => ({
-    id: `demo-${index}`,
+    id: `00000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
     sourceKey: product.catalogKey ?? product.slug,
     product: {
       ...product,
@@ -85,6 +85,7 @@ export default async function AdminDemoPage({
       initialState="ready"
       user={{ id: "demo", email: "modo.visual@6dnx.local", role: "admin" }}
       demoMode
+      initialCreate={novo === "1"}
     />
   );
 }

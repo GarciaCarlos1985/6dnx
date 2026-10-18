@@ -1951,6 +1951,7 @@
 
 .admin-editor-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1.5rem;
@@ -1981,7 +1982,10 @@
   margin: 0;
   font: 400 clamp(2rem, 3vw, 3.25rem) var(--font-display), sans-serif;
   line-height: 1;
+  scroll-margin-top: 6rem;
 }
+
+.admin-editor-header > div:first-child { flex: 1 1 24rem; min-width: 0; }
 
 .admin-editor-header > div:first-child > p {
   margin: 0.55rem 0 0;
@@ -2025,6 +2029,7 @@
 
 .admin-editor-header__actions {
   display: flex;
+  flex: 1 1 24rem;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 0.55rem;
@@ -2215,6 +2220,9 @@
 }
 
 .admin-editor-body {
+  margin: 0;
+  padding: 0;
+  min-width: 0;
   min-height: 38rem;
   border: 1px solid var(--admin-line);
   background:
@@ -4205,6 +4213,35 @@
 .admin-product-destinations a:hover,
 .admin-guidance-row-actions > a:not(.admin-primary-button):hover,
 .admin-guide-check > a:hover { color: #fff; }
+
+.admin-new-product { width: 100%; justify-content: center; min-height: 44px; margin: 0.8rem 0 0.4rem; }
+.admin-create-dialog { width: min(38rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); margin: auto; padding: 0; overflow-y: auto; color: var(--admin-ink); background: var(--admin-panel-2); border: 1px solid #63434c; box-shadow: 0 2rem 6rem #000; }
+.admin-create-dialog::backdrop { background: rgb(0 0 0 / 80%); }
+.admin-draft-save { width: 100%; justify-content: center; }
+.admin-create-dialog header { display: flex; align-items: start; justify-content: space-between; gap: 1rem; padding: 1.5rem; border-bottom: 1px solid var(--admin-line); }
+.admin-create-dialog h2 { margin: 0 0 0.7rem; font-family: var(--font-display), sans-serif; font-size: 1.5rem; line-height: 1.25; }
+.admin-create-dialog p { margin: 0.5rem 0 0; color: #b9aeb3; line-height: 1.65; font-size: 0.85rem; }
+.admin-create-dialog fieldset { display: grid; gap: 1rem; margin: 0; padding: 1.5rem; border: 0; min-width: 0; }
+.admin-create-dialog .admin-field > small { color: #b9aeb3; font-size: 0.75rem; }
+.admin-create-dialog footer { display: flex; justify-content: end; gap: 0.75rem; padding: 1.5rem; border-top: 1px solid var(--admin-line); }
+.admin-create-dialog footer button { min-height: 44px; }
+.admin-create-dialog .admin-notice { margin: 1rem 1.5rem; }
+.admin-create-summary { padding: 0 1.5rem 1.5rem; font-size: 0.9rem; line-height: 1.6; }
+.admin-demo-session-note { margin: 0.9rem 0; color: #b9aeb3; font-size: 0.8rem; line-height: 1.6; }
+.admin-product-destinations a { display: flex; flex-direction: column; gap: 0.3rem; padding: 0.7rem 0.9rem; border: 1px solid var(--admin-line); font-size: 0.85rem; }
+.admin-product-destinations small { color: #b9aeb3; font-size: 0.75rem; }
+.admin-publication-readiness { padding: 1.25rem; margin: 1.5rem 0; border: 1px solid var(--admin-line); background: var(--admin-panel-2); }
+.admin-publication-readiness h3 { font-size: 1.05rem; margin: 0 0 0.7rem; }
+.admin-publication-readiness p, .admin-publication-readiness li { color: #b9aeb3; line-height: 1.7; font-size: 0.85rem; }
+.admin-publication-readiness ul { padding-left: 1.2rem; }
+.admin-publish-product { margin-top: 1rem; }
+@media (max-width: 650px) {
+  .admin-create-dialog { width: calc(100vw - 1rem); max-height: calc(100dvh - 1rem); }
+  .admin-create-dialog header, .admin-create-dialog fieldset, .admin-create-dialog footer { padding: 1.1rem; }
+  .admin-create-summary { padding: 0 1.1rem 1.1rem; }
+  .admin-create-dialog footer { flex-direction: column-reverse; }
+  .admin-create-dialog header > button { padding: 0.25rem; }
+}
 .admin-guidance-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; margin-bottom: 1.4rem; }
 .admin-guidance-heading h1 { margin: 0; font-size: 1.8rem; line-height: 1.2; }
 .admin-guidance-heading p { max-width: 65ch; margin: 0.6rem 0 0; color: #b9aeb3; line-height: 1.65; }

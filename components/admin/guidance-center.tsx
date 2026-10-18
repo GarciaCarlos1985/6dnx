@@ -53,6 +53,7 @@ export function GuidanceCenter({
             <small>Central de comando</small>
           </div>
         </Link>
+        <Link className="admin-primary-button" href={demoMode ? "/admin/demo?novo=1" : "/admin?novo=1"}>+ Novo produto</Link>
         <Link
           className="admin-secondary-button"
           href={demoMode ? "/admin/demo" : "/admin"}

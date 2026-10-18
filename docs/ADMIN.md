@@ -40,14 +40,25 @@ mostram uma indisponibilidade segura, sem ressuscitar produtos arquivados.
 - estado **Esgotado** do card inteiro, preservando seus dados para reativação;
 - nota da alteração.
 
-O modo cotidiano não oferece criação ou duplicação genérica de produtos,
-alteração manual de `slug`/`source_key`, publicação, posição ou paleta
-estrutural. A rota de atualização lê o registro atual e recusa qualquer
-tentativa de mudar esses campos. A estrutura de variações é deliberadamente
+O modo cotidiano oferece **Novo produto** e **Duplicar produto** para qualquer
+solução, sempre começando como rascunho. O editor existente completa os dados;
+salvar rascunho e publicar são ações separadas. A publicação exige imagem,
+descrição, uma opção ativa e confirmação da revisão. Consulte
+[`CADASTRO_PRODUTOS.md`](CADASTRO_PRODUTOS.md) para impacto, testes e ativação.
+
+`slug`/`source_key` são gerados pelo servidor. A atualização comum preserva
+essas identidades, publicação, posição e paleta estrutural. A estrutura de variações é deliberadamente
 editável e validada: no máximo 40 opções, nomes únicos, preço limitado e cor no
 formato `#RRGGBB`.
 
-Existem somente três ações estruturais estreitas e deliberadas:
+As ações estruturais usam fluxos próprios:
+
+- **Novo produto/Duplicar produto:** `POST /api/admin/products` aceita somente
+  nome, categoria, jogo opcional e identidade/revisão da origem. Insere uma nova
+  identidade em rascunho; repetição da mesma requisição não cria outra cópia.
+  O conteúdo a duplicar é lido no servidor. Guias privados e pedidos não são
+  copiados. **Publicar produto no site** usa uma RPC com RLS, revisão e bloqueio
+  da ordenação para acrescentar o novo card ao fim da vitrine;
 
 - **Criar cópias Rust:** sincronização idempotente solicitada pelo proprietário.
   Ela começa em **1**, permite escolher explicitamente a quantidade, copia o
@@ -77,8 +88,9 @@ Existem somente três ações estruturais estreitas e deliberadas:
 - gravação usa controle otimista de revisão e bloqueia sobrescrita concorrente;
 - a API cotidiana preserva rota, ordem, publicação e paleta; a quantidade e os
   estados das variações são validados no servidor;
-- a API cotidiana de produtos não aceita criação e a API de revisões não aceita
-  restauração de conteúdo pelo navegador;
+- a criação dedicada não aceita preços, conteúdo arbitrário, estado publicado,
+  slug ou posição no payload inicial; a API de revisões não aceita restauração
+  de conteúdo pelo navegador;
 - criação do lote Rust, arquivamento e ordenação usam rotas próprias, autenticação
   administrativa, confirmação explícita, proteção de origem e revisão
   otimista;
@@ -100,6 +112,8 @@ supabase/migrations/20260731090000_create_product_catalog_admin.sql
 supabase/migrations/20260801143000_add_catalog_ordering.sql
 supabase/migrations/20260801170000_add_checkout_banner.sql
 supabase/migrations/20260804120000_add_catalog_availability_controls.sql
+supabase/migrations/20261018061604_solution_self_service.sql
+supabase/migrations/20261018162455_catalog_product_publication.sql
 ```
 
 Ela cria:

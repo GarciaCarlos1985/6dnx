@@ -2,6 +2,34 @@
 
 Last updated: 2026-10-18
 
+## Complemento: cadastro diário de produtos — 2026-10-18
+
+- O usuário apontou que jogos/guias não completavam o trabalho cotidiano de
+  adicionar produtos. O complemento reutiliza o editor e adiciona **Novo produto**,
+  **Duplicar produto**, salvamento de rascunho e publicação separada com revisão.
+  A nova identidade começa fora da vitrine; original, pedidos e guias privados
+  não são reaproveitados como vínculo da cópia. Ver `CADASTRO_PRODUTOS.md`.
+- Base do complemento: `64ba685`, já presente em `origin/main`. O usuário mantém
+  a autorização de commit e push na main. Os demais checkouts foram preservados.
+- `npm run check` aprovado: ESLint, TypeScript, 101/101 testes e build com 36
+  páginas estáticas. O ensaio PostgreSQL 17.10 nativo, em diretório local novo,
+  confirmou RLS, revisão/histórico, publicação incompleta bloqueada, preservação
+  comercial e concorrência real com duas conexões. Docker falhou na inicialização;
+  o teste nativo substituiu somente esse laboratório e foi encerrado ao final.
+- Navegador em 1440 × 1000 e 390 × 844 confirmou criar, salvar, editar plano,
+  publicação simulada e duplicação independente. Demo é explicitamente efêmera;
+  não comprova o fluxo autenticado real. Detector: zero achados primários, somente
+  a grade decorativa legada em `admin.css:64` como advisory.
+- A revisão independente pediu uma recaptura, depois três ajustes. O veredito
+  final marcou os três resolvidos e retornou `ship` no escopo das correções:
+  FORM N/A por extensão precisamente especificada, legibilidade da ajuda do modal
+  e documentação funcional atualizada. Novo build aprovado após o ajuste de CSS.
+- A migration nova `20261018162455_catalog_product_publication.sql` cria a RPC
+  administrativa para publicar rascunhos no fim da vitrine, com a mesma trava
+  da ordenação. Foi aplicada somente no laboratório. Tanto ela quanto a migration
+  `20261018061604_solution_self_service.sql` aguardam autorização de produção.
+  Não aplicar migrations pendentes em lote. Checkout e cobranças não foram ativados.
+
 ## Upgrade de jogos e orientação — validação do lote em 2026-10-18
 
 - Pedido autorizado: aproveitar o editor existente, organizar soluções por

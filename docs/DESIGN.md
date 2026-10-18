@@ -75,11 +75,15 @@ Committed: crimson carries identity (~30–40% of accent moments). Surface is pu
 - Admin: the catalog CMS mirrors the storefront palette but reduces spectacle
   in favor of operational clarity. Desktop uses a product rail, five-step
   editor and live preview; tablet/mobile linearize those regions. The everyday
-  owner mode deliberately omits dangerous structural controls: route, arbitrary
-  palette, generic creation/duplication and content restoration are not
-  clickable. Ordering is isolated in a dedicated full-catalog board with four
-  named shelf groups, explicit confirmation and one atomic save. Publication
-  state, unsaved state and errors never depend on color alone.
+  owner mode protects routes, structural palette and content restoration.
+  New product and Duplicate product use a short native dialog and always create
+  an independent draft. The same five-step editor saves drafts separately from
+  explicit, reviewed publication; publication requires image, description and
+  a visible option, then appends the product to the storefront. Activation of
+  the publication RPC in production requires the owner's approval. Ordering is
+  isolated in a dedicated full-catalog board with four named shelf groups,
+  explicit confirmation and one atomic save. Publication state, unsaved state
+  and errors never depend on color alone.
 - Hero: one full-bleed safe viewport, characters bottom-anchored L/R and brand
   centered. Actor, logo, copy and CTA sizing must respond to both viewport width
   and height; fixed desktop pixel ceilings must not collapse the composition on

@@ -10,14 +10,19 @@ import {
   listAdminCatalog,
   listProductRevisions,
   updateAdminProduct,
+  publishAdminProduct,
 } from "@/lib/catalog/repository";
-import { BoundedJsonError, readBoundedJson } from "@/lib/http/read-bounded-json";
+import { catalogPublishErrors } from "@/lib/catalog/creation";
+import {
+  BoundedJsonError,
+  readBoundedJson,
+} from "@/lib/http/read-bounded-json";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_BODY_BYTES = 2 * 1024;
 
-type PublicationAction = "archive" | "restore";
+type PublicationAction = "archive" | "restore" | "publish";
 
 function parsePayload(value: unknown) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
@@ -26,7 +31,7 @@ function parsePayload(value: unknown) {
   const expectedRevision = Number(payload.expectedRevision);
 
   if (
-    (action !== "archive" && action !== "restore") ||
+    (action !== "archive" && action !== "restore" && action !== "publish") ||
     !Number.isInteger(expectedRevision) ||
     expectedRevision < 1
   ) {
@@ -79,6 +84,57 @@ export async function POST(
       },
       409,
     );
+  }
+
+  if (parsed.action === "publish") {
+    if (current.item.publicationState === "published")
+      return noStoreJson({ item: current.item });
+    if (current.item.publicationState !== "draft")
+      return noStoreJson(
+        { error: "Restaure este produto antes de publicar." },
+        409,
+      );
+    const errors = catalogPublishErrors(current.item.product);
+    if (errors.length)
+      return noStoreJson(
+        { error: "Complete o produto antes de publicar.", errors },
+        422,
+      );
+    const result = await publishAdminProduct(
+      auth.supabase,
+      id,
+      parsed.expectedRevision,
+    );
+    if (result.error) {
+      if (["42883", "PGRST202"].includes(result.error.code ?? ""))
+        return noStoreJson(
+          {
+            error:
+              "O rascunho está salvo. A equipe técnica precisa ativar a publicação de produtos neste ambiente.",
+            code: "catalog-publication-unavailable",
+          },
+          503,
+        );
+      if (result.error.code === "40001")
+        return noStoreJson(
+          {
+            error:
+              "O produto mudou durante a revisão. Recarregue antes de publicar.",
+            code: "revision-conflict",
+          },
+          409,
+        );
+      if (result.error.code === "22023")
+        return noStoreJson(
+          {
+            error:
+              "O produto está incompleto ou o catálogo atingiu seu limite. Confira os dados e tente novamente.",
+          },
+          422,
+        );
+      return databaseErrorResponse(result.error);
+    }
+    return noStoreJson({ item: result.item });
   }
 
   if (

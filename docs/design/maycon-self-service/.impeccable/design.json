@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-18T12:20:23.570Z",
+  "generatedAt": "2026-10-18T17:10:04.149864Z",
   "title": "Design System: 6DNX — extensão local de autosserviço",
   "extensions": {
     "colorMeta": {
@@ -37,6 +37,11 @@
         "name": "admin-field-focus",
         "value": "0 0 0 3px rgb(227 6 44 / 9%)",
         "purpose": "Halo de campo em foco."
+      },
+      {
+        "name": "admin-modal-ambient",
+        "value": "0 2rem 6rem #000",
+        "purpose": "Sobreposição nativa de criação e duplicação; não aplicada às listas."
       }
     ],
     "motion": [
@@ -72,6 +77,10 @@
       {
         "name": "public-mobile",
         "value": "600px"
+      },
+      {
+        "name": "product-editor-mobile",
+        "value": "680px"
       }
     ]
   },
@@ -127,25 +136,54 @@
       "description": "details/summary nativo; texto de exemplo extraído dos rótulos existentes.",
       "html": "<details class=\"ds-question\"><summary>Pergunta do cliente</summary><p>Resposta</p></details>",
       "css": ".ds-question{font-family:var(--font-body, Manrope),system-ui,sans-serif;max-width:72ch;line-height:1.9;color:#d2cbce;border-bottom:1px solid #433039;padding:1rem 0}.ds-question summary{cursor:pointer;font-weight:700;color:#fff}.ds-question summary:focus-visible{outline:2px solid #ff3658;outline-offset:5px}.ds-question p{white-space:pre-wrap;padding-top:1rem}"
+    },
+    {
+      "name": "Moldura do diálogo de cadastro",
+      "kind": "custom",
+      "description": "Recorte da moldura nativa compartilhada por criação e duplicação; campos e ações reutilizam os primitivos administrativos.",
+      "html": "<dialog open class=\"ds-create\"><header><h2>Novo produto</h2><p>Comece pelo nome. Depois complete imagem, conteúdo e planos no editor.</p></header><div class=\"ds-create-summary\"><strong>Começa como rascunho, fora da vitrine.</strong><p>Nenhum preço ou plano será inventado. Você preenche os dados e decide quando publicar.</p></div></dialog>",
+      "css": ".ds-create{font-family:var(--font-body,Manrope),system-ui,sans-serif;width:min(38rem,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);margin:auto;padding:0;overflow-y:auto;color:var(--admin-ink,#f8f5f6);background:var(--admin-panel-2,#121011);border:1px solid #63434c;box-shadow:0 2rem 6rem #000}.ds-create::backdrop{background:rgb(0 0 0 / 80%)}.ds-create header{padding:1.5rem;border-bottom:1px solid var(--admin-line,rgb(255 255 255 / 9%))}.ds-create h2{margin:0 0 .7rem;font-family:var(--font-display,\"Archivo Black\"),sans-serif;font-size:1.5rem;line-height:1.25}.ds-create p{margin:.5rem 0 0;color:#b9aeb3;line-height:1.65;font-size:.85rem}.ds-create-summary{padding:0 1.5rem 1.5rem;font-size:.9rem;line-height:1.6}@media(max-width:650px){.ds-create{width:calc(100vw - 1rem);max-height:calc(100dvh - 1rem)}.ds-create header{padding:1.1rem}.ds-create-summary{padding:0 1.1rem 1.1rem}}"
+    },
+    {
+      "name": "Prontidão para publicar",
+      "kind": "card",
+      "description": "Lista textual de pendências antes da confirmação; contêiner compartilhado com o estado pronto para revisão final.",
+      "html": "<section class=\"ds-readiness\"><h3>O que falta antes de publicar</h3><ul><li>Adicione a imagem deste produto na etapa Visual.</li></ul><p>Publicar coloca o produto no fim da vitrine. Salvar rascunho mantém o produto fora do site.</p></section>",
+      "css": ".ds-readiness{font-family:var(--font-body,Manrope),system-ui,sans-serif;color:var(--admin-ink,#f8f5f6);padding:1.25rem;margin:1.5rem 0;border:1px solid var(--admin-line,rgb(255 255 255 / 9%));background:var(--admin-panel-2,#121011)}.ds-readiness h3{font-size:1.05rem;margin:0 0 .7rem}.ds-readiness p,.ds-readiness li{color:#b9aeb3;line-height:1.7;font-size:.85rem}.ds-readiness ul{padding-left:1.2rem}"
     }
   ],
   "narrative": {
     "northStar": "Midnight tactical club",
-    "overview": "Registro local da extensão entregue, subordinado a [../../DESIGN.md](../../DESIGN.md). Reutiliza o caráter aprovado da 6DNX; não substitui a identidade global nem define novas decisões criativas. O acabamento operacional observado reduz o espetáculo em favor da leitura e da edição.",
+    "overview": "Registro local da extensão entregue, subordinado a [../../DESIGN.md](../../DESIGN.md). Reutiliza o caráter aprovado da 6DNX; não substitui a identidade global nem define novas decisões criativas. O acabamento operacional observado reduz o espetáculo em favor da leitura e da edição.\n\nEscopo: cadastro e duplicação de produto, central de orientações, editor e prévia, navegação por jogos, páginas de solução e leitor do guia. Evidência primária: `app/admin/admin.css`, `app/produtos/products.css`, `components/admin/product-create-dialog.tsx`, `components/admin/admin-dashboard.tsx`, `components/admin/guidance-center.tsx`, `components/admin/guide-editor.tsx`, `components/guide-reader.tsx` e `components/solution-list.tsx`; famílias herdadas de `app/layout.tsx` e `app/globals.css`. Contexto: `docs/PRODUCT.md`, `docs/UPGRADE_AUTOSSERVICO.md`, `docs/CADASTRO_PRODUTOS.md` e contratos em `.impeccable/surfaces/app-admin-dashboard-page-tsx.md` e `.impeccable/surfaces/catalog-authoring.md`. Valores locais repetidos são descritos como papéis deste registro, sem promover novos custom properties ao código.",
     "keyCharacteristics": [
       "Superfícies escuras, carmesim nas ações e texto claro.",
       "Listas com divisórias e estados nomeados.",
-      "Formulário, checklist e leitura reorganizados por largura."
+      "Formulário, checklist e leitura reorganizados por largura.",
+      "Rascunho, salvamento e publicação com ações e estados textuais distintos."
     ],
-    "rules": [],
+    "rules": [
+      {
+        "name": "The Estado Nomeado Rule",
+        "body": "Publicação, rascunho, alterações não salvas e erros recebem legenda textual; a cor suplementa a informação.",
+        "section": "colors"
+      },
+      {
+        "name": "The Salvar e Publicar Rule",
+        "body": "Preparar e salvar um rascunho não comunica publicação. A revisão mantém salvamento secundário separado da publicação primária, com pendências e confirmação explícitas.",
+        "section": "components"
+      }
+    ],
     "dos": [
       "Do preservar nomes textuais de publicação e salvamento junto da cor.",
       "Do reutilizar o mesmo leitor na prévia e no guia do comprador.",
-      "Do manter sumário, checklist e ações na ordem responsiva implementada."
+      "Do manter sumário, checklist e ações na ordem responsiva implementada.",
+      "Do manter salvar rascunho secundário e publicar primário, com pendências e confirmação legíveis.",
+      "Do levar o foco do nome no cadastro ao título do editor após a criação."
     ],
     "donts": [
       "Don't tratar este registro local como substituição de docs/DESIGN.md.",
-      "Don't representar rascunho ou prévia como orientação já publicada."
+      "Don't representar rascunho ou prévia como orientação já publicada.",
+      "Don't apresentar a demonstração de sessão como gravação persistente ou publicação real."
     ]
   }
 }

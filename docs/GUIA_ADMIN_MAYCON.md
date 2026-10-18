@@ -9,6 +9,30 @@
 Este guia foi escrito para o Maycon operar o catálogo sem precisar entender
 programação e sem correr o risco de danificar o site.
 
+## Cadastrar um produto novo no dia a dia
+
+1. Na lista **Produtos**, clique em **+ Novo produto**.
+2. Informe nome, categoria comercial e, se houver, o jogo. Clique em
+   **Criar rascunho e editar**. O novo produto já fica selecionado no editor.
+3. Complete as cinco etapas existentes: **Básico**, **Visual**, **Conteúdo**,
+   **Variações** e **Revisão**. Envie a imagem e preencha os planos e valores.
+4. Use **Salvar rascunho** para guardar o trabalho e continuar depois. O produto
+   permanece fora do site e pode ser encontrado pelo filtro **Rascunhos**.
+5. Quando estiver pronto, clique em **Revisar e publicar**, confira a prévia e
+   marque a confirmação. A tela lista o que falta caso o cadastro esteja incompleto.
+6. Clique em **Publicar produto no site**. O card entra no fim da vitrine, sem
+   trocar a ordem dos produtos existentes. Sua página pública usa o mesmo cadastro.
+
+Para um produto parecido com outro, selecione o original e clique em
+**Duplicar produto**. Dê um novo nome. Imagens, textos e planos são copiados para
+um rascunho independente; revise cada dado antes de publicar. O original e seus
+pedidos continuam intactos. O guia exclusivo do comprador é preparado
+separadamente para a nova solução, em **Jogos e orientações**.
+
+Na prévia local `/admin/demo`, essas ações são uma simulação que dura até
+recarregar a página. O banco real e a vitrine não são alterados. A ativação da
+publicação no ambiente conectado depende da migration revisada pelo proprietário.
+
 ## A ideia mais importante
 
 O painel não altera o código do site. Ele altera somente as informações dos
@@ -225,7 +249,8 @@ Mostra todos os produtos. Os filtros significam:
 - **Rascunhos:** produtos salvos, mas invisíveis no site;
 - **Arquivo:** produtos retirados do site sem serem apagados.
 
-Não existe botão de exclusão permanente nem criação genérica. Para cards comuns,
+Não existe botão de exclusão permanente. **Novo produto** e **Duplicar produto**
+iniciam um rascunho, sem publicação automática. Para cards comuns,
 o botão **Arquivar card** apenas retira o produto da vitrine e mantém tudo
 guardado. Qualquer card pode ser arquivado; se ele voltar depois, será colocado
 no fim do catálogo para não bagunçar a ordem salva enquanto esteve fora.
@@ -306,8 +331,9 @@ ou fugir da identidade 6DNX por engano.
 Maycon não precisa decorar uma lista de “não clique”. As ações perigosas não
 ficam disponíveis:
 
-- não há botão de criar ou duplicar produto genericamente;
-- Rust1–Rust20 é a única duplicação assistida e começa com quantidade 1;
+- criar ou duplicar produto sempre começa fora da vitrine;
+- o lote especial Rust1–Rust20 continua separado e começa com quantidade 1;
+- publicar um rascunho exige os campos essenciais e uma conferência explícita;
 - arquivar exige confirmação e nunca apaga dados;
 - não há campo de ordem misturado com a edição do produto; a ordem inteira só
   pode ser salva em **Organizar vitrine**;

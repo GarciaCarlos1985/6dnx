@@ -4,18 +4,18 @@ import type {
   ProductStatus,
   ProductTheme,
   Variant,
-} from "@/lib/products";
+} from "../products.ts";
 import {
   MAX_PRODUCT_DEMO_IMAGES,
   MAX_PRODUCT_VARIANTS,
   variantAvailabilityStates,
-} from "@/lib/products";
+} from "../products.ts";
 import {
   catalogPublicationStates,
   type CatalogMutation,
   type CatalogPublicationState,
-} from "@/lib/catalog/types";
-import { normalizeYouTubeVideoId } from "@/lib/media/youtube";
+} from "./types.ts";
+import { normalizeYouTubeVideoId } from "../media/youtube.ts";
 import { gameSlug } from "./games.ts";
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;

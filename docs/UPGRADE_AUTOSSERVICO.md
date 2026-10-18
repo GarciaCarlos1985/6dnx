@@ -1,5 +1,9 @@
 # Upgrade de navegação e orientação 6DNX
 
+O complemento solicitado para a rotina diária do administrador está em
+[`CADASTRO_PRODUTOS.md`](CADASTRO_PRODUTOS.md): criação genérica, duplicação,
+rascunho e publicação pelo editor atual. Este documento registra o primeiro lote.
+
 Implementação isolada em `codex/maycon-self-service`, a partir de `0521dad`.
 Escopo autorizado em 18/10/2026: aproveitar o editor, navegar por jogo, oferecer
 páginas de soluções e acessar a orientação correspondente após uma compra.

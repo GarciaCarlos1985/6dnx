@@ -19,6 +19,10 @@ import type {
   CatalogRevision,
 } from "@/lib/catalog/types";
 import { parseProduct } from "@/lib/catalog/validation";
+import {
+  buildCreatedProduct,
+  type CreateProductInput,
+} from "@/lib/catalog/creation";
 
 export const PRODUCT_CATALOG_CACHE_TAG = "product-catalog";
 
@@ -315,6 +319,117 @@ export async function updateAdminProduct(
     error: null,
     conflict: false,
   };
+}
+
+export async function createAdminProduct(
+  supabase: SupabaseClient,
+  input: CreateProductInput,
+) {
+  const sourceKey = `admin-${input.requestId}`;
+  const existing = await getAdminProduct(supabase, input.requestId);
+  if (existing.error)
+    return { item: null, created: false, error: existing.error };
+  if (existing.item) {
+    return existing.item.sourceKey === sourceKey
+      ? { item: existing.item, created: false, error: null }
+      : {
+          item: null,
+          created: false,
+          error: {
+            code: "CREATE_ID_CONFLICT",
+            message: "Este cadastro já está em uso. Abra um novo cadastro.",
+          },
+        };
+  }
+  let source: CatalogAdminItem | null = null;
+  if (input.sourceId) {
+    const result = await getAdminProduct(supabase, input.sourceId);
+    if (result.error)
+      return { item: null, created: false, error: result.error };
+    source = result.item;
+    if (!source)
+      return {
+        item: null,
+        created: false,
+        error: {
+          code: "CREATE_SOURCE_MISSING",
+          message: "O produto original não foi encontrado.",
+        },
+      };
+    if (source.revision !== input.expectedSourceRevision)
+      return {
+        item: null,
+        created: false,
+        error: {
+          code: "CREATE_SOURCE_CHANGED",
+          message:
+            "O produto original mudou. Feche o cadastro e confira a versão atual antes de duplicar.",
+        },
+      };
+  }
+  const parsed = parseProduct(buildCreatedProduct(input, source?.product));
+  if (!parsed.ok)
+    return {
+      item: null,
+      created: false,
+      error: {
+        code: "CATALOG_INVALID",
+        message: "O rascunho contém campos incompatíveis.",
+      },
+    };
+  const { data, error } = await supabase
+    .from("product_catalog")
+    .insert({
+      id: input.requestId,
+      ...catalogMutationColumns(
+        {
+          product: parsed.value,
+          publicationState: "draft",
+          catalogOrder: 0,
+          changeNote: source
+            ? `Rascunho duplicado de ${source.product.title}`.slice(0, 240)
+            : "Novo produto criado como rascunho",
+        },
+        sourceKey,
+      ),
+    })
+    .select("*")
+    .single();
+  if (error?.code === "23505") {
+    // The request UUID makes a retried or concurrent POST return the same draft.
+    const replay = await getAdminProduct(supabase, input.requestId);
+    if (replay.item?.sourceKey === sourceKey)
+      return { item: replay.item, created: false, error: null };
+  }
+  if (error) return { item: null, created: false, error };
+  const item = catalogRowToAdminItem(data as CatalogRow);
+  revalidatePublicCatalog();
+  return {
+    item,
+    created: true,
+    error: item
+      ? null
+      : {
+          code: "CATALOG_INVALID",
+          message: "O rascunho salvo não pôde ser lido.",
+        },
+  };
+}
+
+export async function publishAdminProduct(
+  supabase: SupabaseClient,
+  id: string,
+  expectedRevision: number,
+) {
+  const { data, error } = await supabase
+    .rpc("admin_publish_catalog_product", {
+      p_product_id: id,
+      p_expected_revision: expectedRevision,
+    })
+    .single();
+  if (error) return { item: null, error };
+  revalidatePublicCatalog();
+  return { item: catalogRowToAdminItem(data as CatalogRow), error: null };
 }
 
 export async function listProductRevisions(

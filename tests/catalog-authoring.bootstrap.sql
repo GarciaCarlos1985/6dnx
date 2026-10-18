@@ -1,0 +1,12 @@
+create schema auth;
+create role anon nologin;
+create role authenticated nologin;
+create role service_role nologin bypassrls;
+grant usage on schema public, auth to anon, authenticated, service_role;
+create table auth.users(id uuid primary key);
+insert into auth.users values ('11111111-1111-4111-8111-111111111111'),('22222222-2222-4222-8222-222222222222');
+create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb $$;
+create function auth.uid() returns uuid language sql stable as $$ select (auth.jwt()->>'sub')::uuid $$;
+grant execute on function auth.uid(), auth.jwt() to anon, authenticated, service_role;
+create table public.commerce_orders(id uuid primary key, status text not null, amount integer not null);
+insert into public.commerce_orders values ('11111111-2222-4333-8444-555555555555','paid',7990);

@@ -4,6 +4,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CatalogOrderBoard } from "@/components/admin/catalog-order-board";
+import { ProductCreateDialog } from "@/components/admin/product-create-dialog";
+import {
+  catalogPublishErrors,
+  demoCreatedItem,
+  parseCreateProduct,
+  type CreateProductInput,
+} from "@/lib/catalog/creation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type {
   CatalogAdminItem,
@@ -26,6 +33,7 @@ import {
 } from "@/lib/products";
 import { normalizeYouTubeVideoId } from "@/lib/media/youtube";
 import { productPagePath } from "@/lib/catalog/games";
+import { parseProduct } from "@/lib/catalog/validation";
 
 type EditorTab = "basic" | "visual" | "content" | "variants" | "publication";
 
@@ -568,6 +576,7 @@ export function AdminDashboard({
   user,
   demoMode = false,
   initialSelectedId,
+  initialCreate = false,
 }: {
   initialItems: CatalogAdminItem[];
   initialState: CatalogBootstrapState;
@@ -575,6 +584,7 @@ export function AdminDashboard({
   user: { id: string; email: string; role: "admin" };
   demoMode?: boolean;
   initialSelectedId?: string;
+  initialCreate?: boolean;
 }) {
   const router = useRouter();
   const [items, setItems] = useState(initialItems);
@@ -603,11 +613,27 @@ export function AdminDashboard({
   const [reviewConfirmed, setReviewConfirmed] = useState(false);
   const [rustCreateCount, setRustCreateCount] = useState(1);
   const [organizingOrder, setOrganizingOrder] = useState(false);
+  const [creationSource, setCreationSource] = useState<
+    CatalogAdminItem | null | undefined
+  >(initialCreate ? null : undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const checkoutBannerInputRef = useRef<HTMLInputElement>(null);
   const demoImagesInputRef = useRef<HTMLInputElement>(null);
+  const editorHeadingRef = useRef<HTMLHeadingElement>(null);
+  const pendingEditorFocus = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (selectedId !== pendingEditorFocus.current) return;
+    pendingEditorFocus.current = null;
+    editorHeadingRef.current?.focus({ preventScroll: true });
+    editorHeadingRef.current?.scrollIntoView({ block: "start" });
+  }, [selectedId]);
 
   const dirty = Boolean(draft && fingerprint(draft) !== savedFingerprint);
+  const publishErrors = draft ? catalogPublishErrors(draft.product) : [];
+  const gameEnabled = items.some((item) =>
+    Object.hasOwn(item.product, "gameName"),
+  );
   const publishedCount = items.filter(
     (item) => item.publicationState === "published",
   ).length;
@@ -700,6 +726,7 @@ export function AdminDashboard({
     value: Product[K],
   ) => {
     setReviewConfirmed(false);
+    setNotice("");
     setDraft((current) =>
       current
         ? { ...current, product: { ...current.product, [key]: value } }
@@ -707,9 +734,104 @@ export function AdminDashboard({
     );
   };
 
+  const acceptSavedItem = (item: CatalogAdminItem) => {
+    setItems((current) =>
+      current.some((entry) => entry.id === item.id)
+        ? current.map((entry) => (entry.id === item.id ? item : entry))
+        : [item, ...current],
+    );
+    setSelectedId(item.id);
+    setDraft(cloneItem(item));
+    setSavedFingerprint(fingerprint(item));
+    setChangeNote("");
+    setReviewConfirmed(false);
+  };
+
+  const startCreation = (source: CatalogAdminItem | null) => {
+    if (busy) return;
+    if (dirty) {
+      announce(
+        "Salve as alterações atuais antes de iniciar outro produto.",
+        "info",
+      );
+      return;
+    }
+    setCreationSource(source);
+  };
+
+  const createProduct = async (input: CreateProductInput) => {
+    const parsed = parseCreateProduct(input);
+    if (!parsed.ok) throw new Error(parsed.errors.join(" "));
+    setBusy("create");
+    try {
+      const source = input.sourceId
+        ? items.find((item) => item.id === input.sourceId)
+        : undefined;
+      const item = demoMode
+        ? demoCreatedItem(parsed.value, source)
+        : (
+            await readApi<{ item: CatalogAdminItem }>(
+              await fetch("/api/admin/products", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify(parsed.value),
+              }),
+            )
+          ).item;
+      if (!item)
+        throw new Error("O cadastro não retornou um produto. Tente novamente.");
+      pendingEditorFocus.current = item.id;
+      acceptSavedItem(item);
+      setCreationSource(undefined);
+      setCatalogState("ready");
+      setStateFilter("draft");
+      setQuery("");
+      setTab("basic");
+      setOrganizingOrder(false);
+      announce(
+        `${demoMode ? "Prévia local: " : ""}${source ? "Cópia criada como rascunho. Revise imagem, conteúdo e planos antes de publicar." : "Rascunho criado. Complete imagem, conteúdo e planos no editor."}`,
+        "ok",
+      );
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const persistItem = async (item: CatalogAdminItem) => {
+    const checked = parseProduct(item.product);
+    if (!checked.ok) throw new Error(checked.errors.join("\n"));
+    if (demoMode)
+      return {
+        ...cloneItem(item),
+        product: { ...checked.value, catalogKey: item.sourceKey },
+        revision: item.revision + 1,
+        updatedAt: new Date().toISOString(),
+      };
+    const mutation: CatalogMutation = {
+      product: item.product,
+      publicationState: item.publicationState,
+      catalogOrder: item.catalogOrder,
+      expectedRevision: item.revision,
+      changeNote:
+        changeNote.trim() ||
+        (item.publicationState === "draft"
+          ? "Rascunho atualizado no painel"
+          : "Edição pelo painel"),
+    };
+    return (
+      await readApi<{ item: CatalogAdminItem }>(
+        await fetch(`/api/admin/products/${encodeURIComponent(item.id)}`, {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(mutation),
+        }),
+      )
+    ).item;
+  };
+
   const save = async () => {
-    if (!draft || demoMode || busy) return;
-    if (!reviewConfirmed) {
+    if (!draft || busy) return;
+    if (draft.publicationState !== "draft" && !reviewConfirmed) {
       setTab("publication");
       announce(
         "Confira a prévia e marque a confirmação antes de salvar.",
@@ -719,38 +841,89 @@ export function AdminDashboard({
     }
     setBusy("save");
     setNotice("");
-    const mutation: CatalogMutation = {
-      product: draft.product,
-      publicationState: draft.publicationState,
-      catalogOrder: draft.catalogOrder,
-      expectedRevision: draft.revision,
-      changeNote:
-        changeNote.trim() ||
-        `Edição pelo painel: ${tabs.find((item) => item.id === tab)?.label}`,
-    };
-
     try {
-      const payload = await readApi<{ item: CatalogAdminItem }>(
-        await fetch(`/api/admin/products/${encodeURIComponent(draft.id)}`, {
-          method: "PUT",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(mutation),
-        }),
+      acceptSavedItem(await persistItem(draft));
+      announce(
+        demoMode
+          ? "Prévia local salva nesta sessão. O site e o banco não foram alterados."
+          : draft.publicationState === "draft"
+            ? "Rascunho salvo. O produto continua fora da vitrine."
+            : "Alterações salvas com segurança.",
+        "ok",
       );
-      setItems((current) =>
-        current.map((item) =>
-          item.id === payload.item.id ? payload.item : item,
-        ),
-      );
-      setDraft(cloneItem(payload.item));
-      setSavedFingerprint(fingerprint(payload.item));
-      setChangeNote("");
-      setReviewConfirmed(false);
-      announce("Alterações salvas com segurança.", "ok");
-      router.refresh();
+      if (!demoMode) router.refresh();
     } catch (reason) {
       announce(
         reason instanceof Error ? reason.message : "Não foi possível salvar.",
+        "error",
+      );
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const publishProduct = async () => {
+    if (!draft || busy || draft.publicationState !== "draft") return;
+    setTab("publication");
+    if (publishErrors.length) {
+      announce(publishErrors.join("\n"), "error");
+      return;
+    }
+    if (!reviewConfirmed) {
+      announce(
+        "Confira a prévia e confirme os dados antes de publicar.",
+        "info",
+      );
+      return;
+    }
+    setBusy("publish");
+    setNotice("");
+    try {
+      const saved = dirty ? await persistItem(draft) : draft;
+      if (dirty) acceptSavedItem(saved);
+      const item: CatalogAdminItem = demoMode
+        ? {
+            ...saved,
+            publicationState: "published",
+            catalogOrder:
+              Math.max(
+                -1,
+                ...items
+                  .filter((entry) => entry.publicationState === "published")
+                  .map((entry) => entry.catalogOrder),
+              ) + 1,
+            revision: saved.revision + 1,
+            updatedAt: new Date().toISOString(),
+          }
+        : (
+            await readApi<{ item: CatalogAdminItem }>(
+              await fetch(
+                `/api/admin/products/${encodeURIComponent(saved.id)}/publication`,
+                {
+                  method: "POST",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({
+                    action: "publish",
+                    expectedRevision: saved.revision,
+                  }),
+                },
+              ),
+            )
+          ).item;
+      acceptSavedItem(item);
+      setStateFilter("published");
+      announce(
+        demoMode
+          ? "Prévia local: produto marcado como publicado somente nesta sessão. O site e o banco não foram alterados."
+          : "Produto publicado. Ele entrou no fim da vitrine; use Organizar vitrine para posicioná-lo.",
+        "ok",
+      );
+      if (!demoMode) router.refresh();
+    } catch (reason) {
+      announce(
+        reason instanceof Error
+          ? reason.message
+          : "Não foi possível publicar. O rascunho continua preservado.",
         "error",
       );
     } finally {
@@ -970,13 +1143,6 @@ export function AdminDashboard({
     }
 
     const restoring = draft.publicationState === "archived";
-    if (draft.publicationState === "draft") {
-      announce(
-        "Este card já está fora da vitrine porque é um rascunho.",
-        "info",
-      );
-      return;
-    }
 
     const question = restoring
       ? `Restaurar ${draft.product.title}? Ele voltará ao estado anterior ao arquivamento.`
@@ -1178,6 +1344,18 @@ export function AdminDashboard({
     router.refresh();
   };
 
+  const creationDialog =
+    creationSource !== undefined ? (
+      <ProductCreateDialog
+        source={creationSource}
+        gameEnabled={gameEnabled}
+        demoMode={demoMode}
+        busy={busy === "create"}
+        onClose={() => setCreationSource(undefined)}
+        onCreate={createProduct}
+      />
+    ) : null;
+
   if (catalogState === "schema-missing" || catalogState === "unavailable") {
     return (
       <main className="admin-setup">
@@ -1255,6 +1433,13 @@ export function AdminDashboard({
           ) : null}
           <button
             className="admin-primary-button admin-primary-button--wide"
+            onClick={() => startCreation(null)}
+            disabled={Boolean(busy)}
+          >
+            Cadastrar meu primeiro produto
+          </button>
+          <button
+            className="admin-secondary-button admin-secondary-button--wide"
             onClick={bootstrap}
             disabled={Boolean(busy)}
           >
@@ -1266,6 +1451,7 @@ export function AdminDashboard({
             Sair do painel
           </button>
         </section>
+        {creationDialog}
       </main>
     );
   }
@@ -1325,6 +1511,19 @@ export function AdminDashboard({
             placeholder="Buscar produto…"
           />
         </label>
+        <button
+          type="button"
+          className="admin-primary-button admin-new-product"
+          onClick={() => startCreation(null)}
+          disabled={Boolean(busy) || dirty}
+          title={
+            dirty
+              ? "Salve as alterações atuais antes de iniciar outro produto"
+              : "Criar um produto de qualquer jogo como rascunho"
+          }
+        >
+          + Novo produto
+        </button>
         <div className="admin-filter-row" aria-label="Filtrar produtos">
           {[
             ["all", "Todos"],
@@ -1460,7 +1659,9 @@ export function AdminDashboard({
                   Produtos <b>/</b> {draft.product.title}
                 </span>
                 <div className="admin-editor-header__title">
-                  <h1>{draft.product.title}</h1>
+                  <h1 ref={editorHeadingRef} tabIndex={-1}>
+                    {draft.product.title}
+                  </h1>
                   <span
                     className={`admin-publication-chip admin-publication-chip--${draft.publicationState}`}
                   >
@@ -1474,9 +1675,36 @@ export function AdminDashboard({
                     <span className="admin-unsaved-chip">Não salvo</span>
                   ) : null}
                 </div>
-                <p>Edite com calma. Nada muda no site até você salvar.</p>
+                <p>
+                  {draft.publicationState === "draft"
+                    ? "Rascunho fora da vitrine. Salve seu trabalho e publique quando estiver pronto."
+                    : "Edite com calma. Nada muda no site até você salvar."}
+                </p>
               </div>
               <div className="admin-editor-header__actions">
+                <button
+                  type="button"
+                  className="admin-secondary-button"
+                  onClick={() => startCreation(draft)}
+                  disabled={dirty || Boolean(busy)}
+                  title={
+                    dirty
+                      ? "Salve as alterações antes de duplicar"
+                      : "Criar uma cópia independente como rascunho"
+                  }
+                >
+                  Duplicar produto
+                </button>
+                {draft.publicationState === "draft" ? (
+                  <button
+                    type="button"
+                    className="admin-secondary-button"
+                    onClick={save}
+                    disabled={!dirty || Boolean(busy)}
+                  >
+                    {busy === "save" ? "Salvando…" : "Salvar rascunho"}
+                  </button>
+                ) : null}
                 {editingRustFamily && rustMissingCount > 0 ? (
                   <div className="admin-rust-create-control">
                     <label>
@@ -1512,7 +1740,7 @@ export function AdminDashboard({
                     </button>
                   </div>
                 ) : null}
-                {draft.publicationState !== "draft" ? (
+                {
                   <button
                     type="button"
                     className={`admin-secondary-button ${
@@ -1532,9 +1760,11 @@ export function AdminDashboard({
                       ? "Atualizando…"
                       : draft.publicationState === "archived"
                         ? "Restaurar card"
-                        : "Arquivar card"}
+                        : draft.publicationState === "draft"
+                          ? "Arquivar rascunho"
+                          : "Arquivar card"}
                   </button>
-                ) : null}
+                }
                 <button
                   type="button"
                   className="admin-secondary-button"
@@ -1547,12 +1777,24 @@ export function AdminDashboard({
                   type="button"
                   className="admin-primary-button"
                   onClick={() => setTab("publication")}
-                  disabled={!dirty || demoMode || Boolean(busy)}
+                  disabled={
+                    (!dirty && draft.publicationState !== "draft") ||
+                    Boolean(busy)
+                  }
                 >
-                  Revisar alterações
+                  {draft.publicationState === "draft"
+                    ? "Revisar e publicar"
+                    : "Revisar alterações"}
                 </button>
               </div>
             </header>
+
+            {demoMode ? (
+              <p className="admin-demo-session-note">
+                Prévia local interativa: criar, duplicar, salvar e publicar
+                alteram somente esta sessão. Recarregar desfaz a simulação.
+              </p>
+            ) : null}
 
             {notice ? (
               <div
@@ -1581,7 +1823,9 @@ export function AdminDashboard({
               className="admin-product-destinations"
               aria-label="Páginas deste produto"
             >
-              {draft.publicationState === "published" ? (
+              {draft.publicationState === "published" &&
+              (!demoMode ||
+                initialItems.some((item) => item.id === draft.id)) ? (
                 <Link
                   href={productPagePath(draft.product)}
                   target="_blank"
@@ -1590,25 +1834,33 @@ export function AdminDashboard({
                   Abrir página pública <small>Versão salva</small>
                 </Link>
               ) : null}
-              <Link
-                href={
-                  demoMode
-                    ? "/admin/demo?view=guia"
-                    : `/admin/orientacoes/${draft.id}`
-                }
-                onClick={(event) => {
-                  if (
-                    dirty &&
-                    !window.confirm(
-                      "Salve primeiro para manter suas alterações. Sair para o guia mesmo assim?",
+              {!demoMode ||
+              initialItems.some((item) => item.id === draft.id) ? (
+                <Link
+                  href={
+                    demoMode
+                      ? "/admin/demo?view=guia"
+                      : `/admin/orientacoes/${draft.id}`
+                  }
+                  onClick={(event) => {
+                    if (
+                      dirty &&
+                      !window.confirm(
+                        "Salve primeiro para manter suas alterações. Sair para o guia mesmo assim?",
+                      )
                     )
-                  )
-                    event.preventDefault();
-                }}
-              >
-                Preparar guia após a compra{" "}
-                <small>Área exclusiva dos compradores</small>
-              </Link>
+                      event.preventDefault();
+                  }}
+                >
+                  Preparar guia após a compra{" "}
+                  <small>Área exclusiva dos compradores</small>
+                </Link>
+              ) : (
+                <span className="admin-demo-session-note">
+                  A prévia deste novo produto está ao lado. Página pública e
+                  guia real dependem do ambiente conectado.
+                </span>
+              )}
             </nav>
             <nav className="admin-editor-tabs" aria-label="Etapas da edição">
               {tabs.map((item) => (
@@ -1627,7 +1879,7 @@ export function AdminDashboard({
               ))}
             </nav>
 
-            <div className="admin-editor-body">
+            <fieldset className="admin-editor-body" disabled={Boolean(busy)}>
               {tab === "basic" ? (
                 <section className="admin-form-section">
                   <div className="admin-section-heading">
@@ -1794,6 +2046,20 @@ export function AdminDashboard({
                           ? "Enviando…"
                           : "Substituir imagem"}
                       </button>
+                      {demoMode ? (
+                        <button
+                          type="button"
+                          className="admin-text-button"
+                          onClick={() =>
+                            updateProduct(
+                              "image",
+                              initialItems[0].product.image,
+                            )
+                          }
+                        >
+                          Usar imagem de exemplo nesta prévia
+                        </button>
+                      ) : null}
                       <label className="admin-field">
                         <span>Endereço da imagem</span>
                         <input
@@ -2125,11 +2391,15 @@ export function AdminDashboard({
                   <div className="admin-section-heading">
                     <div>
                       <span className="admin-kicker">Última conferência</span>
-                      <h2>Revisar antes de salvar</h2>
+                      <h2>
+                        {draft.publicationState === "draft"
+                          ? "Revisar antes de publicar"
+                          : "Revisar antes de salvar"}
+                      </h2>
                       <p>
-                        O painel salva conteúdo e opções comerciais. Rota,
-                        posição, publicação e paleta estrutural permanecem
-                        exatamente como estavam.
+                        {draft.publicationState === "draft"
+                          ? "Salvar guarda seu trabalho fora da vitrine. Publicar é uma ação separada, liberada após conferir imagem, descrição e planos."
+                          : "O painel salva conteúdo e opções comerciais. Rota, posição, publicação e paleta estrutural permanecem exatamente como estavam."}
                       </p>
                     </div>
                     <span className="admin-help-pill">
@@ -2156,18 +2426,24 @@ export function AdminDashboard({
                     <article>
                       <span aria-hidden>02</span>
                       <p>
-                        <strong>Rota e posição intactas</strong>
+                        <strong>
+                          {draft.publicationState === "draft"
+                            ? "Entrada no fim da vitrine"
+                            : "Rota e posição intactas"}
+                        </strong>
                         <small>
-                          Links e ordem do carrossel não podem mudar.
+                          {draft.publicationState === "draft"
+                            ? "Publicar mantém os produtos existentes na ordem atual."
+                            : "Este salvamento preserva os links e a ordem do carrossel."}
                         </small>
                       </p>
                     </article>
                     <article>
                       <span aria-hidden>03</span>
                       <p>
-                        <strong>Planos preservados</strong>
+                        <strong>Planos revisados</strong>
                         <small>
-                          É possível editar os dados, não apagar opções.
+                          Confira nomes, valores e disponibilidade das opções.
                         </small>
                       </p>
                     </article>
@@ -2204,6 +2480,31 @@ export function AdminDashboard({
                       </p>
                     </div>
                   </div>
+                  {draft.publicationState === "draft" ? (
+                    <div className="admin-publication-readiness">
+                      <h3>
+                        {publishErrors.length
+                          ? "O que falta antes de publicar"
+                          : "Produto pronto para revisão final"}
+                      </h3>
+                      {publishErrors.length ? (
+                        <ul>
+                          {publishErrors.map((error) => (
+                            <li key={error}>{error}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>
+                          Imagem, descrição e opções preenchidas. Confira se
+                          todo o conteúdo corresponde a esta solução.
+                        </p>
+                      )}
+                      <p>
+                        Publicar coloca o produto no fim da vitrine. Salvar
+                        rascunho mantém o produto fora do site.
+                      </p>
+                    </div>
+                  ) : null}
                   <label className="admin-review-confirm">
                     <input
                       type="checkbox"
@@ -2218,26 +2519,54 @@ export function AdminDashboard({
                         Conferi a prévia e os preços deste produto.
                       </strong>
                       <small>
-                        Esta confirmação libera somente o salvamento dos campos
-                        seguros exibidos pelo painel.
+                        {draft.publicationState === "draft"
+                          ? "Esta confirmação permite publicar este produto na vitrine."
+                          : "Esta confirmação libera o salvamento dos campos exibidos pelo painel."}
                       </small>
                     </p>
                   </label>
                   <button
                     type="button"
-                    className="admin-primary-button admin-primary-button--wide"
+                    className={
+                      draft.publicationState === "draft"
+                        ? "admin-secondary-button admin-draft-save"
+                        : "admin-primary-button admin-primary-button--wide"
+                    }
                     onClick={save}
                     disabled={
-                      !dirty || !reviewConfirmed || demoMode || Boolean(busy)
+                      !dirty ||
+                      (draft.publicationState !== "draft" &&
+                        !reviewConfirmed) ||
+                      Boolean(busy)
                     }
                   >
                     {busy === "save"
                       ? "Salvando com segurança…"
-                      : "Salvar campos seguros"}
+                      : draft.publicationState === "draft"
+                        ? "Salvar somente o rascunho"
+                        : "Salvar campos seguros"}
                   </button>
+                  {draft.publicationState === "draft" ? (
+                    <button
+                      type="button"
+                      className="admin-primary-button admin-primary-button--wide admin-publish-product"
+                      onClick={publishProduct}
+                      disabled={
+                        !reviewConfirmed ||
+                        publishErrors.length > 0 ||
+                        Boolean(busy)
+                      }
+                    >
+                      {busy === "publish"
+                        ? "Publicando…"
+                        : demoMode
+                          ? "Simular publicação nesta sessão"
+                          : "Publicar produto no site"}
+                    </button>
+                  ) : null}
                 </section>
               ) : null}
-            </div>
+            </fieldset>
           </section>
 
           <aside className="admin-preview-panel">
@@ -2336,6 +2665,7 @@ export function AdminDashboard({
           </section>
         </div>
       ) : null}
+      {creationDialog}
     </main>
   );
 }

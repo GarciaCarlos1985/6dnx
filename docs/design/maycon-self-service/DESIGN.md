@@ -1,6 +1,6 @@
 ---
 name: "6DNX — extensão local de autosserviço"
-description: "Registro do código entregue para jogos, soluções e orientação após a compra; subordinado ao sistema global."
+description: "Registro do código entregue para cadastro diário, jogos, soluções e orientação após a compra; subordinado ao sistema global."
 colors:
   admin-red: "#e3062c"
   admin-red-bright: "#ff2349"
@@ -74,13 +74,14 @@ components:
 
 Registro local da extensão entregue, subordinado a [../../DESIGN.md](../../DESIGN.md). Reutiliza o caráter aprovado da 6DNX; não substitui a identidade global nem define novas decisões criativas. O acabamento operacional observado reduz o espetáculo em favor da leitura e da edição.
 
-Escopo: central de orientações, editor e prévia, navegação por jogos, páginas de solução e leitor do guia. Evidência primária: `app/admin/admin.css`, `app/produtos/products.css`, `components/admin/guidance-center.tsx`, `components/admin/guide-editor.tsx`, `components/guide-reader.tsx` e `components/solution-list.tsx`; famílias herdadas de `app/layout.tsx` e `app/globals.css`. Contexto: `docs/PRODUCT.md`, `docs/UPGRADE_AUTOSSERVICO.md` e contrato em `.impeccable/surfaces/app-admin-dashboard-page-tsx.md`. Valores locais repetidos são descritos como papéis deste registro, sem promover novos custom properties ao código.
+Escopo: cadastro e duplicação de produto, central de orientações, editor e prévia, navegação por jogos, páginas de solução e leitor do guia. Evidência primária: `app/admin/admin.css`, `app/produtos/products.css`, `components/admin/product-create-dialog.tsx`, `components/admin/admin-dashboard.tsx`, `components/admin/guidance-center.tsx`, `components/admin/guide-editor.tsx`, `components/guide-reader.tsx` e `components/solution-list.tsx`; famílias herdadas de `app/layout.tsx` e `app/globals.css`. Contexto: `docs/PRODUCT.md`, `docs/UPGRADE_AUTOSSERVICO.md`, `docs/CADASTRO_PRODUTOS.md` e contratos em `.impeccable/surfaces/app-admin-dashboard-page-tsx.md` e `.impeccable/surfaces/catalog-authoring.md`. Valores locais repetidos são descritos como papéis deste registro, sem promover novos custom properties ao código.
 
 **Key Characteristics:**
 
 - Superfícies escuras, carmesim nas ações e texto claro.
 - Listas com divisórias e estados nomeados.
 - Formulário, checklist e leitura reorganizados por largura.
+- Rascunho, salvamento e publicação com ações e estados textuais distintos.
 
 ## Colors
 
@@ -94,6 +95,8 @@ Preto da página pública, painel administrativo elevado por tom, texto claro e 
 
 O estado publicado combina texto, borda verde translúcida e fundo verde translúcido; não depende apenas de cor. Seus valores completos permanecem no snippet, sem criar uma nova paleta global.
 
+**The Estado Nomeado Rule.** Publicação, rascunho, alterações não salvas e erros recebem legenda textual; a cor suplementa a informação.
+
 ## Typography
 
 **Display Font:** Archivo Black, com fallback system-ui/sans-serif.
@@ -102,6 +105,8 @@ O estado publicado combina texto, borda verde translúcida e fundo verde transl�
 A extensão mantém títulos de frase, como “Guia após a compra”, conforme os componentes entregues. Títulos públicos usam headline fluido; seções de leitura usam title. O título da central/editor é menor (1.8rem, linha 1.2), chegando a 1.5rem abaixo de 650px. Não há uma razão modular única.
 
 Texto auxiliar administrativo usa o papel admin-help; rótulos de campo usam label em caixa alta. A prosa do guia tem medida máxima de 72ch e entrelinha 1.9; explicações administrativas usam medidas de 65–75ch. Esta medida de leitura é uma particularidade implementada da extensão.
+
+No cadastro, o título do diálogo usa Archivo Black e a explicação usa o mesmo papel auxiliar administrativo. Ajuda de campo usa 0.75rem, também observado no editor do guia e nos destinos de produto. O título do produto mantém o tamanho fluido do editor existente; não deriva do título do diálogo.
 
 ## Layout
 
@@ -113,11 +118,17 @@ Texto auxiliar administrativo usa o papel admin-help; rótulos de campo usam lab
 
 **Catálogo:** diretório com auto-fill e mínimo de 250px limitado à largura disponível. Lista de soluções com miniatura 16:10 de 180px; até 600px usa grade de 90px mais texto e ação na coluna textual. As miniaturas mantêm object-fit cover; o componente usa arquivos locais existentes, sem raster novo.
 
+**Cadastro:** diálogo centralizado, limitado a 38rem e à largura disponível menos 2rem; altura máxima desconta 2rem do viewport dinâmico e o conteúdo rola internamente. Cabeçalho, campos e rodapé usam o mesmo inset de 1.5rem. Até 650px, a margem total cai a 1rem, o inset a 1.1rem e o rodapé empilha em ordem visual inversa, deixando criar acima de cancelar. Os botões do rodapé têm altura mínima de 44px.
+
+**Cabeçalho do produto:** título e ações podem quebrar de linha; cada região tem base flexível de 24rem. Em largura intermediária o cabeçalho vira grade; até 680px os secundários dividem a linha e o primário ocupa uma linha inteira. O painel de prontidão reutiliza o contêiner tonal e o inset de pendências.
+
 ## Elevation & Depth
 
 A extensão usa sobretudo tom e bordas para separar regiões. O primário administrativo herda brilho carmesim difuso e sobe 1px no hover; o campo em foco usa borda e halo. As listas e a leitura não recebem sombras de cartão. Os valores completos de sombra, foco e transição estão no sidecar.
 
 Movimento observado: 160ms ease nos controles administrativos, 180ms ease no fundo da linha pública e 200ms ease na opacidade do diretório. Reduced motion remove as transições públicas e reduz as administrativas a 0.01ms.
+
+O diálogo é uma camada modal nativa com backdrop preto a 80% e sombra ambiente escura. Essa elevação pertence à sobreposição; não muda a estratégia plana das listas. A borda mais visível delimita o diálogo contra o contexto escurecido.
 
 ## Shapes
 
@@ -133,9 +144,15 @@ Campos administrativos têm cantos retos explícitos; ações e regiões da exte
 
 **Estado editorial:** chip textual distingue preparação de publicação. A barra informa alterações não salvas, revisão e publicação. Salvar, publicar e retirar acesso são ações separadas; a prévia reutiliza o leitor, com indicação textual de que depende de publicação.
 
+**Criação e duplicação:** o mesmo diálogo nativo pede nome, categoria e jogo opcional, abre com foco no nome e bloqueia o scroll da página enquanto está aberto. Fechar e Escape respeitam o estado ocupado; erro de criação aparece como alerta no formulário. Ao criar a ficha independente em rascunho, o foco passa ao título do editor existente. A duplicação explica o que será reaproveitado e que o guia privado é preparado separadamente. A imagem neutra inicial é geometria SVG nativa, sem nova linguagem de ilustração.
+
+**Prontidão:** painel tonal apresenta uma lista de pendências ou uma mensagem de revisão final, seguida da confirmação explícita de prévia e preços. Salvar rascunho é secundário; publicar é primário e permanece indisponível enquanto houver pendências ou faltar a confirmação. O texto diferencia manter fora do site e entrar no fim da vitrine. A demonstração identifica a operação como limitada à sessão.
+
+**The Salvar e Publicar Rule.** Preparar e salvar um rascunho não comunica publicação. A revisão mantém salvamento secundário separado da publicação primária, com pendências e confirmação explícitas.
+
 **Leitor:** sumário sem ícones, passos em lista ordenada, perguntas em details/summary nativos e suporte ao final. Vídeo opcional usa iframe 16:9 e link alternativo. Quebras de linha do conteúdo são preservadas.
 
-Os sete snippets do sidecar extraem primário, secundário, campo, pendência, estado, sumário e pergunta. Classes são renomeadas apenas para isolamento; CSS resolve valores locais e preserva estados observados.
+Os nove snippets do sidecar extraem primário, secundário, campo, pendência, estado, sumário, pergunta, diálogo e prontidão. Classes são renomeadas apenas para isolamento; CSS resolve valores locais e preserva estados observados. O snippet do diálogo isola sua moldura nativa e o de prontidão isola o contêiner de conferência; os controles usam os mesmos primitivos registrados.
 
 ## Do's and Don'ts
 
@@ -144,10 +161,13 @@ Os sete snippets do sidecar extraem primário, secundário, campo, pendência, e
 - **Do** preservar nomes textuais de publicação e salvamento junto da cor.
 - **Do** reutilizar o mesmo leitor na prévia e no guia do comprador.
 - **Do** manter sumário, checklist e ações na ordem responsiva implementada.
+- **Do** manter salvar rascunho secundário e publicar primário, com pendências e confirmação legíveis.
+- **Do** levar o foco do nome no cadastro ao título do editor após a criação.
 
 ### Don't:
 
 - **Don't** tratar este registro local como substituição de docs/DESIGN.md.
 - **Don't** representar rascunho ou prévia como orientação já publicada.
+- **Don't** apresentar a demonstração de sessão como gravação persistente ou publicação real.
 
-Não canonizado: kickers e grade decorativa legados fora desta extensão não constituem regras para novas superfícies; a extensão não os utiliza como linguagem de conteúdo. O glyph de seta herdado na ação da lista é detalhe existente, não um sistema de ícones a propagar.
+Não canonizado: kickers, grade decorativa e glyphs legados que o editor e a lista ainda carregam são defeitos ou detalhes herdados, não regras para novas superfícies. Seus estilos não entram no sistema; o cadastro não os amplia. Valores de rótulos minúsculos herdados também não viram novo token de leitura.
