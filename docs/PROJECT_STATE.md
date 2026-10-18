@@ -2,6 +2,37 @@
 
 Last updated: 2026-10-18
 
+## Proteção e ativação em produção — 2026-10-18, 15:10 BRT
+
+- Após o pedido de backup/reversão e autorização explícita para migrar depois
+  da proteção, as versões `20261018061604` e `20261018162455` foram aplicadas
+  em uma transação e registradas no Supabase 6DNX `muwqyoeisiuwadxoiokz`.
+  Nenhuma outra migration pendente foi executada; as passagens abaixo que
+  diziam aguardar autorização registram o checkpoint anterior.
+- Backup lógico privado, schema/papéis, inventário/hash e ZIP do código em
+  `0521dad` guardados fora do Git em
+  `C:\Users\CarlosAlineBianca\6dnx-backups\pre-maycon-2026-10-18T17-48-56-251Z`.
+  TLS/CA/hostname verificados, leitura em snapshot consistente e ACL privada.
+- Restauração das 12 tabelas públicas da aplicação aprovada no PostgreSQL 17.10
+  local: mesmos registros/hashes. Forward e rollback restauraram schema,
+  funções e dados originais; o rollback recusou conteúdo novo ou falta de
+  confirmação. Auth mínimo local foi scaffold; restauração integral da plataforma
+  e binários do Storage não foram comprovados. Detalhes em
+  `RECUPERACAO_UPGRADE_MAYCON.md`.
+- Produção preservou integralmente os dados anteriores das 12 tabelas e os 60
+  produtos. Ensaio admin transacional de criar/salvar/publicar produto e guia
+  passou e foi integralmente desfeito. Prontidão/revisão/RLS/grants verificados.
+  Cache PostgREST atualizado e acesso público/privado validado. Nenhum pedido,
+  preço existente, configuração visual ou flag de cobrança foi alterado.
+- Maycon pode acessar o painel real em `https://www.6dnx.com.br/admin`.
+  A demonstração localhost continua efêmera. Login real do operador no navegador
+  e primeira edição comercial continuam ações dele; nenhuma sessão foi forjada
+  na aplicação para validar a migração.
+- Ferramentas de proteção e recuperação adicionadas sem alterar o runtime do
+  site. Verificações finais: lint dos arquivos novos sem avisos, TypeScript,
+  103/103 testes e build de produção aprovados. Dumps e recibos privados não
+  fazem parte do Git; somente scripts, testes e documentação são versionados.
+
 ## Complemento: cadastro diário de produtos — 2026-10-18
 
 - O usuário apontou que jogos/guias não completavam o trabalho cotidiano de

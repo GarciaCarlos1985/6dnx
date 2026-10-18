@@ -10,15 +10,17 @@ Este diretório é a fonte central de documentação do projeto. O `README.md` d
 raiz continua sendo a apresentação e o guia rápido; os documentos abaixo
 guardam arquitetura, regras, decisões, auditorias e fontes históricas.
 
-Checkpoint validado de 18/10/2026: consulte
+Checkpoint de 18/10/2026: consulte
 [`UPGRADE_AUTOSSERVICO.md`](UPGRADE_AUTOSSERVICO.md) para navegação por jogo,
 páginas de soluções e orientação exclusiva vinculada a pedidos confirmados.
-O código tem commit/push na `main` autorizado. A migration de produção e o fluxo
-autenticado real continuam sujeitos à validação do ambiente de destino.
+O código foi enviado à `main`. As duas migrations foram posteriormente
+autorizadas e aplicadas ao Supabase 6DNX após backup e ensaio de reversão.
 
 Complemento de 18/10/2026: [`CADASTRO_PRODUTOS.md`](CADASTRO_PRODUTOS.md)
 documenta o cadastro genérico, duplicação, salvamento de rascunho e publicação
-explícita no editor existente, incluindo as provas locais e a ativação pendente.
+explícita no editor existente. Consulte também
+[`RECUPERACAO_UPGRADE_MAYCON.md`](RECUPERACAO_UPGRADE_MAYCON.md) para backup,
+restauração local, rollback testado e provas da ativação em produção.
 
 ## Ordem recomendada de leitura
 

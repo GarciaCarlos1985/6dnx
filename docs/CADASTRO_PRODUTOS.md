@@ -87,18 +87,20 @@ Cadastrar/publicar um produto não aprova automaticamente uma cobrança PIX.
 
 ## Ativação e limites
 
-Commit e push na `main` foram autorizados pelo usuário. A autorização não inclui
-aplicar SQL de produção. Nenhuma migration remota foi aplicada neste lote.
-
-Ainda dependem de revisão e autorização direcionada no projeto Supabase 6DNX:
+Após autorizar a proteção e o ensaio de reversão, o proprietário autorizou a
+aplicação em produção. Em 18/10/2026, 15:10 BRT, foram aplicadas e registradas:
 
 1. `20261018061604_solution_self_service.sql`: jogo, galeria e guias do primeiro lote;
 2. `20261018162455_catalog_product_publication.sql`: publicação de novos rascunhos.
 
-Não executar `supabase db push` genérico: há histórico legado e migrations
-pendentes fora do escopo. Conferir o projeto e o schema antes da aplicação.
-Depois, validar o fluxo autenticado com um rascunho controlado e revisão humana
-antes de colocar um produto real no site.
+O backup, a restauração das 12 tabelas, a reversão e a aplicação preservando os
+dados foram comprovados. Ensaio de produto/guia no banco real usou transação
+desfeita; não deixou conteúdo de teste. Consulte
+[`RECUPERACAO_UPGRADE_MAYCON.md`](RECUPERACAO_UPGRADE_MAYCON.md). O painel real
+está disponível em `https://www.6dnx.com.br/admin`.
+
+Não executar `supabase db push` genérico: há histórico legado e outras migrations
+fora do escopo. Nenhuma compra ou cobrança real foi criada para essa validação.
 
 Na rota de desenvolvimento `/admin/demo`, criar, salvar, duplicar e publicar
 alteram somente a sessão em memória; recarregar reinicia a simulação. Ela não

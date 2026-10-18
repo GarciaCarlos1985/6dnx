@@ -4,6 +4,11 @@ O complemento solicitado para a rotina diária do administrador está em
 [`CADASTRO_PRODUTOS.md`](CADASTRO_PRODUTOS.md): criação genérica, duplicação,
 rascunho e publicação pelo editor atual. Este documento registra o primeiro lote.
 
+**Ativação posterior:** as duas migrations do upgrade foram autorizadas e
+aplicadas em produção em 18/10/2026, após backup e ensaio de reversão. Os trechos
+abaixo sobre autorização pendente são históricos. Provas e recuperação:
+[`RECUPERACAO_UPGRADE_MAYCON.md`](RECUPERACAO_UPGRADE_MAYCON.md).
+
 Implementação isolada em `codex/maycon-self-service`, a partir de `0521dad`.
 Escopo autorizado em 18/10/2026: aproveitar o editor, navegar por jogo, oferecer
 páginas de soluções e acessar a orientação correspondente após uma compra.
